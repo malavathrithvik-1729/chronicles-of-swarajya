@@ -1,0 +1,259 @@
+{
+  "project": "Chronicles of Swarajya: The Divine Blade",
+  "phase": "Phase 1: Character Art & Animation Production Pipeline",
+  "generatedAt": "2026-10-11T16:09:45.022Z",
+  "gridSize": 16,
+  "logicalResolution": "160x160",
+  "palette": {
+    "SAFFRON_DARK": "#b45309",
+    "SAFFRON": "#e66012",
+    "SAFFRON_LIGHT": "#f59e0b",
+    "TURBAN_RED": "#b91c1c",
+    "RUBY": "#7f1d1d",
+    "GOLD": "#fbbf24",
+    "GOLD_DARK": "#d97706",
+    "SKIN": "#c68642",
+    "SKIN_LIGHT": "#dfa064",
+    "SKIN_DARK": "#8d5b2d",
+    "BEARD": "#1c1917",
+    "DHOTI": "#fef3c7",
+    "MOJARI": "#451a03",
+    "STEEL": "#e2e8f0",
+    "STEEL_DARK": "#64748b",
+    "STEEL_LIGHT": "#ffffff",
+    "LEATHER": "#78350f",
+    "MUGHAL_GREEN": "#166534",
+    "MUGHAL_DARK": "#14532d",
+    "MUGHAL_LIGHT": "#22c55e",
+    "HELMET_STEEL": "#334155",
+    "BRASS": "#ca8a04",
+    "BRASS_LIGHT": "#facc15",
+    "BRIGANDINE_RED": "#991b1b",
+    "CHARGER_HORN": "#fde047",
+    "ELITE_ARMOR": "#475569",
+    "ELITE_PURPLE": "#581c87",
+    "AFZAL_PURPLE": "#4a154b",
+    "AFZAL_GOLD": "#ca8a04",
+    "AFZAL_ROBE": "#3b0764",
+    "SHAISTA_DARK": "#1e293b",
+    "SHAISTA_SASH": "#b91c1c",
+    "AURANGZEB_GOLD": "#b45309",
+    "AURANGZEB_CROWN": "#15803d",
+    "AURANGZEB_WHITE": "#ffffff",
+    "FIRE_CORE": "#ffffff",
+    "FIRE_YELLOW": "#fde047",
+    "FIRE_ORANGE": "#f97316",
+    "FIRE_RED": "#dc2626",
+    "FIRE_DARK": "#7f1d1d",
+    "WATER_CORE": "#e0f2fe",
+    "WATER_CYAN": "#38bdf8",
+    "WATER_BLUE": "#0284c7",
+    "WATER_DEEP": "#1e3a8a",
+    "EARTH_OCHRE": "#d97706",
+    "EARTH_BROWN": "#78350f",
+    "EARTH_CRACK": "#451a03",
+    "EARTH_DUST": "#fef08a"
+  },
+  "assets": {
+    "shivaji": [
+      {
+        "name": "shivaji_idle",
+        "file": "01_Shivaji/shivaji_idle.png",
+        "frameW": 24,
+        "frameH": 32,
+        "cols": 2,
+        "rows": 4,
+        "fps": 2,
+        "directions": [
+          "south",
+          "north",
+          "east",
+          "west"
+        ]
+      },
+      {
+        "name": "shivaji_walk",
+        "file": "01_Shivaji/shivaji_walk.png",
+        "frameW": 24,
+        "frameH": 32,
+        "cols": 4,
+        "rows": 4,
+        "fps": 6,
+        "directions": [
+          "south",
+          "north",
+          "east",
+          "west"
+        ]
+      },
+      {
+        "name": "shivaji_attack",
+        "file": "01_Shivaji/shivaji_attack.png",
+        "frameW": 24,
+        "frameH": 32,
+        "cols": 3,
+        "rows": 4,
+        "fps": 8,
+        "directions": [
+          "south",
+          "north",
+          "east",
+          "west"
+        ]
+      },
+      {
+        "name": "shivaji_dodge",
+        "file": "01_Shivaji/shivaji_dodge.png",
+        "frameW": 24,
+        "frameH": 32,
+        "cols": 3,
+        "rows": 4,
+        "fps": 10,
+        "directions": [
+          "south",
+          "north",
+          "east",
+          "west"
+        ]
+      },
+      {
+        "name": "shivaji_astra_cast",
+        "file": "01_Shivaji/shivaji_astra_cast.png",
+        "frameW": 24,
+        "frameH": 32,
+        "cols": 3,
+        "rows": 3,
+        "fps": 6,
+        "astras": [
+          "agni",
+          "varuna",
+          "bhoomi"
+        ]
+      },
+      {
+        "name": "shivaji_hurt_victory",
+        "file": "01_Shivaji/shivaji_hurt_victory.png",
+        "frameW": 24,
+        "frameH": 32,
+        "cols": 2,
+        "rows": 2,
+        "fps": 4
+      }
+    ],
+    "enemies": [
+      {
+        "name": "swordsman",
+        "file": "02_Enemies/swordsman.png",
+        "frameW": 16,
+        "frameH": 24,
+        "cols": 4,
+        "rows": 4,
+        "fps": 4
+      },
+      {
+        "name": "shield_guard",
+        "file": "02_Enemies/shield_guard.png",
+        "frameW": 18,
+        "frameH": 24,
+        "cols": 4,
+        "rows": 4,
+        "fps": 4
+      },
+      {
+        "name": "archer",
+        "file": "02_Enemies/archer.png",
+        "frameW": 16,
+        "frameH": 24,
+        "cols": 4,
+        "rows": 4,
+        "fps": 4
+      },
+      {
+        "name": "charging_soldier",
+        "file": "02_Enemies/charging_soldier.png",
+        "frameW": 20,
+        "frameH": 24,
+        "cols": 4,
+        "rows": 4,
+        "fps": 5
+      },
+      {
+        "name": "elite_guard",
+        "file": "02_Enemies/elite_guard.png",
+        "frameW": 22,
+        "frameH": 28,
+        "cols": 4,
+        "rows": 4,
+        "fps": 4
+      }
+    ],
+    "bosses": [
+      {
+        "name": "afzal_khan",
+        "file": "03_Bosses/afzal_khan.png",
+        "frameW": 36,
+        "frameH": 44,
+        "cols": 3,
+        "rows": 4,
+        "fps": 4
+      },
+      {
+        "name": "shaista_khan",
+        "file": "03_Bosses/shaista_khan.png",
+        "frameW": 28,
+        "frameH": 36,
+        "cols": 3,
+        "rows": 4,
+        "fps": 4
+      },
+      {
+        "name": "aurangzeb",
+        "file": "03_Bosses/aurangzeb.png",
+        "frameW": 36,
+        "frameH": 44,
+        "cols": 3,
+        "rows": 4,
+        "fps": 4
+      }
+    ],
+    "astraEffects": [
+      {
+        "name": "agni_effects",
+        "file": "04_AstraEffects/agni_effects.png",
+        "frameW": 32,
+        "frameH": 32,
+        "cols": 4,
+        "rows": 2,
+        "fps": 8
+      },
+      {
+        "name": "varuna_effects",
+        "file": "04_AstraEffects/varuna_effects.png",
+        "frameW": 32,
+        "frameH": 32,
+        "cols": 4,
+        "rows": 2,
+        "fps": 8
+      },
+      {
+        "name": "bhoomi_effects",
+        "file": "04_AstraEffects/bhoomi_effects.png",
+        "frameW": 32,
+        "frameH": 32,
+        "cols": 4,
+        "rows": 2,
+        "fps": 8
+      }
+    ],
+    "weapons": [
+      "05_Weapons/talwar_basic.png",
+      "05_Weapons/talwar_upgraded.png",
+      "05_Weapons/halberd_elite.png",
+      "05_Weapons/bow_and_arrow.png",
+      "05_Weapons/shield_guard.png",
+      "05_Weapons/sword_slash_arc.png",
+      "05_Weapons/arrow_projectile.png",
+      "05_Weapons/hit_flash.png"
+    ]
+  }
+}

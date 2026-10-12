@@ -1,0 +1,5005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Chronicles of Swarajya: The Divine Blade</title>
+<style>
+  :root {
+    --bg-dark: #0a0806;
+    --panel-bg: #140f0c;
+    --card-bg: #1f1712;
+    --saffron: #e66012;
+    --saffron-light: #f59e0b;
+    --maratha-red: #b91c1c;
+    --gold: #d97706;
+    --gold-light: #fde68a;
+    --border-gold: #b45309;
+    --border-dark: #451a03;
+    --stone-gray: #475569;
+    --text-cream: #fef3c7;
+    --text-muted: #9ca3af;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body, html {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background-color: var(--bg-dark);
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+    color: var(--text-cream);
+  }
+
+  /* Desktop-First Viewport Frame */
+  #game-wrapper {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #1c140d 0%, #060504 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Widescreen Desktop Companion Panels */
+  .desktop-side-panel {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 290px;
+    height: calc(100vh - 28px);
+    height: calc(100dvh - 28px);
+    max-height: 820px;
+    background: var(--panel-bg);
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    padding: 14px;
+    margin: 0 14px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.85);
+    z-index: 10;
+    overflow-y: auto;
+  }
+  @media (min-width: 1240px) {
+    .desktop-side-panel {
+      display: flex;
+    }
+  }
+
+  .panel-header {
+    border-bottom: 2px solid var(--border-dark);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .panel-header h2 {
+    font-size: 14px;
+    color: var(--saffron-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .panel-header .subtext {
+    font-size: 10px;
+    color: var(--gold-light);
+  }
+
+  .panel-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 11px;
+  }
+  .panel-card h3 {
+    font-size: 11px;
+    color: var(--gold-light);
+    margin-bottom: 6px;
+    border-bottom: 1px dashed #78350f;
+    padding-bottom: 3px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Stat Bars */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 11px;
+  }
+  .bar-wrap {
+    width: 100%;
+    height: 8px;
+    background: #261b14;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    border: 1px solid #451a03;
+  }
+  .bar-fill {
+    height: 100%;
+    transition: width 0.15s ease-out;
+  }
+  .bar-hp { background: linear-gradient(90deg, #dc2626, #ef4444); }
+  .bar-xp { background: linear-gradient(90deg, #d97706, #fbbf24); }
+  .bar-astra { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+
+  /* Resources Grid */
+  .resource-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .resource-pill {
+    background: #140d09;
+    border: 1px solid #573315;
+    border-radius: 3px;
+    padding: 4px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .resource-name { color: #d1d5db; font-size: 10px; }
+  .resource-val { color: var(--gold-light); font-weight: bold; font-size: 11px; }
+
+  /* Objectives List */
+  .quest-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 6px;
+    line-height: 1.3;
+    font-size: 10.5px;
+    color: #e5e7eb;
+  }
+  .quest-item.completed {
+    color: #9ca3af;
+    text-decoration: line-through;
+  }
+  .quest-check {
+    font-size: 11px;
+    color: var(--saffron-light);
+  }
+  .quest-item.completed .quest-check {
+    color: #4ade80;
+  }
+
+  /* Center Screen Container */
+  #viewport-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    max-height: 100dvh;
+  }
+
+  #canvas-container {
+    position: relative;
+    border: 3px solid var(--border-gold);
+    box-shadow: 0 0 35px rgba(0,0,0,0.9), 0 0 10px rgba(180, 83, 9, 0.4);
+    background: #000;
+    overflow: hidden;
+  }
+
+  /* 160x160 Logical Screen scaled up */
+  canvas#gameCanvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    background: #000;
+  }
+
+  /* In-Game Mini HUD (Overlay on canvas) */
+  #canvas-hud {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 20;
+    font-size: 10px;
+    font-family: inherit;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000;
+  }
+  .hud-badge {
+    background: rgba(15, 10, 7, 0.85);
+    border: 1px solid var(--border-gold);
+    border-radius: 3px;
+    padding: 3px 6px;
+    color: var(--text-cream);
+  }
+
+  #notification-toast {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 13, 9, 0.92);
+    border: 1px solid var(--saffron-light);
+    border-radius: 4px;
+    padding: 6px 14px;
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: bold;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 30;
+    box-shadow: 0 0 15px rgba(0,0,0,0.9);
+    text-align: center;
+    white-space: nowrap;
+  }
+  #notification-toast.show {
+    opacity: 1;
+  }
+
+  /* Game Overlay Modals & Screens */
+  .game-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 6, 5, 0.94);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 40;
+    padding: 16px;
+    text-align: center;
+  }
+  .game-overlay.active {
+    display: flex;
+  }
+
+  /* Title Screen */
+  #screen-title {
+    background: radial-gradient(circle at center, #26160c 0%, #080605 90%);
+  }
+  .title-emblem {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 10px;
+    image-rendering: pixelated;
+  }
+  .title-h1 {
+    font-size: 20px;
+    color: var(--saffron-light);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 #000, 0 0 15px rgba(230, 96, 18, 0.6);
+    margin-bottom: 4px;
+  }
+  .title-subtitle {
+    font-size: 12px;
+    color: var(--gold-light);
+    letter-spacing: 1px;
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+
+  .menu-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 220px;
+  }
+  .game-btn {
+    background: linear-gradient(90deg, #2d180d, #422212);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    color: var(--text-cream);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 8px 14px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.1s ease;
+    text-transform: uppercase;
+  }
+  .game-btn:hover {
+    background: linear-gradient(90deg, #9a3412, #c2410c);
+    border-color: var(--gold-light);
+    color: #fff;
+    transform: scale(1.02);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+  }
+  .game-btn:active {
+    transform: scale(0.98);
+  }
+  .game-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #451a03;
+    background: #17110d;
+  }
+
+  /* Cinematic Story Screen */
+  #screen-story {
+    background: rgba(10, 8, 6, 0.96);
+  }
+  .story-box {
+    max-width: 440px;
+    background: var(--panel-bg);
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    padding: 18px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.9);
+  }
+  .story-title {
+    font-size: 13px;
+    color: var(--saffron-light);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-dark);
+    padding-bottom: 4px;
+  }
+  .story-text {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-cream);
+    margin-bottom: 16px;
+    text-align: left;
+    min-height: 70px;
+  }
+  .story-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* Astra Selection Screen */
+  #screen-astra {
+    background: rgba(10, 7, 5, 0.96);
+  }
+  .astra-cards-wrap {
+    display: flex;
+    gap: 12px;
+    margin: 14px 0;
+    max-width: 580px;
+  }
+  .astra-card {
+    flex: 1;
+    background: var(--card-bg);
+    border: 2px solid var(--border-dark);
+    border-radius: 6px;
+    padding: 12px 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .astra-card:hover, .astra-card.selected {
+    border-color: var(--saffron-light);
+    background: #2b180e;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.35);
+    transform: translateY(-2px);
+  }
+  .astra-card.selected {
+    border-color: #fbbf24;
+    border-width: 2px;
+  }
+  .astra-icon-canvas {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    background: #0d0a08;
+  }
+  .astra-card h4 {
+    font-size: 12px;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .astra-card .astra-role {
+    font-size: 10px;
+    color: var(--saffron-light);
+    margin-bottom: 6px;
+  }
+  .astra-desc {
+    font-size: 10px;
+    line-height: 1.35;
+    color: #d1d5db;
+    margin-bottom: 6px;
+  }
+  .astra-spec {
+    font-size: 9.5px;
+    color: #9ca3af;
+    margin-top: auto;
+    border-top: 1px dashed #451a03;
+    padding-top: 4px;
+    width: 100%;
+  }
+
+  /* Crafting Modal */
+  .modal-dialog {
+    background: var(--panel-bg);
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    padding: 18px;
+    max-width: 360px;
+    width: 90%;
+    box-shadow: 0 0 35px rgba(0,0,0,0.9);
+  }
+  .recipe-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    padding: 10px;
+    margin: 12px 0;
+    text-align: left;
+  }
+  .recipe-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    font-size: 11px;
+  }
+
+  /* Victory Screen */
+  .victory-banner {
+    font-size: 20px;
+    color: #4ade80;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+    margin-bottom: 6px;
+  }
+
+  /* Pause & Settings */
+  .settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 11px;
+    width: 100%;
+  }
+
+  /* Dialogue Modal */
+  .dialogue-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+    text-align: left;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--text-cream);
+    border-left: 3px solid var(--saffron-light);
+  }
+  .dialogue-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .dialogue-avatar {
+    font-size: 26px;
+    line-height: 1;
+    background: #2a1b12;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid var(--border-gold);
+  }
+
+  /* Mission Briefing Overlay */
+  #screen-mission-intro {
+    background: rgba(8, 6, 4, 0.94);
+  }
+  .mission-card {
+    background: var(--panel-bg);
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    padding: 18px;
+    max-width: 440px;
+    width: 90%;
+    box-shadow: 0 0 40px rgba(0,0,0,0.95);
+    text-align: center;
+  }
+  .location-badge {
+    font-size: 10px;
+    color: var(--gold-light);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-weight: bold;
+  }
+  .mission-narrative {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-gold);
+    border-left: 3px solid var(--saffron-light);
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin: 10px 0;
+    text-align: left;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--text-cream);
+  }
+
+  /* Stronghold Modal */
+  .upgrade-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+  .upgrade-card:hover {
+    border-color: var(--border-gold);
+  }
+  .upgrade-info {
+    text-align: left;
+  }
+  .upgrade-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--gold-light);
+  }
+  .upgrade-desc {
+    font-size: 9.5px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div id="game-wrapper">
+
+  <!-- Left Desktop Companion: Shivaji Status & Resources -->
+  <aside class="desktop-side-panel" id="panel-left">
+    <div>
+      <div class="panel-header">
+        <h2>Shivaji Maharaj</h2>
+        <div class="subtext">Defender of Swarajya • Level <span id="ui-level">1</span></div>
+      </div>
+
+      <div class="panel-card">
+        <h3>Vital Statistics</h3>
+        <div class="stat-row">
+          <span>HEALTH</span>
+          <span><span id="ui-hp-cur">100</span> / <span id="ui-hp-max">100</span></span>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-hp" id="ui-bar-hp" style="width: 100%;"></div>
+        </div>
+
+        <div class="stat-row">
+          <span>EXPERIENCE</span>
+          <span><span id="ui-xp-cur">0</span> / <span id="ui-xp-max">100</span></span>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-fill bar-xp" id="ui-bar-xp" style="width: 0%;"></div>
+        </div>
+
+        <div class="stat-row" style="margin-top: 6px;">
+          <span>ATTACK POWER</span>
+          <span style="color: var(--saffron-light);" id="ui-atk">4 (Fists)</span>
+        </div>
+        <div class="stat-row">
+          <span>DEFENSE ARMOUR</span>
+          <span style="color: #60a5fa;" id="ui-def">2</span>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>Equipped Astra</h3>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <canvas id="hud-astra-icon" width="32" height="32" style="border: 1px solid var(--border-gold); background: #000; border-radius: 3px;"></canvas>
+          <div>
+            <div style="font-weight: bold; color: var(--gold-light);" id="ui-astra-name">None Selected</div>
+            <div style="font-size: 10px; color: var(--text-muted);" id="ui-astra-status">Cooldown: Ready (Shift)</div>
+          </div>
+        </div>
+        <div class="bar-wrap" style="margin-top: 6px; height: 5px;">
+          <div class="bar-fill bar-astra" id="ui-bar-astra" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>Materials & Loot</h3>
+        <div class="resource-grid">
+          <div class="resource-pill">
+            <span class="resource-name">Sagwan Wood</span>
+            <span class="resource-val" id="ui-wood">0</span>
+          </div>
+          <div class="resource-pill">
+            <span class="resource-name">Iron Ore</span>
+            <span class="resource-val" id="ui-ore">0</span>
+          </div>
+          <div class="resource-pill">
+            <span class="resource-name">Gold Coins</span>
+            <span class="resource-val" id="ui-gold">0</span>
+          </div>
+          <div class="resource-pill">
+            <span class="resource-name">Kot Gate Key</span>
+            <span class="resource-val" id="ui-key" style="color: #ef4444;">No</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size: 10px; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border-dark); padding-top: 6px;">
+      Hindavi Swarajya • 16-Bit Engine
+    </div>
+  </aside>
+
+  <!-- Center Column: 160x160 Logical Screen -->
+  <main id="viewport-center">
+    <div id="canvas-container">
+      <canvas id="gameCanvas" width="160" height="160"></canvas>
+
+      <!-- Mini HUD (Top Left / Right Overlay on Canvas) -->
+      <div id="canvas-hud">
+        <div class="hud-badge">HP: <span id="hud-hp">100</span></div>
+        <div class="hud-badge" id="hud-astra-badge">Astra: Ready</div>
+      </div>
+
+      <!-- Toast Notifications -->
+      <div id="notification-toast">Message</div>
+
+      <!-- OVERLAY 1: TITLE SCREEN -->
+      <div class="game-overlay active" id="screen-title">
+        <canvas class="title-emblem" id="title-emblem-canvas" width="64" height="64"></canvas>
+        <h1 class="title-h1">Chronicles of Swarajya</h1>
+        <div class="title-subtitle">The Divine Blade</div>
+        <div class="menu-btn-group">
+          <button class="game-btn" id="btn-new-campaign">New Campaign</button>
+          <button class="game-btn" id="btn-continue" disabled>Continue</button>
+          <button class="game-btn" id="btn-settings">Settings</button>
+          <button class="game-btn" id="btn-fullscreen">Full Screen [F]</button>
+          <button class="game-btn" id="btn-credits">Credits</button>
+        </div>
+      </div>
+
+      <!-- OVERLAY 2: STORY CINEMATIC -->
+      <div class="game-overlay" id="screen-story">
+        <div class="story-box">
+          <div class="story-title" id="story-scene-title">Scene 1 — A land yearning for Swarajya</div>
+          <div class="story-text" id="story-scene-text">
+            “Once upon a time, Chhatrapati Shivaji Maharaj dreamed of a land where his people could live with dignity, courage, and freedom.”
+          </div>
+          <div class="story-controls">
+            <button class="game-btn" style="flex: 1;" id="btn-story-skip">Skip Intro</button>
+            <button class="game-btn" style="flex: 1;" id="btn-story-next">Continue ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERLAY 3: FIRST ASTRA SELECTION -->
+      <div class="game-overlay" id="screen-astra">
+        <h2 style="font-size: 15px; color: var(--saffron-light); text-transform: uppercase; margin-bottom: 2px;">Blessing of Goddess Bhavani</h2>
+        <div style="font-size: 11px; color: var(--gold-light); margin-bottom: 10px;">Select your starting Divine Astra</div>
+        
+        <div class="astra-cards-wrap">
+          <!-- Agni -->
+          <div class="astra-card selected" data-astra="agni" id="card-agni">
+            <canvas class="astra-icon-canvas" id="canvas-preview-agni" width="32" height="32"></canvas>
+            <h4>Agni Astra</h4>
+            <div class="astra-role">Offensive Power</div>
+            <div class="astra-desc">Releases an expanding radial flame wave that burns enemies over time.</div>
+            <div class="astra-spec">Cooldown: 6s • High Burst</div>
+          </div>
+
+          <!-- Varuna -->
+          <div class="astra-card" data-astra="varuna" id="card-varuna">
+            <canvas class="astra-icon-canvas" id="canvas-preview-varuna" width="32" height="32"></canvas>
+            <h4>Varuna Astra</h4>
+            <div class="astra-role">Survival & Shield</div>
+            <div class="astra-desc">Summons a soothing aquatic vortex that heals health and gives a protective shield.</div>
+            <div class="astra-spec">Cooldown: 10s • Recovery</div>
+          </div>
+
+          <!-- Bhoomi -->
+          <div class="astra-card" data-astra="bhoomi" id="card-bhoomi">
+            <canvas class="astra-icon-canvas" id="canvas-preview-bhoomi" width="32" height="32"></canvas>
+            <h4>Bhoomi Astra</h4>
+            <div class="astra-role">Ground Control</div>
+            <div class="astra-desc">Slams the earth with a fissure shockwave that staggers and knocks back enemies.</div>
+            <div class="astra-spec">Cooldown: 8s • Stun Wave</div>
+          </div>
+        </div>
+
+        <button class="game-btn" id="btn-confirm-astra" style="width: 240px; font-weight: bold;">Receive Blessing</button>
+      </div>
+
+      <!-- OVERLAY 4: CRAFTING FORGE MODAL -->
+      <div class="game-overlay" id="screen-crafting">
+        <div class="modal-dialog">
+          <h2 style="font-size: 14px; color: var(--saffron-light); margin-bottom: 8px;">Maratha Weaponsmith Forge</h2>
+          <div class="recipe-box">
+            <div style="font-weight: bold; color: var(--gold-light); margin-bottom: 6px;">Recipe: Steel Talwar</div>
+            <div style="font-size: 10.5px; color: #9ca3af; margin-bottom: 8px;">A balanced curved blade essential for Maratha warriors.</div>
+            <div class="recipe-row">
+              <span>Sagwan Wood:</span>
+              <span id="craft-wood-req">0 / 6</span>
+            </div>
+            <div class="recipe-row">
+              <span>Iron Ore:</span>
+              <span id="craft-ore-req">0 / 4</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="game-btn" style="flex: 1;" id="btn-craft-forge">Forge Blade</button>
+            <button class="game-btn" style="flex: 1;" id="btn-craft-close">Close [U]</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERLAY 5: PAUSE & SETTINGS MODAL -->
+      <div class="game-overlay" id="screen-pause">
+        <div class="modal-dialog">
+          <h2 style="font-size: 15px; color: var(--saffron-light); margin-bottom: 12px;">Game Paused</h2>
+          <div class="menu-btn-group" style="width: 100%;">
+            <button class="game-btn" id="btn-resume">Resume [Esc]</button>
+            <button class="game-btn" id="btn-pause-craft">Forge Weapons [U]</button>
+            <button class="game-btn" id="btn-replay-intro">Replay Story</button>
+            <button class="game-btn" id="btn-save-quit">Save & Return to Title</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERLAY 6: VICTORY / MISSION COMPLETE -->
+      <div class="game-overlay" id="screen-victory">
+        <div class="modal-dialog" style="max-width: 420px;">
+          <div class="victory-banner" id="victory-banner-text">Fort Liberated!</div>
+          <h3 style="font-size: 13px; color: var(--gold-light); margin-bottom: 8px;" id="victory-level-title">Level 1 — The Forest Awakening Complete</h3>
+          <p style="font-size: 11px; line-height: 1.5; color: #e5e7eb; margin-bottom: 12px;" id="victory-level-desc">
+            Shivaji Maharaj has forged his divine talwar, broken the enemy outpost, and hoisted the saffron Bhagwa Zenda over Kot Fort! Swarajya has taken root.
+          </p>
+          <div class="recipe-box" style="text-align: left;" id="victory-rewards-box">
+            <div class="recipe-row"><span>XP Awarded:</span><span style="color: var(--gold-light);" id="v-xp-text">+250 XP</span></div>
+            <div class="recipe-row"><span>Bonus Ore:</span><span style="color: var(--gold-light);" id="v-ore-text">+10 Iron</span></div>
+            <div class="recipe-row"><span>Bonus Wood:</span><span style="color: var(--gold-light);" id="v-wood-text">+15 Teak</span></div>
+            <div class="recipe-row"><span>Bonus Gold:</span><span style="color: var(--gold-light);" id="v-gold-text">+20 Gold</span></div>
+            <div class="recipe-row"><span>Campaign Saved:</span><span style="color: #4ade80;">Progress Recorded</span></div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="game-btn" style="flex: 1; background: linear-gradient(90deg, #b45309, #d97706); color: #fff; font-weight: bold;" id="btn-victory-next">Next Level</button>
+            <button class="game-btn" style="flex: 1;" id="btn-victory-continue">Free Roam</button>
+            <button class="game-btn" style="flex: 1;" id="btn-victory-title">Main Menu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERLAY 8: REUSABLE NPC DIALOGUE MODAL -->
+      <div class="game-overlay" id="screen-dialogue">
+        <div class="modal-dialog" style="max-width: 380px;">
+          <div class="dialogue-header">
+            <div class="dialogue-avatar" id="dialogue-avatar">👴</div>
+            <div style="text-align: left;">
+              <h3 style="font-size: 13px; color: var(--gold-light); margin: 0;" id="dialogue-speaker">Village Elder</h3>
+              <div style="font-size: 9.5px; color: var(--saffron-light);" id="dialogue-role">Bhavani Nagar Settlement</div>
+            </div>
+          </div>
+          <div class="dialogue-box" id="dialogue-text">
+            ...
+          </div>
+          <button class="game-btn" id="btn-dialogue-continue" style="width: 100%; font-weight: bold; background: linear-gradient(90deg, #9a3412, #c2410c);">Continue [Space / E]</button>
+        </div>
+      </div>
+
+      <!-- OVERLAY 10: CINEMATIC MISSION BRIEFING -->
+      <div class="game-overlay" id="screen-mission-intro">
+        <div class="mission-card">
+          <div class="location-badge" id="intro-location-tag">Western Ghats • 1646</div>
+          <h2 style="font-size: 16px; color: var(--saffron-light); margin-bottom: 4px;" id="intro-mission-title">Level 1: The Forest Awakening</h2>
+          <div class="mission-narrative" id="intro-narrative-text">
+            Deep in the sacred Sahyadri hills, Shivaji Maharaj gathers timber and iron to forge his first blade of liberation...
+          </div>
+          <div class="recipe-box" style="margin-bottom: 12px; text-align: left;">
+            <div style="font-size: 10px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">Primary Directives:</div>
+            <div style="font-size: 10.5px; color: #e5e7eb; line-height: 1.4;" id="intro-directives-text">
+              • Forge the steel Talwar at the anvil<br/>• Defeat scouting sentries<br/>• Hoist the Bhagwa Zenda
+            </div>
+          </div>
+          <button class="game-btn" id="btn-commence-mission" style="width: 100%; font-weight: bold; background: linear-gradient(90deg, #b45309, #d97706); color: #fff; font-size: 12px; padding: 10px;">Commence Mission [Space / E]</button>
+        </div>
+      </div>
+
+      <!-- OVERLAY 9: SWARAJYA STRONGHOLD MANAGEMENT MODAL -->
+      <div class="game-overlay" id="screen-stronghold">
+        <div class="modal-dialog" style="max-width: 440px;">
+          <h2 style="font-size: 15px; color: var(--saffron-light); margin-bottom: 2px;">Swarajya Stronghold Management</h2>
+          <div style="font-size: 10.5px; color: var(--gold-light); margin-bottom: 8px;" id="sh-title-tier">Tier 1: Torna Fortress • Seat of Hindavi Swarajya</div>
+          <div class="recipe-box" style="margin-bottom: 10px;">
+            <div class="recipe-row"><span>Stronghold Defense:</span><span id="sh-defense-val" style="color: #4ade80;">50 PTS</span></div>
+            <div class="recipe-row"><span>Shivaji Attack / Defense:</span><span id="sh-combat-val" style="color: var(--gold-light);">32 ATK / 6 DEF</span></div>
+            <div class="recipe-row"><span>Available Treasury:</span><span id="sh-gold-val" style="color: var(--gold-light);">15 Gold</span></div>
+            <div class="recipe-row"><span>Stockpile Materials:</span><span id="sh-mats-val" style="color: var(--gold-light);">0 Wood, 0 Ore</span></div>
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <div class="upgrade-card">
+              <div class="upgrade-info">
+                <div class="upgrade-title">Reinforce Bastion Walls</div>
+                <div class="upgrade-desc">+15 Stronghold Def (Cost: 15 Wood, 10 Ore)</div>
+              </div>
+              <button class="game-btn" id="btn-sh-upgrade-walls" style="font-size: 10px; padding: 5px 10px;">Upgrade</button>
+            </div>
+
+            <div class="upgrade-card">
+              <div class="upgrade-info">
+                <div class="upgrade-title">Refine Weapon Steel</div>
+                <div class="upgrade-desc">+5 Player Attack (Cost: 20 Ore, 25 Gold)</div>
+              </div>
+              <button class="game-btn" id="btn-sh-upgrade-talwar" style="font-size: 10px; padding: 5px 10px;">Upgrade</button>
+            </div>
+
+            <div class="upgrade-card">
+              <div class="upgrade-info">
+                <div class="upgrade-title">Mavali Garrison Training</div>
+                <div class="upgrade-desc">+30 Player Max HP (Cost: 20 Wood, 20 Gold)</div>
+              </div>
+              <button class="game-btn" id="btn-sh-upgrade-hp" style="font-size: 10px; padding: 5px 10px;">Train</button>
+            </div>
+          </div>
+
+          <button class="game-btn" id="btn-stronghold-close" style="width: 100%;">Close [M]</button>
+        </div>
+      </div>
+
+      <!-- OVERLAY 7: GAME OVER / DEFEAT -->
+      <div class="game-overlay" id="screen-gameover">
+        <div class="modal-dialog">
+          <h2 style="font-size: 16px; color: #ef4444; margin-bottom: 8px;">Shivaji Fell in Battle</h2>
+          <p style="font-size: 11px; line-height: 1.5; color: #e5e7eb; margin-bottom: 12px;">
+            The dream of Swarajya does not perish. Regroup at the forest clearing and strike with renewed vigilance.
+          </p>
+          <div class="menu-btn-group" style="width: 100%;">
+            <button class="game-btn" id="btn-restart-level">Respawn at Clearing</button>
+            <button class="game-btn" id="btn-gameover-title">Return to Menu</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Right Desktop Companion: Campaign Objectives & Controls -->
+  <aside class="desktop-side-panel" id="panel-right">
+    <div>
+      <div class="panel-header">
+        <h2>Mission Directives</h2>
+        <div class="subtext" id="level-subtext">Level 1: The Forest Awakening</div>
+      </div>
+
+      <div class="panel-card" id="quest-list-container">
+        <h3>Campaign Objectives</h3>
+        <div class="quest-item" id="quest-wood">
+          <span class="quest-check">○</span>
+          <span>Gather Sagwan Teak Wood (<span id="q-wood-count">0</span>/6)</span>
+        </div>
+        <div class="quest-item" id="quest-ore">
+          <span class="quest-check">○</span>
+          <span>Mine Iron Ore Deposits (<span id="q-ore-count">0</span>/4)</span>
+        </div>
+        <div class="quest-item" id="quest-craft">
+          <span class="quest-check">○</span>
+          <span>Forge Maratha Steel Talwar [U]</span>
+        </div>
+        <div class="quest-item" id="quest-patrols">
+          <span class="quest-check">○</span>
+          <span>Defeat scouting guards in mountain pass</span>
+        </div>
+        <div class="quest-item" id="quest-keeper">
+          <span class="quest-check">○</span>
+          <span>Defeat Fort Keeper & obtain Kot Key</span>
+        </div>
+        <div class="quest-item" id="quest-hoist">
+          <span class="quest-check">○</span>
+          <span>Unlock Kot Gate [E] & hoist Bhagwa Zenda</span>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>Desktop Controls</h3>
+        <div class="stat-row"><span>MOVE</span><span style="color: var(--gold-light);">W, A, S, D / Arrows</span></div>
+        <div class="stat-row"><span>ATTACK / CHOP</span><span style="color: var(--gold-light);">Space</span></div>
+        <div class="stat-row"><span>INTERACT / GATE</span><span style="color: var(--gold-light);">E</span></div>
+        <div class="stat-row"><span>CAST ASTRA</span><span style="color: var(--gold-light);">Shift</span></div>
+        <div class="stat-row"><span>EVASIVE DODGE</span><span style="color: var(--gold-light);">K</span></div>
+        <div class="stat-row"><span>FORGE / CRAFT</span><span style="color: var(--gold-light);">U</span></div>
+        <div class="stat-row"><span>PAUSE / MENU</span><span style="color: var(--gold-light);">Esc / P</span></div>
+        <div class="stat-row"><span>STRONGHOLD</span><span style="color: var(--gold-light);">M</span></div>
+        <div class="stat-row"><span>FULL SCREEN</span><span style="color: var(--gold-light);">F</span></div>
+      </div>
+    </div>
+
+    <div class="panel-card" style="margin-bottom: 0;">
+      <h3>Sahyadri Region</h3>
+      <p style="font-size: 10px; line-height: 1.4; color: #9ca3af;">
+        Western Ghats, 1646. A rugged land of basalt crags, dense teak forests, and impregnable hill forts.
+      </p>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+/**
+ * CHRONICLES OF SWARAJYA: THE DIVINE BLADE
+ * Phase 3 — Playable Desktop RPG Engine
+ * 16-bit Top-down Action RPG
+ */
+
+// ==========================================
+// 1. AUDIO SYNTHESIZER (Web Audio API)
+// ==========================================
+class SoundEngine {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+  }
+  init() {
+    if (!this.ctx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        this.ctx = new AudioContext();
+      }
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+  play(type) {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    switch(type) {
+      case 'menu_select':
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.08);
+        osc.start(now); osc.stop(now + 0.08);
+        break;
+      case 'chop':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.linearRampToValueAtTime(60, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+        break;
+      case 'mine':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(1320, now + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(440, now + 0.12);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.12);
+        osc.start(now); osc.stop(now + 0.12);
+        break;
+      case 'slash':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(380, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.12);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.12);
+        osc.start(now); osc.stop(now + 0.12);
+        break;
+      case 'hit':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.linearRampToValueAtTime(40, now + 0.1);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+        break;
+      case 'dodge':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.linearRampToValueAtTime(350, now + 0.12);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.12);
+        osc.start(now); osc.stop(now + 0.12);
+        break;
+      case 'craft_success':
+        // Fanfare chord
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+          const o = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          o.connect(g); g.connect(this.ctx.destination);
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + i * 0.08);
+          g.gain.setValueAtTime(0.15, now + i * 0.08);
+          g.gain.linearRampToValueAtTime(0, now + i * 0.08 + 0.4);
+          o.start(now + i * 0.08); o.stop(now + i * 0.08 + 0.4);
+        });
+        break;
+      case 'astra_fire':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.35);
+        osc.start(now); osc.stop(now + 0.35);
+        break;
+      case 'astra_water':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+        break;
+      case 'astra_earth':
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(90, now);
+        osc.frequency.linearRampToValueAtTime(30, now + 0.3);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+        break;
+      case 'victory':
+        [392, 523.25, 659.25, 783.99].forEach((freq, idx) => {
+          const o = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          o.connect(g); g.connect(this.ctx.destination);
+          o.type = 'square';
+          o.frequency.setValueAtTime(freq, now + idx * 0.12);
+          g.gain.setValueAtTime(0.15, now + idx * 0.12);
+          g.gain.linearRampToValueAtTime(0, now + idx * 0.12 + 0.5);
+          o.start(now + idx * 0.12); o.stop(now + idx * 0.12 + 0.5);
+        });
+        break;
+      case 'parry':
+        // High-pitched metallic deflection
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1800, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.08);
+        osc.start(now); osc.stop(now + 0.08);
+        break;
+      case 'shoot':
+        // Arrow release whoosh
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(1100, now + 0.09);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.09);
+        osc.start(now); osc.stop(now + 0.09);
+        break;
+      case 'charge':
+        // Low rumble charge
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(95, now);
+        osc.frequency.linearRampToValueAtTime(50, now + 0.22);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.22);
+        osc.start(now); osc.stop(now + 0.22);
+        break;
+      case 'boss_roar':
+        // War horn brass swell
+        [150, 225, 300].forEach((freq, idx) => {
+          const o = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          o.connect(g); g.connect(this.ctx.destination);
+          o.type = 'sawtooth';
+          o.frequency.setValueAtTime(freq, now);
+          o.frequency.exponentialRampToValueAtTime(freq * 1.25, now + 0.25);
+          o.frequency.exponentialRampToValueAtTime(freq * 0.9, now + 0.55);
+          g.gain.setValueAtTime(0.12, now);
+          g.gain.linearRampToValueAtTime(0, now + 0.55);
+          o.start(now); o.stop(now + 0.55);
+        });
+        break;
+    }
+  }
+}
+const audio = new SoundEngine();
+
+// ==========================================
+// 2. ASSET LOADER & CACHE
+// ==========================================
+const ASSET_PATHS = {
+  // Characters
+  shivaji_idle: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png',
+  shivaji_walk: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_walk.png',
+  shivaji_attack: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_attack.png',
+  shivaji_dodge: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_dodge.png',
+  shivaji_victory: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_hurt_victory.png',
+  // Enemies
+  swordsman: 'ChroniclesOfSwarajya_Art/02_Enemies/swordsman.png',
+  // Astras
+  agni_effects: 'ChroniclesOfSwarajya_Art/04_AstraEffects/agni_effects.png',
+  varuna_effects: 'ChroniclesOfSwarajya_Art/04_AstraEffects/varuna_effects.png',
+  bhoomi_effects: 'ChroniclesOfSwarajya_Art/04_AstraEffects/bhoomi_effects.png',
+  // Weapons
+  talwar_basic: 'ChroniclesOfSwarajya_Art/05_Weapons/talwar_basic.png',
+  slash_arc: 'ChroniclesOfSwarajya_Art/05_Weapons/sword_slash_arc.png',
+  hit_flash: 'ChroniclesOfSwarajya_Art/05_Weapons/hit_flash.png',
+  arrow_projectile: 'ChroniclesOfSwarajya_Art/05_Weapons/arrow_projectile.png',
+  talwar_upgraded: 'ChroniclesOfSwarajya_Art/05_Weapons/talwar_upgraded.png',
+  // Environment Tilesets
+  grass_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/grass_tiles.png',
+  dirt_path_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/dirt_path_tiles.png',
+  stone_cliff_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/stone_cliff_tiles.png',
+  water_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/water_tiles.png',
+  terrain_transitions: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/terrain_transitions.png',
+  // Trees & Nature
+  forest_trees: 'ChroniclesOfSwarajya_Art/08_Trees/forest_trees.png',
+  sagwan_trees: 'ChroniclesOfSwarajya_Art/08_Trees/sagwan_trees.png',
+  stumps: 'ChroniclesOfSwarajya_Art/08_Trees/stumps_and_fallen_trees.png',
+  rocks: 'ChroniclesOfSwarajya_Art/09_RocksAndMountains/rocks_and_boulders.png',
+  cliffs: 'ChroniclesOfSwarajya_Art/09_RocksAndMountains/cliffs_and_outcrops.png',
+  ores: 'ChroniclesOfSwarajya_Art/09_RocksAndMountains/iron_ore_nodes.png',
+  // Fort Architecture
+  fort_walls: 'ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_walls.png',
+  fort_gates: 'ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_gates.png',
+  towers: 'ChroniclesOfSwarajya_Art/10_FortArchitecture/towers_and_buildings.png',
+  fort_decor: 'ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_decorations.png',
+  fences: 'ChroniclesOfSwarajya_Art/11_VillageAndCamp/bridges_and_fences.png',
+  village_assets: 'ChroniclesOfSwarajya_Art/11_VillageAndCamp/village_assets.png',
+  camp_assets: 'ChroniclesOfSwarajya_Art/11_VillageAndCamp/camp_assets.png',
+  archer: 'ChroniclesOfSwarajya_Art/02_Enemies/archer.png',
+  shield_guard: 'ChroniclesOfSwarajya_Art/02_Enemies/shield_guard.png',
+  elite_guard: 'ChroniclesOfSwarajya_Art/02_Enemies/elite_guard.png',
+  charging_soldier: 'ChroniclesOfSwarajya_Art/02_Enemies/charging_soldier.png',
+  afzal_khan: 'ChroniclesOfSwarajya_Art/03_Bosses/afzal_khan.png',
+  // VFX
+  vfx_water: 'ChroniclesOfSwarajya_Art/13_EnvironmentEffects/water_and_leaves.png',
+  vfx_torches: 'ChroniclesOfSwarajya_Art/13_EnvironmentEffects/torches_and_campfires.png',
+  vfx_dust: 'ChroniclesOfSwarajya_Art/13_EnvironmentEffects/dust_and_debris.png',
+  preview_fort: 'ChroniclesOfSwarajya_Art/14_MapPreviews/forest_fort_entrance.png'
+};
+
+const images = {};
+let loadedImagesCount = 0;
+const totalImagesCount = Object.keys(ASSET_PATHS).length;
+
+function preloadAssets(onComplete) {
+  for (const [key, path] of Object.entries(ASSET_PATHS)) {
+    const img = new Image();
+    img.onload = () => {
+      loadedImagesCount++;
+      if (loadedImagesCount === totalImagesCount) {
+        if (onComplete) onComplete();
+      }
+    };
+    img.onerror = () => {
+      console.warn(`Failed to load asset: ${path}`);
+      loadedImagesCount++;
+      if (loadedImagesCount === totalImagesCount) {
+        if (onComplete) onComplete();
+      }
+    };
+    img.src = path;
+    images[key] = img;
+  }
+}
+
+// ==========================================
+// 3. GAME STATE & CAMPAIGN DATA
+// ==========================================
+const SAVE_KEY = 'swarajya_campaign_save_v1';
+
+const gameState = {
+  screen: 'TITLE', // TITLE, STORY, ASTRA_SELECT, PLAYING, CRAFTING, PAUSED, VICTORY, GAMEOVER
+  level: 1,
+  selectedAstra: null, // agni, varuna, bhoomi
+  astraCooldown: 0,
+  astraMaxCooldown: 6.0,
+  astraActiveTimer: 0, // Shield timer for varuna
+  
+  // Shivaji Player Stats
+  player: {
+    x: 96, // Spawn in forest clearing
+    y: 120,
+    dir: 0, // 0: South, 1: North, 2: East, 3: West
+    isMoving: false,
+    hp: 100,
+    maxHp: 100,
+    xp: 0,
+    maxXp: 100,
+    level: 1,
+    atk: 4,
+    def: 2,
+    hasTalwar: false,
+    isAttacking: false,
+    attackTimer: 0,
+    isDodging: false,
+    dodgeTimer: 0,
+    dodgeDirX: 0,
+    dodgeDirY: 0,
+    invulnerableTimer: 0,
+    animFrame: 0,
+    animTimer: 0,
+    speed: 52 // pixels per second
+  },
+
+  // Inventory
+  inventory: {
+    wood: 0,
+    ore: 0,
+    gold: 15,
+    hasKotKey: false,
+    hasHillFortKey: false
+  },
+  maxUnlockedLevel: 1,
+  recoveredCrates: 0,
+  stronghold: {
+    tier: 1,
+    defense: 50,
+    walls: 0,
+    forge: 0,
+    garrison: 0
+  },
+
+  // Mission Checklist
+  quests: {
+    woodGathered: false,
+    oreGathered: false,
+    talwarCrafted: false,
+    patrolsDefeated: false,
+    keeperDefeated: false,
+    fortLiberated: false
+  },
+
+  // Environment Objects & Harvestables
+  resources: [],
+  enemies: [],
+  floatingTexts: [],
+  particles: [],
+  projectiles: [],
+  dodgeCooldownTimer: 0,
+  activeBoss: null,
+
+  // Map settings
+  mapCols: 30,
+  mapRows: 20,
+  tileSize: 16,
+  gateOpen: false,
+  flagHoisted: false,
+
+  // Camera
+  camX: 0,
+  camY: 0
+};
+
+// ==========================================
+// 4. LEVEL 1 MAP BUILDER & OBJECT LAYOUT
+// ==========================================
+// Handcrafted 30 x 20 tile map
+// Cols 0..13: Sahyadri Forest Clearing & Resource Gathering
+// Cols 14..18: Mountain Pass
+// Cols 19..21: Fort Approach, Gate Entrance & Keeper Forecourt
+// Cols 22..28: Enclosed Inner Fort Courtyard
+// Col 29: Eastern Bastion Ridge
+let groundTiles = [];
+let collisionGrid = []; // 0: Walkable, 1: Solid wall/cliff/closed gate, 2: Deep water
+
+function initLevel1Map() {
+  groundTiles = [];
+  collisionGrid = [];
+
+  for (let r = 0; r < gameState.mapRows; r++) {
+    const row = [];
+    const colRow = [];
+    for (let c = 0; c < gameState.mapCols; c++) {
+      // 1. Natural Mountain Cliff Borders (North rows 0..3, South rows 17..19, East col 29, West col 0)
+      if (r <= 3 || r >= 17 || c === 0 || c === 29) {
+        row.push(18); // Basalt cliff rock tile
+        colRow.push(1); // Solid impassable cliff
+      }
+      // 2. Impassable Deep Forest Pond (Cols 1..5, Rows 14..16)
+      else if (c >= 1 && c <= 5 && r >= 14 && r <= 16) {
+        row.push(24); // Water tile
+        colRow.push(2); // Solid impassable water
+      }
+      // 3. Fort Perimeter Walls (Completely enclosing the Courtyard from Col 21 to 28, Rows 4 to 16)
+      // North Wall: Row 4, Cols 21 to 28
+      else if (r === 4 && c >= 21 && c <= 28) {
+        row.push(32); // Horizontal battlement wall
+        colRow.push(1); // Solid fort wall
+      }
+      // South Wall: Row 16, Cols 21 to 28
+      else if (r === 16 && c >= 21 && c <= 28) {
+        row.push(32); // Horizontal battlement wall
+        colRow.push(1); // Solid fort wall
+      }
+      // East Wall: Col 28, Rows 4 to 16
+      else if (c === 28 && r >= 4 && r <= 16) {
+        row.push(33); // Vertical bastion wall
+        colRow.push(1); // Solid fort wall
+      }
+      // West Fort Wall (With the Kot Gate at Rows 9 & 10)
+      else if (c === 21 && r >= 4 && r <= 16) {
+        if (r === 9 || r === 10) {
+          // Kot Gate Gateway!
+          row.push(16); // Flagstone floor beneath gate
+          colRow.push(gameState.gateOpen ? 0 : 1); // Solid when closed, passable when open
+        } else {
+          row.push(33); // Vertical bastion wall
+          colRow.push(1); // Solid fort wall
+        }
+      }
+      // 4. Inner Fort Courtyard Flagstone Ground (Cols 22..27, Rows 5..15)
+      else if (c >= 22 && c <= 27 && r >= 5 && r <= 15) {
+        row.push(16); // Courtyard flagstone slab
+        colRow.push(0); // Walkable
+      }
+      // 5. Main Footpath leading from clearing through pass to the Kot Gate
+      else if (r >= 9 && r <= 10 && c < 21) {
+        row.push(8); // Dirt footpath
+        colRow.push(0); // Walkable
+      }
+      // 6. Natural Grass Floor in Clearing & Mountain Pass
+      else {
+        row.push((c + r * 3) % 4); // Grass variations
+        colRow.push(0); // Walkable
+      }
+    }
+    groundTiles.push(row);
+    collisionGrid.push(colRow);
+  }
+
+  // Setup Harvestable Nodes & Static World Entities
+  gameState.resources = [
+    // 4 Sagwan Teak Trees (Harvestable for wood)
+    { id: 'tree_1', type: 'sagwan', x: 40, y: 50, chopsLeft: 3, maxChops: 3, visualState: 0 },
+    { id: 'tree_2', type: 'sagwan', x: 120, y: 44, chopsLeft: 3, maxChops: 3, visualState: 0 },
+    { id: 'tree_3', type: 'sagwan', x: 60, y: 190, chopsLeft: 3, maxChops: 3, visualState: 0 },
+    { id: 'tree_4', type: 'sagwan', x: 140, y: 220, chopsLeft: 3, maxChops: 3, visualState: 0 },
+
+    // 3 Iron Ore Deposits (Harvestable for ore)
+    { id: 'ore_1', type: 'ore', x: 80, y: 50, oresLeft: 2, maxOres: 2, visualState: 0 },
+    { id: 'ore_2', type: 'ore', x: 180, y: 60, oresLeft: 2, maxOres: 2, visualState: 0 },
+    { id: 'ore_3', type: 'ore', x: 100, y: 230, oresLeft: 2, maxOres: 2, visualState: 0 },
+
+    // Broadleaf Trees (Decoration / Obstacles)
+    { id: 'dec_tree_1', type: 'forest_tree', x: 20, y: 100, variety: 1 },
+    { id: 'dec_tree_2', type: 'forest_tree', x: 170, y: 130, variety: 2 },
+
+    // Basalt Boulders
+    { id: 'rock_1', type: 'boulder', x: 160, y: 90 },
+    { id: 'rock_2', type: 'boulder', x: 120, y: 160 },
+
+    // The Kot Gate (Col 21 = 336px, Row 9-10 = 152px)
+    { id: 'fort_gate', type: 'gate', x: 336, y: 152, isOpen: !!gameState.gateOpen },
+
+    // Buruj Watchtower inside Courtyard (Col 24 = 384px, Row 5 = 70px)
+    { id: 'buruj_tower', type: 'tower', x: 384, y: 64 },
+
+    // Armoury Blacksmith inside Courtyard (Col 26 = 416px, Row 6 = 80px)
+    { id: 'armoury', type: 'armoury', x: 416, y: 80 },
+
+    // Bhagwa Zenda Flagpole on Rampart (Col 27 = 432px, Row 10 = 152px)
+    { id: 'flagpole', type: 'flagpole', x: 432, y: 152, hoisted: !!gameState.flagHoisted },
+
+    // Torches
+    { id: 'torch_1', type: 'torch', x: 326, y: 134 },
+    { id: 'torch_2', type: 'torch', x: 326, y: 176 },
+    { id: 'torch_3', type: 'torch', x: 380, y: 140 }
+  ];
+
+  // Enemies: Outer Pass Scouts + Fort Approach Guards + Forecourt Fort Keeper + Courtyard Defenders
+  gameState.enemies = [
+    // 1. Mountain Scout: Basic Swordsman
+    {
+      id: 'patrol_1',
+      name: 'Mountain Scout',
+      type: 'swordsman',
+      x: 160,
+      y: 130,
+      hp: 32,
+      maxHp: 32,
+      atk: 7,
+      speed: 34,
+      state: 'patrol',
+      patrolStartX: 130,
+      patrolEndX: 190,
+      dir: 2,
+      animTimer: 0,
+      attackCooldown: 1.2,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    // 2. Ridge Swordsman: Basic Swordsman
+    {
+      id: 'patrol_2',
+      name: 'Ridge Swordsman',
+      type: 'swordsman',
+      x: 210,
+      y: 170,
+      hp: 35,
+      maxHp: 35,
+      atk: 8,
+      speed: 34,
+      state: 'patrol',
+      patrolStartX: 180,
+      patrolEndX: 240,
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.2,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    // 3. Gate Sentry: Shield Guard (Frontal Block)
+    {
+      id: 'gate_guard',
+      name: 'Gate Sentry',
+      type: 'shield_guard',
+      hasShield: true,
+      x: 290,
+      y: 152,
+      hp: 45,
+      maxHp: 45,
+      atk: 9,
+      speed: 24,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.6,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    // 4. Fort Keeper (Kot Havaldar): 2-Phase Boss
+    {
+      id: 'fort_keeper',
+      name: 'Fort Keeper (Kot Havaldar)',
+      bossTitle: 'KOT HAVALDAR',
+      type: 'subedar',
+      x: 260,
+      y: 110,
+      hp: 80,
+      maxHp: 80,
+      atk: 12,
+      speed: 26,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.8,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      phase: 1,
+      shockwaveCooldown: 4.0,
+      isBoss: true
+    },
+    // 5. Courtyard Watchman: Archer (Ranged Projectiles & Kiting)
+    {
+      id: 'courtyard_guard_1',
+      name: 'Courtyard Watchman',
+      type: 'archer',
+      x: 380,
+      y: 110,
+      hp: 35,
+      maxHp: 35,
+      atk: 8,
+      speed: 32,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 2.0,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    // 6. Citadel Defender: Elite Halberd Guard (28px Extended Reach)
+    {
+      id: 'courtyard_guard_2',
+      name: 'Citadel Defender',
+      type: 'elite_guard',
+      x: 420,
+      y: 190,
+      hp: 45,
+      maxHp: 45,
+      atk: 10,
+      speed: 28,
+      state: 'idle',
+      dir: 1,
+      animTimer: 0,
+      attackCooldown: 1.5,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    }
+  ];
+}
+
+// ==========================================
+// 4B. CAMPAIGN EXPANSION: LEVELS 2 - 5 BUILDERS
+// ==========================================
+
+// --- LEVEL 2: THE VILLAGE IN PERIL ---
+function initLevel2Map() {
+  groundTiles = [];
+  collisionGrid = [];
+
+  for (let r = 0; r < gameState.mapRows; r++) {
+    const row = [];
+    const colRow = [];
+    for (let c = 0; c < gameState.mapCols; c++) {
+      // Mountain cliffs on North (0..2), South (17..19), West border col 0 (except pass row 9-10), East col 29
+      if (r <= 2 || r >= 17 || (c === 0 && !(r === 9 || r === 10)) || c === 29) {
+        row.push(18); // Basalt cliff rock tile
+        colRow.push(1); // Solid impassable cliff
+      }
+      // Small village irrigation pond (Cols 1..4, Rows 3..5)
+      else if (c >= 1 && c <= 4 && r >= 3 && r <= 5) {
+        row.push(24); // Water tile
+        colRow.push(2); // Solid impassable water
+      }
+      // Village square ground (Cols 12..18, Rows 7..13)
+      else if (c >= 12 && c <= 18 && r >= 7 && r <= 13) {
+        row.push((c + r) % 2 === 0 ? 16 : 9); // Beaten stone & dirt
+        colRow.push(0);
+      }
+      // Main road from West pass through square to East encampment
+      else if ((r === 9 || r === 10) && c < 28) {
+        row.push(8); // Dirt footpath
+        colRow.push(0);
+      }
+      // Raiders camp clearing (Cols 22..27, Rows 8..14)
+      else if (c >= 22 && c <= 27 && r >= 8 && r <= 14) {
+        row.push(9); // Beaten earth
+        colRow.push(0);
+      }
+      // Natural grass
+      else {
+        row.push((c + r * 2) % 4);
+        colRow.push(0);
+      }
+    }
+    groundTiles.push(row);
+    collisionGrid.push(colRow);
+  }
+
+  // Resources, Buildings, NPCs in Level 2
+  gameState.resources = [
+    // Village Huts (Decor & Solid Obstacles)
+    { id: 'hut_1', type: 'village_hut', x: 140, y: 80 },
+    { id: 'hut_2', type: 'village_hut', x: 150, y: 220 },
+    { id: 'hut_3', type: 'village_hut', x: 280, y: 76 },
+
+    // Village Stone Well (Village Square Center)
+    { id: 'village_well', type: 'village_well', x: 240, y: 160 },
+
+    // Wooden Carts & Clay Pots
+    { id: 'cart_1', type: 'wooden_cart', x: 200, y: 120 },
+    { id: 'cart_2', type: 'wooden_cart', x: 270, y: 190 },
+    { id: 'pots_1', type: 'clay_pots', x: 226, y: 144 },
+    { id: 'pots_2', type: 'clay_pots', x: 254, y: 174 },
+
+    // Fences around village square with open gateway at road
+    { id: 'fence_1', type: 'fence', x: 96, y: 100 },
+    { id: 'fence_2', type: 'fence', x: 96, y: 116 },
+    { id: 'fence_3', type: 'fence', x: 96, y: 184 },
+    { id: 'fence_4', type: 'fence', x: 96, y: 200 },
+
+    // Interactive Village Elder NPC
+    { id: 'village_elder', type: 'village_elder', x: 260, y: 150 },
+
+    // Eastern Raider Encampment (Tents & Campfire)
+    { id: 'tent_1', type: 'tent', x: 390, y: 100 },
+    { id: 'tent_2', type: 'tent', x: 420, y: 170 },
+    { id: 'camp_fire', type: 'torch', x: 390, y: 150 },
+    { id: 'crates_1', type: 'camp_crates', x: 420, y: 110 },
+
+    // Harvestables around settlement borders
+    { id: 'tree_v1', type: 'sagwan', x: 50, y: 60, chopsLeft: 3, maxChops: 3, visualState: 0 },
+    { id: 'tree_v2', type: 'sagwan', x: 70, y: 220, chopsLeft: 3, maxChops: 3, visualState: 0 },
+    { id: 'ore_v1', type: 'ore', x: 100, y: 50, oresLeft: 2, maxOres: 2, visualState: 0 },
+    { id: 'ore_v2', type: 'ore', x: 330, y: 230, oresLeft: 2, maxOres: 2, visualState: 0 },
+    { id: 'rock_v1', type: 'boulder', x: 180, y: 48 },
+    { id: 'rock_v2', type: 'boulder', x: 320, y: 50 }
+  ];
+
+  // Enemies in Level 2: Entrance Scouts + Square Raiders + Plunder Captain
+  gameState.enemies = [
+    {
+      id: 'v_scout_1',
+      name: 'Hostile Scout',
+      type: 'swordsman',
+      x: 160,
+      y: 150,
+      hp: 36,
+      maxHp: 36,
+      atk: 8,
+      speed: 35,
+      state: 'patrol',
+      patrolStartX: 140,
+      patrolEndX: 180,
+      dir: 2,
+      animTimer: 0,
+      attackCooldown: 1.2,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'v_scout_2',
+      name: 'Hostile Scout',
+      type: 'swordsman',
+      x: 190,
+      y: 170,
+      hp: 36,
+      maxHp: 36,
+      atk: 8,
+      speed: 35,
+      state: 'patrol',
+      patrolStartX: 170,
+      patrolEndX: 210,
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.2,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'v_soldier_1',
+      name: 'Plunder Archer',
+      type: 'archer',
+      x: 280,
+      y: 130,
+      hp: 36,
+      maxHp: 36,
+      atk: 8,
+      speed: 32,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 2.0,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'v_soldier_2',
+      name: 'Plunder Raider',
+      type: 'swordsman',
+      x: 290,
+      y: 180,
+      hp: 40,
+      maxHp: 40,
+      atk: 9,
+      speed: 34,
+      state: 'idle',
+      dir: 0,
+      animTimer: 0,
+      attackCooldown: 1.3,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'v_raider_1',
+      name: 'Camp Vanguard',
+      type: 'charging_soldier',
+      x: 340,
+      y: 150,
+      hp: 46,
+      maxHp: 46,
+      atk: 12,
+      speed: 30,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 2.2,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'village_captain',
+      name: 'Plunder Captain (Diler Khan)',
+      bossTitle: 'CAPTAIN DILER KHAN',
+      type: 'subedar',
+      hasShield: true,
+      x: 400,
+      y: 150,
+      hp: 95,
+      maxHp: 95,
+      atk: 13,
+      speed: 27,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.7,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      phase: 1,
+      shockwaveCooldown: 4.0,
+      isBoss: true
+    }
+  ];
+}
+
+// --- LEVEL 3: THE LOST SUPPLY CARAVAN ---
+function initLevel3Map() {
+  groundTiles = [];
+  collisionGrid = [];
+
+  for (let r = 0; r < gameState.mapRows; r++) {
+    const row = [];
+    const colRow = [];
+    for (let c = 0; c < gameState.mapCols; c++) {
+      // Rugged Mountain Canyon Borders: North (0..3), South (16..19), West col 0 (except path row 9-10), East col 29
+      if (r <= 3 || r >= 16 || (c === 0 && !(r === 9 || r === 10)) || c === 29) {
+        row.push(18); // Basalt cliff rock tile
+        colRow.push(1); // Solid impassable cliff
+      }
+      // Canyon Gorge Passages (winding trail)
+      else if (r >= 8 && r <= 11 && c < 28) {
+        row.push((c + r) % 2 === 0 ? 8 : 16); // Dirt footpath and rocky flagstones
+        colRow.push(0);
+      }
+      // Ambushed Caravan site clearing (Cols 10..16, Rows 6..13)
+      else if (c >= 10 && c <= 16 && r >= 6 && r <= 13) {
+        row.push(9); // Rocky dirt ground
+        colRow.push(0);
+      }
+      // Bandit camp clearing (Cols 22..27, Rows 6..14)
+      else if (c >= 22 && c <= 27 && r >= 6 && r <= 14) {
+        row.push(16); // Rocky plateau
+        colRow.push(0);
+      }
+      // Mountain shrubs & grass
+      else {
+        row.push((c + r) % 3);
+        colRow.push(0);
+      }
+    }
+    groundTiles.push(row);
+    collisionGrid.push(colRow);
+  }
+
+  // 4 Recoverable Supply Crates & Mountain Caravan Assets
+  gameState.resources = [
+    // Overturned Wagon Cart at ambush site
+    { id: 'cart_overturned', type: 'wooden_cart', x: 180, y: 150 },
+
+    // 4 Lost Supply Crates (Interactive [E])
+    { id: 'supply_crate_1', type: 'supply_crate', x: 150, y: 120, collected: false, crateNum: 1 },
+    { id: 'supply_crate_2', type: 'supply_crate', x: 210, y: 175, collected: false, crateNum: 2 },
+    { id: 'supply_crate_3', type: 'supply_crate', x: 250, y: 110, collected: false, crateNum: 3 },
+    { id: 'supply_crate_4', type: 'supply_crate', x: 340, y: 175, collected: false, crateNum: 4 },
+
+    // Wagon Master / Caravan Scout at extraction point
+    { id: 'wagon_master', type: 'wagon_master', x: 440, y: 150 },
+
+    // Bandit Camp in eastern canyon
+    { id: 'tent_b1', type: 'tent', x: 380, y: 95 },
+    { id: 'tent_b2', type: 'tent', x: 410, y: 160 },
+    { id: 'torch_b1', type: 'torch', x: 380, y: 140 },
+    { id: 'crate_decor', type: 'camp_crates', x: 400, y: 115 },
+
+    // Basalt Boulders & Outcrops
+    { id: 'rock_c1', type: 'boulder', x: 120, y: 80 },
+    { id: 'rock_c2', type: 'boulder', x: 280, y: 70 },
+    { id: 'rock_c3', type: 'boulder', x: 240, y: 210 },
+    { id: 'rock_c4', type: 'boulder', x: 330, y: 80 },
+
+    // Teak & Ore deposits
+    { id: 'tree_c1', type: 'sagwan', x: 60, y: 70, chopsLeft: 3, maxChops: 3, visualState: 0 },
+    { id: 'ore_c1', type: 'ore', x: 90, y: 60, oresLeft: 2, maxOres: 2, visualState: 0 },
+    { id: 'ore_c2', type: 'ore', x: 300, y: 220, oresLeft: 2, maxOres: 2, visualState: 0 }
+  ];
+
+  // Enemies: Caravan Ambushers + Canyon Patrols + Camp Leader
+  gameState.enemies = [
+    {
+      id: 'c_guard_1',
+      name: 'Caravan Ambusher',
+      type: 'swordsman',
+      x: 180,
+      y: 130,
+      hp: 42,
+      maxHp: 42,
+      atk: 9,
+      speed: 35,
+      state: 'patrol',
+      patrolStartX: 160,
+      patrolEndX: 200,
+      dir: 2,
+      animTimer: 0,
+      attackCooldown: 1.2,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'c_guard_2',
+      name: 'Canyon Bowsman',
+      type: 'archer',
+      x: 210,
+      y: 160,
+      hp: 40,
+      maxHp: 40,
+      atk: 9,
+      speed: 32,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.9,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'c_patrol_1',
+      name: 'Canyon Sentry',
+      type: 'shield_guard',
+      hasShield: true,
+      x: 280,
+      y: 130,
+      hp: 50,
+      maxHp: 50,
+      atk: 10,
+      speed: 25,
+      state: 'patrol',
+      patrolStartX: 260,
+      patrolEndX: 300,
+      dir: 2,
+      animTimer: 0,
+      attackCooldown: 1.6,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'c_patrol_2',
+      name: 'Bandit Rusher',
+      type: 'charging_soldier',
+      x: 310,
+      y: 170,
+      hp: 48,
+      maxHp: 48,
+      atk: 13,
+      speed: 30,
+      state: 'idle',
+      dir: 1,
+      animTimer: 0,
+      attackCooldown: 2.2,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'camp_leader',
+      name: 'Camp Leader (Rustam Beg)',
+      bossTitle: 'RUSTAM BEG',
+      type: 'elite_guard',
+      x: 380,
+      y: 130,
+      hp: 115,
+      maxHp: 115,
+      atk: 14,
+      speed: 28,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.6,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      phase: 1,
+      shockwaveCooldown: 4.0,
+      isBoss: true
+    }
+  ];
+}
+
+// --- LEVEL 4: THE SIEGE OF THE HILL FORT ---
+function initLevel4Map() {
+  groundTiles = [];
+  collisionGrid = [];
+
+  for (let r = 0; r < gameState.mapRows; r++) {
+    const row = [];
+    const colRow = [];
+    for (let c = 0; c < gameState.mapCols; c++) {
+      // Natural Cliffs Borders: North (0..3), South (17..19), West col 0, East col 29
+      if (r <= 3 || r >= 17 || c === 0 || c === 29) {
+        row.push(18); // Basalt cliff rock tile
+        colRow.push(1); // Solid impassable cliff
+      }
+      // Fortress Perimeter Walls (Enclosing Courtyard from Col 13 to 28, Rows 4 to 16)
+      // North Wall: Row 4, Cols 13 to 28
+      else if (r === 4 && c >= 13 && c <= 28) {
+        row.push(32);
+        colRow.push(1);
+      }
+      // South Wall: Row 16, Cols 13 to 28
+      else if (r === 16 && c >= 13 && c <= 28) {
+        row.push(32);
+        colRow.push(1);
+      }
+      // East Wall: Col 28, Rows 4 to 16
+      else if (c === 28 && r >= 4 && r <= 16) {
+        row.push(33);
+        colRow.push(1);
+      }
+      // West Citadel Wall (With the Kot Gate at Rows 9 & 10, Col 13)
+      else if (c === 13 && r >= 4 && r <= 16) {
+        if (r === 9 || r === 10) {
+          row.push(16); // Flagstone beneath gate
+          colRow.push(gameState.gateOpen ? 0 : 1);
+        } else {
+          row.push(33);
+          colRow.push(1);
+        }
+      }
+      // Inner Courtyard Flagstone Ground (Cols 14..27, Rows 5..15)
+      else if (c >= 14 && c <= 27 && r >= 5 && r <= 15) {
+        row.push(16);
+        colRow.push(0);
+      }
+      // Outer approach footpath leading to the gate
+      else if ((r === 9 || r === 10) && c < 13) {
+        row.push(8);
+        colRow.push(0);
+      }
+      // Outer Approach natural ground
+      else {
+        row.push((c + r * 2) % 4);
+        colRow.push(0);
+      }
+    }
+    groundTiles.push(row);
+    collisionGrid.push(colRow);
+  }
+
+  // Fort Structures, Gate, Anvil, Towers & Ramparts
+  gameState.resources = [
+    // Main Citadel Gate (Col 13 = 208px, Rows 9-10 = 152px)
+    { id: 'fort_gate', type: 'gate', x: 208, y: 152, isOpen: !!gameState.gateOpen },
+
+    // Watchtowers inside courtyard
+    { id: 'tower_4_1', type: 'tower', x: 280, y: 64 },
+    { id: 'tower_4_2', type: 'tower', x: 380, y: 64 },
+
+    // Armoury Blacksmith Anvil inside Courtyard
+    { id: 'armoury', type: 'armoury', x: 320, y: 220 },
+
+    // Saffron Bhagwa Zenda Flagpole on High Rampart
+    { id: 'flagpole', type: 'flagpole', x: 420, y: 152, hoisted: !!gameState.flagHoisted },
+
+    // Torches
+    { id: 'torch_f1', type: 'torch', x: 198, y: 134 },
+    { id: 'torch_f2', type: 'torch', x: 198, y: 176 },
+    { id: 'torch_f3', type: 'torch', x: 300, y: 140 },
+
+    // Outer approach boulders and trees
+    { id: 'rock_f1', type: 'boulder', x: 80, y: 100 },
+    { id: 'rock_f2', type: 'boulder', x: 100, y: 190 },
+    { id: 'tree_f1', type: 'sagwan', x: 40, y: 70, chopsLeft: 3, maxChops: 3, visualState: 0 },
+    { id: 'ore_f1', type: 'ore', x: 70, y: 50, oresLeft: 2, maxOres: 2, visualState: 0 }
+  ];
+
+  // Enemies: Outer Pass Vanguard + Gate Commander (Drops Key) + Courtyard Defenders + Captain
+  gameState.enemies = [
+    {
+      id: 'fort4_guard_1',
+      name: 'Hill Fort Vanguard',
+      type: 'charging_soldier',
+      x: 110,
+      y: 130,
+      hp: 50,
+      maxHp: 50,
+      atk: 12,
+      speed: 30,
+      state: 'patrol',
+      patrolStartX: 90,
+      patrolEndX: 130,
+      dir: 2,
+      animTimer: 0,
+      attackCooldown: 2.2,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'fort4_guard_2',
+      name: 'Bastion Archer',
+      type: 'archer',
+      x: 130,
+      y: 170,
+      hp: 45,
+      maxHp: 45,
+      atk: 10,
+      speed: 32,
+      state: 'patrol',
+      patrolStartX: 110,
+      patrolEndX: 150,
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.8,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'hill_fort_commander',
+      name: 'Gate Commander (Sardar Bahlool)',
+      bossTitle: 'SARDAR BAHLOOL',
+      type: 'shield_guard',
+      hasShield: true,
+      x: 170,
+      y: 150,
+      hp: 125,
+      maxHp: 125,
+      atk: 15,
+      speed: 27,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.6,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      phase: 1,
+      shockwaveCooldown: 4.0,
+      isBoss: true
+    },
+    {
+      id: 'fort4_elite_1',
+      name: 'Courtyard Halberdier',
+      type: 'elite_guard',
+      x: 270,
+      y: 120,
+      hp: 55,
+      maxHp: 55,
+      atk: 11,
+      speed: 28,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.5,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'fort4_elite_2',
+      name: 'Wall Sentinel',
+      type: 'archer',
+      x: 310,
+      y: 180,
+      hp: 45,
+      maxHp: 45,
+      atk: 10,
+      speed: 32,
+      state: 'idle',
+      dir: 0,
+      animTimer: 0,
+      attackCooldown: 1.8,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'fort4_captain',
+      name: 'Fortress Captain (Murtaza Khan)',
+      bossTitle: 'CAPTAIN MURTAZA KHAN',
+      type: 'subedar',
+      hasShield: true,
+      x: 360,
+      y: 150,
+      hp: 120,
+      maxHp: 120,
+      atk: 15,
+      speed: 28,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.5,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      phase: 1,
+      shockwaveCooldown: 3.8,
+      isBoss: true
+    }
+  ];
+}
+
+// --- LEVEL 5: THE FIRST SWARAJYA STRONGHOLD ---
+function initLevel5Map() {
+  groundTiles = [];
+  collisionGrid = [];
+
+  for (let r = 0; r < gameState.mapRows; r++) {
+    const row = [];
+    const colRow = [];
+    for (let c = 0; c < gameState.mapCols; c++) {
+      // Stronghold Battlements on North (Rows 0..2) and South (Rows 17..19)
+      if (r <= 2 || r >= 17) {
+        row.push(32); // Fort horizontal wall battlement
+        colRow.push(1); // Solid
+      }
+      // Outer West Gateway Approach (Cols 0..5, Rows 8..11)
+      else if (c <= 5 && r >= 8 && r <= 11) {
+        row.push(8); // Approach road
+        colRow.push(0);
+      }
+      // Royal Flagstone Courtyard throughout Stronghold (Cols 6..27, Rows 3..16)
+      else if (c >= 6 && c <= 27 && r >= 3 && r <= 16) {
+        row.push(16); // Royal flagstone slab
+        colRow.push(0);
+      }
+      // Eastern Bastion Wall (Col 28)
+      else if (c === 28) {
+        row.push(33); // Bastion wall
+        colRow.push(1);
+      }
+      // Western Rampart Wall (Col 5, except gateway rows 8..11)
+      else if (c === 5 && (r < 8 || r > 11)) {
+        row.push(33);
+        colRow.push(1);
+      }
+      // Natural grass outside fort
+      else {
+        row.push((c + r) % 4);
+        colRow.push(0);
+      }
+    }
+    groundTiles.push(row);
+    collisionGrid.push(colRow);
+  }
+
+  // Grand Stronghold Pavilions, Command Desk, Royal Forge, Flagpole
+  gameState.resources = [
+    // Central Stronghold Command Pavilion (Col 15 = 240px, Row 5 = 80px)
+    { id: 'command_pavilion', type: 'command_pavilion', x: 240, y: 80 },
+
+    // Stronghold Command Desk / Table (Interactive [E] / [M] for Stronghold Management)
+    { id: 'command_desk', type: 'command_desk', x: 240, y: 160 },
+
+    // Royal Armoury Forge & Anvil
+    { id: 'armoury', type: 'armoury', x: 140, y: 210 },
+
+    // Stronghold Granary & Treasury Storehouse
+    { id: 'granary', type: 'camp_crates', x: 340, y: 210 },
+
+    // Grand Saffron Bhagwa Zenda Flagpole
+    { id: 'flagpole', type: 'flagpole', x: 420, y: 150, hoisted: !!gameState.flagHoisted },
+
+    // Watchtowers on Bastion corners
+    { id: 'tower_5_1', type: 'tower', x: 130, y: 64 },
+    { id: 'tower_5_2', type: 'tower', x: 350, y: 64 },
+
+    // Torches & Braziers
+    { id: 'torch_s1', type: 'torch', x: 100, y: 110 },
+    { id: 'torch_s2', type: 'torch', x: 100, y: 190 },
+    { id: 'torch_s3', type: 'torch', x: 240, y: 135 },
+    { id: 'torch_s4', type: 'torch', x: 380, y: 140 }
+  ];
+
+  // Enemies: Imperial Siege Vanguard + Royal Halberdiers + Subedar Inayat Khan
+  gameState.enemies = [
+    {
+      id: 'siege_soldier_1',
+      name: 'Royal Shield Sentry',
+      type: 'shield_guard',
+      hasShield: true,
+      x: 120,
+      y: 130,
+      hp: 55,
+      maxHp: 55,
+      atk: 11,
+      speed: 26,
+      state: 'patrol',
+      patrolStartX: 100,
+      patrolEndX: 140,
+      dir: 2,
+      animTimer: 0,
+      attackCooldown: 1.5,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'siege_soldier_2',
+      name: 'Imperial Shock Trooper',
+      type: 'charging_soldier',
+      x: 120,
+      y: 170,
+      hp: 55,
+      maxHp: 55,
+      atk: 14,
+      speed: 32,
+      state: 'patrol',
+      patrolStartX: 100,
+      patrolEndX: 140,
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 2.0,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'siege_halberd_1',
+      name: 'Imperial Halberdier',
+      type: 'elite_guard',
+      x: 180,
+      y: 110,
+      hp: 60,
+      maxHp: 60,
+      atk: 12,
+      speed: 29,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.4,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'siege_halberd_2',
+      name: 'Citadel Marksman',
+      type: 'archer',
+      x: 180,
+      y: 190,
+      hp: 50,
+      maxHp: 50,
+      atk: 11,
+      speed: 32,
+      state: 'idle',
+      dir: 0,
+      animTimer: 0,
+      attackCooldown: 1.7,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      isBoss: false
+    },
+    {
+      id: 'subedar_inayat',
+      name: 'Subedar Inayat Khan',
+      bossTitle: 'SUBEDAR INAYAT KHAN',
+      type: 'subedar',
+      x: 320,
+      y: 150,
+      hp: 170,
+      maxHp: 170,
+      atk: 18,
+      speed: 29,
+      state: 'idle',
+      dir: 3,
+      animTimer: 0,
+      attackCooldown: 1.4,
+      attackTimer: 0,
+      hitFlashTimer: 0,
+      burnTimer: 0,
+      burnTickTimer: 0,
+      phase: 1,
+      shockwaveCooldown: 3.5,
+      isBoss: true
+    }
+  ];
+}
+
+// ==========================================
+// 4C. CAMPAIGN DIRECTIVES & LEVEL MANAGER
+// ==========================================
+const CAMPAIGN_LEVELS = {
+  1: {
+    id: 1,
+    title: "Level 1: The Forest Awakening",
+    subtitle: "Clearing & Kot Fort Outpost",
+    location: "Western Ghats • Sacred Sahyadri Ridge • 1646",
+    introBriefing: "“In the sacred Sahyadri forests, Shivaji Maharaj resolves to establish Hindavi Swarajya. An enemy outpost guards Kot Fort. Gather timber and iron, forge the steel Jagdamba Talwar, vanquish the Havaldar, and raise the sacred Bhagwa Zenda.”",
+    directives: "• Gather 6 Teak Wood & 4 Iron Ore\n• Forge Steel Talwar at Blacksmith Anvil [U]\n• Defeat pass sentries & Fort Keeper for Key\n• Unlock Kot Gate [E] & hoist Bhagwa Zenda",
+    spawn: { x: 96, y: 120 },
+    initMap: initLevel1Map,
+    quests: [
+      { id: 'quest-wood', text: () => `Gather Sagwan Teak Wood (${Math.min(6, gameState.inventory.wood)}/6)`, check: () => gameState.inventory.wood >= 6 },
+      { id: 'quest-ore', text: () => `Mine Iron Ore Deposits (${Math.min(4, gameState.inventory.ore)}/4)`, check: () => gameState.inventory.ore >= 4 },
+      { id: 'quest-craft', text: () => `Forge Maratha Steel Talwar [U]`, check: () => !!gameState.player.hasTalwar },
+      { id: 'quest-patrols', text: () => `Defeat scouting guards in mountain pass`, check: () => !gameState.enemies.some(e => e.id.startsWith('patrol') && e.hp > 0) },
+      { id: 'quest-keeper', text: () => `Defeat Fort Keeper & obtain Kot Key`, check: () => !gameState.enemies.some(e => e.id === 'fort_keeper' && e.hp > 0) },
+      { id: 'quest-hoist', text: () => `Unlock Kot Gate [E] & hoist Bhagwa Zenda`, check: () => !!gameState.flagHoisted }
+    ]
+  },
+  2: {
+    id: 2,
+    title: "Level 2: The Village in Peril",
+    subtitle: "Bhavani Nagar Settlement",
+    location: "Western Ghats • Bhavani Nagar Village • 1646",
+    introBriefing: "“Hostile raiders under Plunder Captain Diler Khan have terrorized Bhavani Nagar. Granaries are plundered and homes broken. Ride to the rescue of the farmers, break the eastern raider encampment, and receive the sacred blessing of the Village Elders!”",
+    directives: "• Defeat 2 entrance scouts\n• Clear plundering soldiers from village square\n• Vanquish Captain Diler Khan in eastern camp\n• Speak with Village Elder Sadashiv Pant [E]",
+    spawn: { x: 48, y: 152 },
+    initMap: initLevel2Map,
+    quests: [
+      { id: 'q2-scouts', text: () => `Defeat hostile entrance scouts (${2 - gameState.enemies.filter(e => e.id.startsWith('v_scout') && e.hp > 0).length}/2)`, check: () => !gameState.enemies.some(e => e.id.startsWith('v_scout') && e.hp > 0) },
+      { id: 'q2-soldiers', text: () => `Defeat plundering soldiers in square (${2 - gameState.enemies.filter(e => e.id.startsWith('v_soldier') && e.hp > 0).length}/2)`, check: () => !gameState.enemies.some(e => e.id.startsWith('v_soldier') && e.hp > 0) },
+      { id: 'q2-captain', text: () => `Defeat Plunder Captain at eastern camp`, check: () => !gameState.enemies.some(e => e.id === 'village_captain' && e.hp > 0) },
+      { id: 'q2-elder', text: () => `Speak to Village Elder [E] to secure village`, check: () => !!gameState.quests.elderSpoken }
+    ]
+  },
+  3: {
+    id: 3,
+    title: "Level 3: The Lost Supply Caravan",
+    subtitle: "Ghat Mountain Pass",
+    location: "Western Ghats • Treacherous Ghat Canyon • 1646",
+    introBriefing: "“A vital logistics caravan was ambushed in the rugged canyon pass. Wagons were overturned and essential cargo seized by bandits under Rustam Beg. Navigate the rocky gorge, recover all 4 supply crates, defeat the Camp Leader, and secure the lifeline of Swarajya!”",
+    directives: "• Defeat canyon ambushers\n• Recover 4 lost supply crates along pass [E]\n• Vanquish Camp Leader Rustam Beg\n• Report to Wagon Master Tanaji's Scout [E]",
+    spawn: { x: 48, y: 150 },
+    initMap: initLevel3Map,
+    quests: [
+      { id: 'q3-ambush', text: () => `Defeat caravan ambushers (${2 - gameState.enemies.filter(e => e.id.startsWith('c_guard') && e.hp > 0).length}/2)`, check: () => !gameState.enemies.some(e => e.id.startsWith('c_guard') && e.hp > 0) },
+      { id: 'q3-crates', text: () => `Recover lost supply crates [E] (${gameState.recoveredCrates || 0}/4)`, check: () => (gameState.recoveredCrates || 0) >= 4 },
+      { id: 'q3-leader', text: () => `Defeat Camp Leader in canyon camp`, check: () => !gameState.enemies.some(e => e.id === 'camp_leader' && e.hp > 0) },
+      { id: 'q3-report', text: () => `Report to Wagon Master [E] at trail extraction`, check: () => !!gameState.quests.caravanReported }
+    ]
+  },
+  4: {
+    id: 4,
+    title: "Level 4: The Siege of the Hill Fort",
+    subtitle: "Prachandagad Bastion",
+    location: "Western Ghats • Prachandagad Mountain Bastion • 1646",
+    introBriefing: "“The imposing fortress of Prachandagad commands the trade routes of the Deccan. Heavily defended by shield guards and archers under Gate Commander Bahlool, the citadel bars the road to freedom. Breach the outer approach, seize the Hill Fort Key, and hoist the Bhagwa Zenda!”",
+    directives: "• Defeat outer approach vanguard\n• Defeat Gate Commander Bahlool for Key\n• Unlock Citadel Kot Gate [E]\n• Clear inner courtyard elite & hoist banner",
+    spawn: { x: 48, y: 150 },
+    initMap: initLevel4Map,
+    quests: [
+      { id: 'q4-vanguard', text: () => `Defeat vanguard guards at outer pass (${2 - gameState.enemies.filter(e => e.id.startsWith('fort4_guard') && e.hp > 0).length}/2)`, check: () => !gameState.enemies.some(e => e.id.startsWith('fort4_guard') && e.hp > 0) },
+      { id: 'q4-key', text: () => `Defeat Gate Commander & seize Hill Fort Key`, check: () => !gameState.enemies.some(e => e.id === 'hill_fort_commander' && e.hp > 0) },
+      { id: 'q4-gate', text: () => `Unlock Citadel Kot Gate [E]`, check: () => !!gameState.gateOpen },
+      { id: 'q4-defenders', text: () => `Defeat inner courtyard defenders`, check: () => !gameState.enemies.some(e => (e.id.startsWith('fort4_elite') || e.id === 'fort4_captain') && e.hp > 0) },
+      { id: 'q4-flag', text: () => `Hoist Bhagwa Zenda banner on rampart [E]`, check: () => !!gameState.flagHoisted }
+    ]
+  },
+  5: {
+    id: 5,
+    title: "Level 5: The First Swarajya Stronghold",
+    subtitle: "Torna - Seat of Swarajya",
+    location: "Torna Citadel • The Royal Sovereign Seat • 1646",
+    introBriefing: "“The defining confrontation of the early campaign. Imperial Subedar Inayat Khan has rallied a fortified siege garrison to crush our movement. Repel the vanguard, defeat the Subedar in epic combat, secure Torna, and establish the very first sovereign stronghold of Hindavi Swarajya!”",
+    directives: "• Repel imperial siege vanguard\n• Defeat royal halberd guards\n• Vanquish Subedar Inayat Khan\n• Hoist supreme banner & access Command Desk [M]",
+    spawn: { x: 60, y: 150 },
+    initMap: initLevel5Map,
+    quests: [
+      { id: 'q5-vanguard', text: () => `Repel siege assault swordsmen (${2 - gameState.enemies.filter(e => e.id.startsWith('siege_soldier') && e.hp > 0).length}/2)`, check: () => !gameState.enemies.some(e => e.id.startsWith('siege_soldier') && e.hp > 0) },
+      { id: 'q5-halberd', text: () => `Defeat royal halberd guards (${2 - gameState.enemies.filter(e => e.id.startsWith('siege_halberd') && e.hp > 0).length}/2)`, check: () => !gameState.enemies.some(e => e.id.startsWith('siege_halberd') && e.hp > 0) },
+      { id: 'q5-subedar', text: () => `Defeat Subedar Inayat Khan`, check: () => !gameState.enemies.some(e => e.id === 'subedar_inayat' && e.hp > 0) },
+      { id: 'q5-flag', text: () => `Hoist supreme Swarajya flag at rampart [E]`, check: () => !!gameState.flagHoisted },
+      { id: 'q5-stronghold', text: () => `Access Stronghold Command Desk [E / M]`, check: () => !!gameState.quests.strongholdAccessed }
+    ]
+  }
+};
+
+function renderQuestList() {
+  const container = document.getElementById('quest-list-container');
+  const subtextEl = document.getElementById('level-subtext');
+  const lvlCfg = CAMPAIGN_LEVELS[gameState.level] || CAMPAIGN_LEVELS[1];
+
+  if (subtextEl) {
+    subtextEl.innerText = `${lvlCfg.title}: ${lvlCfg.subtitle}`;
+  }
+  if (!container) return;
+
+  let html = '<h3>Campaign Objectives</h3>';
+  lvlCfg.quests.forEach(q => {
+    html += `<div class="quest-item" id="${q.id}">
+      <span class="quest-check">○</span>
+      <span class="quest-text">${q.text()}</span>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function startLevel(lvlIndex, skipBriefing = false) {
+  const targetLevel = Math.max(1, Math.min(5, lvlIndex));
+  if (targetLevel > (gameState.maxUnlockedLevel || 1)) {
+    showToast(`Level ${targetLevel} is locked! Complete preceding missions.`);
+    return;
+  }
+
+  gameState.level = targetLevel;
+  gameState.flagHoisted = false;
+  gameState.gateOpen = false;
+  gameState.recoveredCrates = 0;
+  gameState.floatingTexts = [];
+  gameState.particles = [];
+  gameState.projectiles = [];
+  gameState.activeBoss = null;
+
+  const cfg = CAMPAIGN_LEVELS[targetLevel] || CAMPAIGN_LEVELS[1];
+  gameState.player.x = cfg.spawn.x;
+  gameState.player.y = cfg.spawn.y;
+  gameState.player.hp = Math.max(gameState.player.hp, Math.floor(gameState.player.maxHp * 0.75));
+  gameState.player.isAttacking = false;
+  gameState.player.isDodging = false;
+
+  cfg.initMap();
+  renderQuestList();
+  checkQuests();
+  updateHUD();
+
+  if (!skipBriefing) {
+    showMissionIntroCard(cfg);
+  } else {
+    commenceMission();
+  }
+}
+
+function showMissionIntroCard(cfg) {
+  gameState.screen = 'MISSION_INTRO';
+  const locEl = document.getElementById('intro-location-tag');
+  if (locEl) locEl.innerText = cfg.location || "Western Ghats • 1646";
+  const titleEl = document.getElementById('intro-mission-title');
+  if (titleEl) titleEl.innerText = cfg.title;
+  const narrEl = document.getElementById('intro-narrative-text');
+  if (narrEl) narrEl.innerText = cfg.introBriefing;
+  const dirEl = document.getElementById('intro-directives-text');
+  if (dirEl) dirEl.innerHTML = cfg.directives.replace(/\n/g, '<br/>');
+  setOverlay('screen-mission-intro');
+  audio.play('menu_select');
+}
+
+function commenceMission() {
+  gameState.screen = 'PLAYING';
+  setOverlay(null);
+  const cfg = CAMPAIGN_LEVELS[gameState.level] || CAMPAIGN_LEVELS[1];
+  showToast(`${cfg.title} Commenced!`);
+  audio.play('craft_success');
+  saveGame();
+}
+
+function startLevel1() {
+  startLevel(1);
+}
+
+function continueToNextLevel() {
+  if (gameState.level < 5) {
+    startLevel(gameState.level + 1);
+  } else {
+    openStrongholdMenu();
+  }
+}
+
+
+// Collision Detection System (AABB vs Tiles and Object Footprints)
+function isBoxColliding(bx, by, bw, bh) {
+  // Map boundaries
+  if (bx < 4 || by < 4 || (bx + bw) > (gameState.mapCols * 16 - 4) || (by + bh) > (gameState.mapRows * 16 - 4)) {
+    return true;
+  }
+
+  // 1. Check tile grid collision
+  const startCol = Math.floor(bx / 16);
+  const endCol = Math.floor((bx + bw - 0.1) / 16);
+  const startRow = Math.floor(by / 16);
+  const endRow = Math.floor((by + bh - 0.1) / 16);
+
+  for (let r = startRow; r <= endRow; r++) {
+    for (let c = startCol; c <= endCol; c++) {
+      if (c < 0 || c >= gameState.mapCols || r < 0 || r >= gameState.mapRows) {
+        return true;
+      }
+      if (collisionGrid[r] && collisionGrid[r][c] > 0) {
+        // Special check: Kot Gate tile at Col 21 (L1) or Col 13 (L4)
+        if ((r === 9 || r === 10) && ((gameState.level === 1 && c === 21) || (gameState.level === 4 && c === 13))) {
+          if (!gameState.gateOpen) return true; // Closed gate blocks!
+          continue; // Open gate is passable
+        }
+        return true;
+      }
+    }
+  }
+
+  // 2. Check discrete entity footprints (trunk bases, boulders, buildings, obstacles)
+  for (const res of gameState.resources) {
+    let ox = 0, oy = 0, ow = 0, oh = 0;
+    if (res.type === 'sagwan') {
+      ox = res.x + 15; oy = res.y + 72; ow = 12; oh = 8;
+    } else if (res.type === 'forest_tree') {
+      ox = res.x + 11; oy = res.y + 68; ow = 10; oh = 6;
+    } else if (res.type === 'boulder') {
+      ox = res.x + 6; oy = res.y + 24; ow = 20; oh = 12;
+    } else if (res.type === 'ore') {
+      ox = res.x + 6; oy = res.y + 12; ow = 14; oh = 10;
+    } else if (res.type === 'tower') {
+      ox = res.x + 7; oy = res.y + 50; ow = 28; oh = 22;
+    } else if (res.type === 'armoury') {
+      ox = res.x + 5; oy = res.y + 44; ow = 32; oh = 22;
+    } else if (res.type === 'village_hut') {
+      ox = res.x - 14; oy = res.y - 4; ow = 28; oh = 18;
+    } else if (res.type === 'village_well') {
+      ox = res.x - 8; oy = res.y - 4; ow = 16; oh = 12;
+    } else if (res.type === 'wooden_cart') {
+      ox = res.x - 12; oy = res.y - 4; ow = 24; oh = 12;
+    } else if (res.type === 'tent') {
+      ox = res.x - 12; oy = res.y - 4; ow = 24; oh = 16;
+    } else if (res.type === 'fence') {
+      ox = res.x - 8; oy = res.y - 2; ow = 16; oh = 6;
+    } else if (res.type === 'command_pavilion') {
+      ox = res.x - 16; oy = res.y - 4; ow = 32; oh = 18;
+    } else if (res.type === 'supply_crate') {
+      if (!res.collected) {
+        ox = res.x - 6; oy = res.y - 6; ow = 12; oh = 12;
+      } else {
+        continue;
+      }
+    } else if (res.type === 'gate') {
+      if (!gameState.gateOpen) {
+        ox = res.x - 14; oy = res.y - 12; ow = 28; oh = 24;
+      } else {
+        continue;
+      }
+    }
+
+    if (ow > 0 && oh > 0) {
+      if (bx < ox + ow && bx + bw > ox && by < oy + oh && by + bh > oy) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// Axis-separated movement resolution (permits sliding along walls)
+function moveEntity(ent, vx, vy, dt) {
+  const bw = 10, bh = 6;
+  const offX = -5, offY = 7;
+
+  // Horizontal motion with collision check
+  const stepX = vx * dt;
+  if (!isBoxColliding(ent.x + offX + stepX, ent.y + offY, bw, bh)) {
+    ent.x += stepX;
+  }
+
+  // Vertical motion with collision check
+  const stepY = vy * dt;
+  if (!isBoxColliding(ent.x + offX, ent.y + offY + stepY, bw, bh)) {
+    ent.y += stepY;
+  }
+}
+
+// ==========================================
+// 5. INPUT HANDLING
+// ==========================================
+const keys = {};
+
+window.addEventListener('keydown', (e) => {
+  keys[e.key.toLowerCase()] = true;
+  keys[e.code] = true;
+
+  // Global Keys
+  if (e.key === 'f' || e.key === 'F') {
+    toggleFullscreen();
+  }
+  if (e.key === 'm' || e.key === 'M') {
+    if (gameState.screen === 'PLAYING') {
+      openStrongholdMenu();
+    } else if (gameState.screen === 'STRONGHOLD') {
+      closeStrongholdMenu();
+    }
+  }
+  if (gameState.screen === 'MISSION_INTRO' && (e.code === 'Space' || e.key === 'e' || e.key === 'E')) {
+    commenceMission();
+    return;
+  }
+  if (gameState.screen === 'DIALOGUE' && (e.code === 'Space' || e.key === 'e' || e.key === 'E')) {
+    closeDialogue();
+    return;
+  }
+  if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+    if (gameState.screen === 'PLAYING') {
+      openPauseMenu();
+    } else if (gameState.screen === 'PAUSED') {
+      resumeGame();
+    } else if (gameState.screen === 'CRAFTING') {
+      closeCrafting();
+    }
+  }
+  if (e.key === 'u' || e.key === 'U') {
+    if (gameState.screen === 'PLAYING') {
+      openCrafting();
+    } else if (gameState.screen === 'CRAFTING') {
+      closeCrafting();
+    }
+  }
+  if (e.key === 'e' || e.key === 'E') {
+    if (gameState.screen === 'PLAYING') {
+      handleInteraction();
+    }
+  }
+  if (e.key === 'k' || e.key === 'K') {
+    if (gameState.screen === 'PLAYING') {
+      triggerDodge();
+    }
+  }
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+    if (gameState.screen === 'PLAYING') {
+      triggerAstra();
+    }
+  }
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (gameState.screen === 'PLAYING') {
+      triggerActionOrAttack();
+    } else if (gameState.screen === 'STORY') {
+      nextStoryScene();
+    }
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  keys[e.key.toLowerCase()] = false;
+  keys[e.code] = false;
+});
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('notification-toast');
+  toast.innerText = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2200);
+}
+
+// ==========================================
+// 6. STORY CINEMATIC SCENES
+// ==========================================
+const STORY_SCENES = [
+  {
+    title: "Scene 1 — A Land Yearning for Swarajya",
+    text: "“Once upon a time, Chhatrapati Shivaji Maharaj dreamed of a land where his people could live with dignity, courage, and freedom.”"
+  },
+  {
+    title: "Scene 2 — A Promise to His People",
+    text: "“Witnessing oppression and injustice across the Deccan, he resolved to protect his people and work toward the sovereign ideal of Hindavi Swarajya.”"
+  },
+  {
+    title: "Scene 3 — The Prayer in the Sahyadri",
+    text: "“One night among the sacred basalt peaks, Shivaji Maharaj prayed to Goddess Bhavani, seeking the strength, righteousness, and wisdom to defend his motherland.”"
+  },
+  {
+    title: "Scene 4 — The Divine Blessing",
+    text: "“Moved by his devotion and indomitable courage, Goddess Bhavani offered him a choice of three divine Astras. Each would guide his journey in a distinct way.”"
+  },
+  {
+    title: "Scene 5 — Choose Your First Astra",
+    text: "“Select the elemental power that will awaken with you in the ancient Sahyadri forest...”"
+  }
+];
+let currentStoryIdx = 0;
+
+function startStoryCinematic() {
+  gameState.screen = 'STORY';
+  currentStoryIdx = 0;
+  updateStoryUI();
+  setOverlay('screen-story');
+  audio.play('menu_select');
+}
+
+function updateStoryUI() {
+  const scene = STORY_SCENES[currentStoryIdx];
+  document.getElementById('story-scene-title').innerText = scene.title;
+  document.getElementById('story-scene-text').innerText = scene.text;
+  document.getElementById('btn-story-next').innerText = (currentStoryIdx === STORY_SCENES.length - 1) ? "Choose Astra ▶" : "Continue ▶";
+}
+
+function nextStoryScene() {
+  currentStoryIdx++;
+  if (currentStoryIdx >= STORY_SCENES.length) {
+    openAstraSelection();
+  } else {
+    updateStoryUI();
+    audio.play('menu_select');
+  }
+}
+
+function openAstraSelection() {
+  gameState.screen = 'ASTRA_SELECT';
+  gameState.selectedAstra = 'agni'; // Default selected
+  updateAstraCardSelection();
+  setOverlay('screen-astra');
+  audio.play('menu_select');
+}
+
+function updateAstraCardSelection() {
+  ['agni', 'varuna', 'bhoomi'].forEach(a => {
+    const card = document.getElementById(`card-${a}`);
+    if (card) {
+      card.classList.toggle('selected', gameState.selectedAstra === a);
+    }
+  });
+}
+
+function confirmAstraSelection() {
+  if (!gameState.selectedAstra) return;
+  audio.play('craft_success');
+  
+  // Set Cooldown based on astra
+  if (gameState.selectedAstra === 'agni') gameState.astraMaxCooldown = 6.0;
+  else if (gameState.selectedAstra === 'varuna') gameState.astraMaxCooldown = 10.0;
+  else if (gameState.selectedAstra === 'bhoomi') gameState.astraMaxCooldown = 8.0;
+  gameState.astraCooldown = 0;
+
+  // Save selection
+  saveGame();
+  startLevel1();
+}
+
+// ==========================================
+// 7. LEVEL 1 GAMEPLAY & LOOP
+// ==========================================
+function startLevel1() {
+  gameState.screen = 'PLAYING';
+  setOverlay(null);
+  initLevel1Map();
+  updateHUD();
+  showToast("LEVEL 1: The Forest Awakening — Gather Wood & Ore!");
+  audio.play('menu_select');
+}
+
+function setOverlay(activeId) {
+  document.querySelectorAll('.game-overlay').forEach(el => {
+    el.classList.toggle('active', el.id === activeId);
+  });
+}
+
+// Player Action: Gather or Attack
+// Player Action: Gather or Attack
+function triggerActionOrAttack() {
+  const p = gameState.player;
+
+  // 1. Check if near harvestable Sagwan Tree
+  for (const res of gameState.resources) {
+    if (res.type === 'sagwan' && res.chopsLeft > 0) {
+      const dist = Math.hypot((p.x) - (res.x + 20), (p.y) - (res.y + 40));
+      if (dist < 32) {
+        res.chopsLeft--;
+        gameState.inventory.wood += 3;
+        audio.play('chop');
+        addFloatingText(res.x + 16, res.y + 20, "+3 Teak Wood", "#84cc16");
+        spawnChips(res.x + 20, res.y + 35, "#ca8a04");
+
+        if (res.chopsLeft === 0) {
+          res.visualState = 1; // Harvested
+          showToast("Sagwan tree felled! Recovered quality timber.");
+        }
+        checkQuests();
+        updateHUD();
+        return;
+      }
+    }
+  }
+
+  // 2. Check if near harvestable Iron Ore
+  for (const res of gameState.resources) {
+    if (res.type === 'ore' && res.oresLeft > 0) {
+      const dist = Math.hypot((p.x) - (res.x + 12), (p.y) - (res.y + 12));
+      if (dist < 28) {
+        res.oresLeft--;
+        gameState.inventory.ore += 2;
+        audio.play('mine');
+        addFloatingText(res.x + 8, res.y + 8, "+2 Iron Ore", "#93c5fd");
+        spawnChips(res.x + 12, res.y + 12, "#e2e8f0");
+
+        if (res.oresLeft === 0) {
+          res.visualState = 2; // Depleted
+          showToast("Iron deposit depleted.");
+        } else {
+          res.visualState = 1; // Fractured
+        }
+        checkQuests();
+        updateHUD();
+        return;
+      }
+    }
+  }
+
+  // 3. Normal Combat Sword Attack
+  if (p.isAttacking || p.isDodging) return;
+  p.isAttacking = true;
+  p.attackTimer = 0.28;
+  audio.play('slash');
+
+  // Calculate attack hitbox in front of Shivaji
+  let attackX = p.x;
+  let attackY = p.y;
+  const reach = 24;
+  if (p.dir === 0) attackY += reach;
+  else if (p.dir === 1) attackY -= reach;
+  else if (p.dir === 2) attackX += reach;
+  else if (p.dir === 3) attackX -= reach;
+
+  // Check hit against active enemies
+  gameState.enemies.forEach(en => {
+    if (en.hp <= 0) return;
+    const dist = Math.hypot(attackX - en.x, attackY - en.y);
+    if (dist < 26) {
+      // Check Shield Guard / Boss Shield Frontal Block
+      if ((en.type === 'shield_guard' || en.hasShield) && en.state !== 'stunned' && en.state !== 'recovery') {
+        let fX = 0, fY = 0;
+        if (en.dir === 0) fY = 1;
+        else if (en.dir === 1) fY = -1;
+        else if (en.dir === 2) fX = 1;
+        else if (en.dir === 3) fX = -1;
+
+        const toPx = p.x - en.x;
+        const toPy = p.y - en.y;
+        const len = Math.hypot(toPx, toPy) || 1;
+        const dot = (fX * (toPx / len)) + (fY * (toPy / len));
+
+        // Frontal cone (dot > 0.42 = roughly +-65 deg)
+        if (dot > 0.42) {
+          audio.play('parry');
+          addFloatingText(en.x, en.y - 14, "BLOCKED!", "#93c5fd");
+          spawnChips(en.x, en.y, "#cbd5e1");
+          return; // 0 damage dealt through shield!
+        }
+      }
+
+      // Hit connects successfully!
+      const dmg = p.hasTalwar ? Math.floor(18 + Math.random() * 8) : 5;
+      en.hp -= dmg;
+      en.hitFlashTimer = 0.12;
+      audio.play('hit');
+      addFloatingText(en.x, en.y - 12, `-${dmg}`, p.hasTalwar ? "#fbbf24" : "#ffffff");
+      spawnChips(en.x, en.y, "#ef4444");
+
+      // Interrupt charging windup if hit
+      if (en.state === 'windup') {
+        en.state = 'chase';
+        en.attackTimer = 0.8;
+      }
+
+      // Knockback
+      const angle = Math.atan2(en.y - p.y, en.x - p.x);
+      en.x += Math.cos(angle) * 8;
+      en.y += Math.sin(angle) * 8;
+
+      if (en.hp <= 0) {
+        onEnemyDefeated(en);
+      }
+    }
+  });
+}
+
+function triggerDodge() {
+  const p = gameState.player;
+  if (p.isDodging || p.isAttacking) return;
+  if ((gameState.dodgeCooldownTimer || 0) > 0) return; // Enforce tactical dodge cooldown
+
+  p.isDodging = true;
+  p.dodgeTimer = 0.28;
+  p.invulnerableTimer = 0.28;
+  gameState.dodgeCooldownTimer = 0.35; // 0.35s tactical cooldown
+  audio.play('dodge');
+
+  // Dodge direction
+  let dx = 0, dy = 0;
+  if (keys['w'] || keys['arrowup']) dy -= 1;
+  if (keys['s'] || keys['arrowdown']) dy += 1;
+  if (keys['a'] || keys['arrowleft']) dx -= 1;
+  if (keys['d'] || keys['arrowright']) dx += 1;
+
+  if (dx === 0 && dy === 0) {
+    if (p.dir === 0) dy = 1;
+    else if (p.dir === 1) dy = -1;
+    else if (p.dir === 2) dx = 1;
+    else if (p.dir === 3) dx = -1;
+  }
+  const len = Math.hypot(dx, dy) || 1;
+  p.dodgeDirX = dx / len;
+  p.dodgeDirY = dy / len;
+  spawnChips(p.x, p.y + 10, "#d1d5db");
+}
+
+function triggerAstra() {
+  if (gameState.astraCooldown > 0) {
+    showToast("Astra cooling down!");
+    return;
+  }
+  const p = gameState.player;
+
+  if (gameState.selectedAstra === 'agni') {
+    // Radial Fire Wave with 3s Burn DOT
+    gameState.astraCooldown = gameState.astraMaxCooldown;
+    audio.play('astra_fire');
+    addFloatingText(p.x, p.y - 14, "AGNI ASTRA!", "#f97316");
+
+    // Burst particles
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2;
+      gameState.particles.push({
+        x: p.x, y: p.y,
+        vx: Math.cos(a) * 65, vy: Math.sin(a) * 65,
+        life: 0.45, maxLife: 0.45, color: '#f59e0b', size: 4
+      });
+    }
+
+    // Damage all nearby enemies & apply Burn DOT
+    gameState.enemies.forEach(en => {
+      if (en.hp <= 0) return;
+      const dist = Math.hypot(en.x - p.x, en.y - p.y);
+      if (dist < 58) {
+        const dmg = 32;
+        en.hp -= dmg;
+        en.hitFlashTimer = 0.15;
+        en.burnTimer = 3.0; // 3 seconds burn DOT
+        en.burnTickTimer = 0.6;
+        addFloatingText(en.x, en.y - 12, `-${dmg} BURST`, "#ea580c");
+        spawnChips(en.x, en.y, "#f97316");
+        if (en.hp <= 0) onEnemyDefeated(en);
+      }
+    });
+  } else if (gameState.selectedAstra === 'varuna') {
+    // Water Heal + 4.5s Water Shield (50% damage reduction)
+    gameState.astraCooldown = gameState.astraMaxCooldown;
+    gameState.astraActiveTimer = 4.5;
+    p.hp = Math.min(p.maxHp, p.hp + 35);
+    audio.play('astra_water');
+    addFloatingText(p.x, p.y - 14, "+35 HP HEAL", "#38bdf8");
+
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      gameState.particles.push({
+        x: p.x, y: p.y,
+        vx: Math.cos(a) * 35, vy: Math.sin(a) * 35,
+        life: 0.6, maxLife: 0.6, color: '#60a5fa', size: 3
+      });
+    }
+  } else if (gameState.selectedAstra === 'bhoomi') {
+    // Earth Shockwave: Stuns, Staggers & Interrupts Enemies
+    gameState.astraCooldown = gameState.astraMaxCooldown;
+    audio.play('astra_earth');
+    addFloatingText(p.x, p.y - 14, "BHOOMI SHOCKWAVE!", "#d97706");
+
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2;
+      gameState.particles.push({
+        x: p.x, y: p.y,
+        vx: Math.cos(a) * 55, vy: Math.sin(a) * 55,
+        life: 0.5, maxLife: 0.5, color: '#a16207', size: 5
+      });
+    }
+
+    gameState.enemies.forEach(en => {
+      if (en.hp <= 0) return;
+      const dist = Math.hypot(en.x - p.x, en.y - p.y);
+      if (dist < 64) {
+        const dmg = 26;
+        en.hp -= dmg;
+        en.hitFlashTimer = 0.15;
+        en.state = 'stunned';
+        en.attackTimer = en.isBoss ? 0.8 : 1.8; // Bosses resist stunlock
+        // Knockback
+        const ang = Math.atan2(en.y - p.y, en.x - p.x);
+        en.x += Math.cos(ang) * 14;
+        en.y += Math.sin(ang) * 14;
+        addFloatingText(en.x, en.y - 12, `-${dmg} STAGGER`, "#ca8a04");
+        spawnChips(en.x, en.y, "#b45309");
+        if (en.hp <= 0) onEnemyDefeated(en);
+      }
+    });
+  }
+  updateHUD();
+}
+
+function handleInteraction() {
+  const p = gameState.player;
+  const lvl = gameState.level;
+
+  // 1. Interacting with Kot Gate (Level 1 & Level 4)
+  const gate = gameState.resources.find(r => r.id === 'fort_gate');
+  if (gate) {
+    const dist = Math.hypot(p.x - gate.x, p.y - gate.y);
+    if (dist < 36) {
+      if (gate.isOpen) {
+        showToast("The fort gate is open.");
+      } else {
+        const hasKey = lvl === 4 ? gameState.inventory.hasHillFortKey : gameState.inventory.hasKotKey;
+        if (hasKey) {
+          gate.isOpen = true;
+          gameState.gateOpen = true;
+          audio.play('craft_success');
+          showToast(lvl === 4 ? "Hill Fort Gate Unlocked with Key!" : "Kot Gate Unlocked with Key!");
+          addFloatingText(gate.x, gate.y - 16, "GATE OPENED", "#4ade80");
+          saveGame();
+          checkQuests();
+          updateHUD();
+        } else {
+          audio.play('hit');
+          showToast(lvl === 4 ? "The gate is locked. Defeat the Gate Commander for the Hill Fort Key." : "The gate is locked. Defeat the Fort Keeper to obtain the Kot Gate Key.");
+        }
+      }
+      return;
+    }
+  }
+
+  // 2. Interacting with Supply Crates (Level 3)
+  if (lvl === 3) {
+    for (const res of gameState.resources) {
+      if (res.type === 'supply_crate' && !res.collected) {
+        const dist = Math.hypot(p.x - res.x, p.y - res.y);
+        if (dist < 30) {
+          res.collected = true;
+          gameState.recoveredCrates = (gameState.recoveredCrates || 0) + 1;
+          gameState.inventory.wood += 5;
+          gameState.inventory.ore += 5;
+          gameState.inventory.gold += 10;
+          audio.play('craft_success');
+          showToast(`Supply Crate Recovered! (${gameState.recoveredCrates}/4)`);
+          addFloatingText(res.x, res.y - 14, "+1 CRATE! (+10 Gold)", "#fbbf24");
+          checkQuests();
+          updateHUD();
+          return;
+        }
+      }
+    }
+  }
+
+  // 3. Interacting with Village Elder (Level 2)
+  if (lvl === 2) {
+    const elder = gameState.resources.find(r => r.type === 'village_elder');
+    if (elder) {
+      const dist = Math.hypot(p.x - elder.x, p.y - elder.y);
+      if (dist < 36) {
+        const captainAlive = gameState.enemies.some(e => e.id === 'village_captain' && e.hp > 0);
+        if (captainAlive) {
+          openDialogue({
+            speaker: "Village Elder (Sadashiv Pant)",
+            role: "Bhavani Nagar Settlement",
+            avatar: "👴",
+            text: "“Help us, Raje! Hostile plunderers terrorize our homes, and Captain Diler's forces occupy our eastern grove. Drive them away so Swarajya may protect us!”"
+          });
+        } else {
+          openDialogue({
+            speaker: "Village Elder (Sadashiv Pant)",
+            role: "Bhavani Nagar Settlement",
+            avatar: "👴",
+            text: "“Dhanyavaad, Chhatrapati Shivaji Maharaj! You broke the oppressors' yoke! Accept our elders' sacred blessing (+20 Max HP) and our everlasting loyalty to Hindavi Swarajya!”",
+            onConfirm: () => {
+              gameState.quests.elderSpoken = true;
+              gameState.player.maxHp += 20;
+              gameState.player.hp = gameState.player.maxHp;
+              showToast("Village Elder Blessing Received! +20 Max HP!");
+              triggerVictory();
+            }
+          });
+        }
+        return;
+      }
+    }
+  }
+
+  // 4. Interacting with Wagon Master (Level 3)
+  if (lvl === 3) {
+    const wm = gameState.resources.find(r => r.type === 'wagon_master');
+    if (wm) {
+      const dist = Math.hypot(p.x - wm.x, p.y - wm.y);
+      if (dist < 36) {
+        const cratesDone = (gameState.recoveredCrates || 0) >= 4;
+        const leaderAlive = gameState.enemies.some(e => e.id === 'camp_leader' && e.hp > 0);
+        if (!cratesDone || leaderAlive) {
+          openDialogue({
+            speaker: "Wagon Master (Tanaji Malusare's Scout)",
+            role: "Swarajya Caravan Logistics",
+            avatar: "🛡️",
+            text: "“Raje! Please recover all 4 lost supply crates along the canyon pass and vanquish the Camp Leader in the eastern camp before we extract!”"
+          });
+        } else {
+          openDialogue({
+            speaker: "Wagon Master (Tanaji Malusare's Scout)",
+            role: "Swarajya Caravan Logistics",
+            avatar: "🛡️",
+            text: "“Jai Bhavani, Raje! All 4 supply crates are secured and the canyon bandits dispersed! In the recovered cache, we found fine Maratha Chainmail Armour (+4 DEF) for you!”",
+            onConfirm: () => {
+              gameState.quests.caravanReported = true;
+              gameState.player.def += 4;
+              showToast("Maratha Chainmail Equipped! +4 DEF!");
+              triggerVictory();
+            }
+          });
+        }
+        return;
+      }
+    }
+  }
+
+  // 5. Interacting with Stronghold Command Desk (Level 5)
+  if (lvl === 5) {
+    const desk = gameState.resources.find(r => r.type === 'command_desk');
+    if (desk) {
+      const dist = Math.hypot(p.x - desk.x, p.y - desk.y);
+      if (dist < 36) {
+        gameState.quests.strongholdAccessed = true;
+        openStrongholdMenu();
+        checkQuests();
+        return;
+      }
+    }
+  }
+
+  // 6. Interacting with Flagpole (Victory Condition for L1, L4, L5)
+  const flag = gameState.resources.find(r => r.id === 'flagpole');
+  if (flag && !flag.hoisted) {
+    const dist = Math.hypot(p.x - flag.x, p.y - flag.y);
+    if (dist < 36) {
+      if (lvl === 4) {
+        const defendersAlive = gameState.enemies.some(e => (e.id.startsWith('fort4_elite') || e.id === 'fort4_captain') && e.hp > 0);
+        if (defendersAlive) {
+          audio.play('hit');
+          showToast("Defeat the inner fortress defenders before hoisting the banner!");
+          return;
+        }
+      } else if (lvl === 5) {
+        const siegeAlive = gameState.enemies.some(e => e.hp > 0);
+        if (siegeAlive) {
+          audio.play('hit');
+          showToast("Repel all imperial siege forces before raising the saffron banner!");
+          return;
+        }
+      }
+      flag.hoisted = true;
+      gameState.flagHoisted = true;
+      triggerVictory();
+      return;
+    }
+  }
+
+  // 7. Interacting with Armoury Anvil (Weapon Crafting)
+  const armoury = gameState.resources.find(r => r.id === 'armoury');
+  if (armoury) {
+    const dist = Math.hypot(p.x - armoury.x, p.y - armoury.y);
+    if (dist < 44) {
+      openCrafting();
+      return;
+    }
+  }
+}
+
+function onEnemyDefeated(en) {
+  audio.play('menu_select');
+  addFloatingText(en.x, en.y - 8, "+30 XP", "#fde047");
+  gameState.player.xp += 30;
+  if (gameState.player.xp >= gameState.player.maxXp) {
+    gameState.player.level++;
+    gameState.player.xp -= gameState.player.maxXp;
+    gameState.player.maxHp += 15;
+    gameState.player.hp = gameState.player.maxHp;
+    showToast(`Level Up! Shivaji is now Level ${gameState.player.level}!`);
+    audio.play('craft_success');
+  }
+
+  // Boss & Encounter Drops
+  if (en.id === 'fort_keeper') {
+    gameState.inventory.hasKotKey = true;
+    showToast("FORT KEEPER DEFEATED! Kot Gate Key Acquired!");
+    addFloatingText(en.x, en.y - 20, "KOT GATE KEY!", "#ef4444");
+    audio.play('victory');
+  } else if (en.id === 'village_captain') {
+    gameState.inventory.gold += 20;
+    gameState.inventory.wood += 10;
+    showToast("PLUNDER CAPTAIN DEFEATED! Village Stash Recovered!");
+    addFloatingText(en.x, en.y - 20, "+20 GOLD & TIMBER!", "#f59e0b");
+    audio.play('victory');
+  } else if (en.id === 'camp_leader') {
+    gameState.inventory.gold += 30;
+    gameState.inventory.ore += 15;
+    showToast("CAMP LEADER DEFEATED! Caravan Cache Seized!");
+    addFloatingText(en.x, en.y - 20, "+30 GOLD & IRON!", "#f59e0b");
+    audio.play('victory');
+  } else if (en.id === 'hill_fort_commander') {
+    gameState.inventory.hasHillFortKey = true;
+    showToast("GATE COMMANDER DEFEATED! Hill Fort Key Acquired!");
+    addFloatingText(en.x, en.y - 20, "HILL FORT KEY!", "#ef4444");
+    audio.play('victory');
+  } else if (en.id === 'subedar_inayat') {
+    gameState.inventory.gold += 50;
+    showToast("SUBEDAR INAYAT KHAN DEFEATED! Imperial Vanguard Broken!");
+    addFloatingText(en.x, en.y - 20, "IMPERIAL DEFEAT!", "#ef4444");
+    audio.play('victory');
+  }
+
+  checkQuests();
+  updateHUD();
+}
+
+function checkQuests() {
+  const lvl = gameState.level;
+  const cfg = CAMPAIGN_LEVELS[lvl] || CAMPAIGN_LEVELS[1];
+
+  cfg.quests.forEach(q => {
+    const completed = q.check();
+    updateQuestElement(q.id, completed);
+  });
+
+  // Level 1 specific counters
+  if (lvl === 1) {
+    const elWood = document.getElementById('q-wood-count');
+    if (elWood) elWood.innerText = Math.min(6, gameState.inventory.wood);
+    const elOre = document.getElementById('q-ore-count');
+    if (elOre) elOre.innerText = Math.min(4, gameState.inventory.ore);
+  }
+}
+
+function updateQuestElement(id, completed) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('completed', completed);
+  const check = el.querySelector('.quest-check');
+  if (check) check.innerText = completed ? '✓' : '○';
+}
+
+function openCrafting() {
+  gameState.screen = 'CRAFTING';
+  document.getElementById('craft-wood-req').innerText = `${gameState.inventory.wood} / 6`;
+  document.getElementById('craft-ore-req').innerText = `${gameState.inventory.ore} / 4`;
+  setOverlay('screen-crafting');
+  audio.play('menu_select');
+}
+
+function closeCrafting() {
+  gameState.screen = 'PLAYING';
+  setOverlay(null);
+}
+
+function craftTalwar() {
+  if (gameState.player.hasTalwar) {
+    showToast("You already possess the Steel Talwar!");
+    return;
+  }
+  if (gameState.inventory.wood >= 6 && gameState.inventory.ore >= 4) {
+    gameState.inventory.wood -= 6;
+    gameState.inventory.ore -= 4;
+    gameState.player.hasTalwar = true;
+    gameState.player.atk = 22; // Jump in attack power
+    audio.play('craft_success');
+    showToast("STEEL TALWAR FORGED! Press Space to slash enemies.");
+    checkQuests();
+    updateHUD();
+    closeCrafting();
+  } else {
+    audio.play('hit');
+    showToast("Insufficient materials! Need 6 Teak Wood and 4 Iron Ore.");
+  }
+}
+
+function triggerVictory() {
+  gameState.screen = 'VICTORY';
+  audio.play('victory');
+
+  const lvl = gameState.level;
+  let title = `Level ${lvl} Complete`;
+  let desc = "";
+  let xp = 250, wood = 10, ore = 10, gold = 20;
+
+  if (lvl === 1) {
+    title = "Level 1 — The Forest Awakening Complete";
+    desc = "Shivaji Maharaj has forged his divine talwar, broken the enemy outpost, and hoisted the saffron Bhagwa Zenda over Kot Fort! Swarajya has taken root.";
+    xp = 250; wood = 15; ore = 10; gold = 20;
+    gameState.quests.fortLiberated = true;
+  } else if (lvl === 2) {
+    title = "Level 2 — The Village in Peril Complete";
+    desc = "Bhavani Nagar is saved! The plundering raiders have been scattered, and the grateful village elders have bestowed their sacred blessing upon Shivaji Maharaj (+20 Max HP).";
+    xp = 300; wood = 12; ore = 8; gold = 25;
+    gameState.quests.villageSaved = true;
+  } else if (lvl === 3) {
+    title = "Level 3 — The Lost Supply Caravan Complete";
+    desc = "All 4 supply crates have been recovered from the mountain pass ambush. Supply lines are secure, and Shivaji has donned protective Maratha Chainmail Armour (+4 DEF)!";
+    xp = 350; wood = 20; ore = 15; gold = 40;
+    gameState.quests.caravanSaved = true;
+  } else if (lvl === 4) {
+    title = "Level 4 — The Siege of the Hill Fort Complete";
+    desc = "Prachandagad Hill Fort has been captured! The citadel gate was breached, the defenders bested, and the divine Pattisa Steel Talwar forged (+10 ATK)!";
+    xp = 450; wood = 25; ore = 25; gold = 50;
+    gameState.player.atk = Math.max(gameState.player.atk, 32);
+    gameState.quests.hillFortCaptured = true;
+  } else if (lvl === 5) {
+    title = "Level 5 — The First Swarajya Stronghold Complete";
+    desc = "VICTORY! Subedar Inayat Khan's imperial siege has been repelled. Torna Fortress stands as the first sovereign stronghold of Hindavi Swarajya!";
+    xp = 600; wood = 30; ore = 30; gold = 100;
+    gameState.quests.strongholdEstablished = true;
+  }
+
+  // Grant rewards
+  gameState.player.xp += xp;
+  gameState.inventory.wood += wood;
+  gameState.inventory.ore += ore;
+  gameState.inventory.gold += gold;
+
+  if (gameState.player.xp >= gameState.player.maxXp) {
+    gameState.player.level++;
+    gameState.player.xp -= gameState.player.maxXp;
+    gameState.player.maxHp += 15;
+    gameState.player.hp = gameState.player.maxHp;
+  }
+
+  // Unlock next level progression
+  gameState.maxUnlockedLevel = Math.max(gameState.maxUnlockedLevel || 1, Math.min(5, lvl + 1));
+  saveGame();
+
+  // Populate Victory UI
+  const bannerEl = document.getElementById('victory-banner-text');
+  if (bannerEl) bannerEl.innerText = lvl === 5 ? "Chhatrapati of Swarajya!" : "Swarajya Expands!";
+  const titleEl = document.getElementById('victory-level-title');
+  if (titleEl) titleEl.innerText = title;
+  const descEl = document.getElementById('victory-level-desc');
+  if (descEl) descEl.innerText = desc;
+  const xpEl = document.getElementById('v-xp-text');
+  if (xpEl) xpEl.innerText = `+${xp} XP`;
+  const oreEl = document.getElementById('v-ore-text');
+  if (oreEl) oreEl.innerText = `+${ore} Iron`;
+  const woodEl = document.getElementById('v-wood-text');
+  if (woodEl) woodEl.innerText = `+${wood} Teak`;
+  const goldEl = document.getElementById('v-gold-text');
+  if (goldEl) goldEl.innerText = `+${gold} Gold`;
+
+  const btnNext = document.getElementById('btn-victory-next');
+  if (btnNext) {
+    if (lvl < 5) {
+      btnNext.innerText = `Continue to Level ${lvl + 1}`;
+      btnNext.style.display = 'block';
+    } else {
+      btnNext.innerText = `Manage Stronghold [M]`;
+      btnNext.style.display = 'block';
+    }
+  }
+
+  setOverlay('screen-victory');
+}
+
+// Dialogue System
+function openDialogue(options) {
+  gameState.screen = 'DIALOGUE';
+  const spk = document.getElementById('dialogue-speaker');
+  if (spk) spk.innerText = options.speaker || 'Elder';
+  const role = document.getElementById('dialogue-role');
+  if (role) role.innerText = options.role || 'Sahyadri Settlement';
+  const av = document.getElementById('dialogue-avatar');
+  if (av) av.innerText = options.avatar || '👴';
+  const txt = document.getElementById('dialogue-text');
+  if (txt) txt.innerText = options.text || '';
+  gameState.dialogueCallback = options.onConfirm || null;
+  setOverlay('screen-dialogue');
+  audio.play('menu_select');
+}
+
+function closeDialogue() {
+  const cb = gameState.dialogueCallback;
+  gameState.dialogueCallback = null;
+  gameState.screen = 'PLAYING';
+  setOverlay(null);
+  if (cb) cb();
+}
+
+// Stronghold Management System
+function openStrongholdMenu() {
+  gameState.screen = 'STRONGHOLD';
+  updateStrongholdUI();
+  setOverlay('screen-stronghold');
+  audio.play('menu_select');
+}
+
+function closeStrongholdMenu() {
+  gameState.screen = 'PLAYING';
+  setOverlay(null);
+}
+
+function updateStrongholdUI() {
+  const sh = gameState.stronghold || { tier: 1, defense: 50 };
+  const p = gameState.player;
+  const inv = gameState.inventory;
+
+  const defEl = document.getElementById('sh-defense-val');
+  if (defEl) defEl.innerText = `${sh.defense} PTS`;
+  const combatEl = document.getElementById('sh-combat-val');
+  if (combatEl) combatEl.innerText = `${p.atk} ATK / ${p.def} DEF`;
+  const goldEl = document.getElementById('sh-gold-val');
+  if (goldEl) goldEl.innerText = `${inv.gold} Gold`;
+  const matsEl = document.getElementById('sh-mats-val');
+  if (matsEl) matsEl.innerText = `${inv.wood} Wood, ${inv.ore} Ore`;
+}
+
+function upgradeStrongholdWalls() {
+  const inv = gameState.inventory;
+  if (inv.wood >= 15 && inv.ore >= 10) {
+    inv.wood -= 15;
+    inv.ore -= 10;
+    gameState.stronghold.defense += 15;
+    gameState.stronghold.walls = (gameState.stronghold.walls || 0) + 1;
+    audio.play('craft_success');
+    showToast("Bastion Walls Reinforced! +15 Defense!");
+    addFloatingText(gameState.player.x, gameState.player.y - 14, "+15 STRONGHOLD DEF", "#4ade80");
+    updateStrongholdUI();
+    updateHUD();
+    saveGame();
+  } else {
+    audio.play('hit');
+    showToast("Insufficient materials! Need 15 Wood & 10 Ore.");
+  }
+}
+
+function upgradeStrongholdForge() {
+  const inv = gameState.inventory;
+  if (inv.ore >= 20 && inv.gold >= 25) {
+    inv.ore -= 20;
+    inv.gold -= 25;
+    gameState.player.atk += 5;
+    gameState.stronghold.forge = (gameState.stronghold.forge || 0) + 1;
+    audio.play('craft_success');
+    showToast("Weapon Steel Refined! +5 Shivaji Attack!");
+    addFloatingText(gameState.player.x, gameState.player.y - 14, "+5 ATTACK POWER", "#fbbf24");
+    updateStrongholdUI();
+    updateHUD();
+    saveGame();
+  } else {
+    audio.play('hit');
+    showToast("Insufficient materials! Need 20 Ore & 25 Gold.");
+  }
+}
+
+function upgradeStrongholdGarrison() {
+  const inv = gameState.inventory;
+  if (inv.wood >= 20 && inv.gold >= 20) {
+    inv.wood -= 20;
+    inv.gold -= 20;
+    gameState.player.maxHp += 30;
+    gameState.player.hp = gameState.player.maxHp;
+    gameState.stronghold.garrison = (gameState.stronghold.garrison || 0) + 1;
+    audio.play('craft_success');
+    showToast("Mavali Garrison Trained! +30 Max HP!");
+    addFloatingText(gameState.player.x, gameState.player.y - 14, "+30 MAX HP", "#38bdf8");
+    updateStrongholdUI();
+    updateHUD();
+    saveGame();
+  } else {
+    audio.play('hit');
+    showToast("Insufficient materials! Need 20 Wood & 20 Gold.");
+  }
+}
+
+function openPauseMenu() {
+  gameState.screen = 'PAUSED';
+  setOverlay('screen-pause');
+  audio.play('menu_select');
+}
+
+function resumeGame() {
+  gameState.screen = 'PLAYING';
+  setOverlay(null);
+}
+
+function restartLevelAtClearing() {
+  gameState.player.hp = gameState.player.maxHp;
+  gameState.player.x = 96;
+  gameState.player.y = 120;
+  gameState.screen = 'PLAYING';
+  setOverlay(null);
+  showToast("Respawned at forest clearing!");
+}
+
+// Particle & Floating Text Helpers
+function addFloatingText(x, y, text, color) {
+  gameState.floatingTexts.push({ x, y, text, color, life: 0.8, maxLife: 0.8 });
+}
+
+function spawnChips(x, y, color) {
+  for (let i = 0; i < 6; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 20 + Math.random() * 30;
+    gameState.particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 0.35, maxLife: 0.35,
+      color, size: 2
+    });
+  }
+}
+
+// ==========================================
+// 8. UPDATE GAME ENGINE TICK
+// ==========================================
+let lastTime = performance.now();
+
+function gameLoop(now) {
+  try {
+    const dt = Math.min(0.1, (now - lastTime) / 1000);
+    lastTime = now;
+
+    if (gameState.screen === 'PLAYING') {
+      update(dt);
+    }
+    render();
+  } catch (err) {
+    console.error("Critical rendering exception caught safely:", err);
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+  const p = gameState.player;
+
+  // Astra Cooldown & Active Timer tick
+  if (gameState.astraCooldown > 0) {
+    gameState.astraCooldown = Math.max(0, gameState.astraCooldown - dt);
+  }
+  if (gameState.astraActiveTimer > 0) {
+    gameState.astraActiveTimer = Math.max(0, gameState.astraActiveTimer - dt);
+  }
+  if (p.invulnerableTimer > 0) {
+    p.invulnerableTimer = Math.max(0, p.invulnerableTimer - dt);
+  }
+  if ((gameState.dodgeCooldownTimer || 0) > 0) {
+    gameState.dodgeCooldownTimer = Math.max(0, gameState.dodgeCooldownTimer - dt);
+  }
+
+  // Attack timer tick
+  if (p.isAttacking) {
+    p.attackTimer -= dt;
+    if (p.attackTimer <= 0) p.isAttacking = false;
+  }
+
+  // Dodge roll tick
+  if (p.isDodging) {
+    p.dodgeTimer -= dt;
+    const dodgeSpeed = 130;
+    moveEntity(p, p.dodgeDirX * dodgeSpeed, p.dodgeDirY * dodgeSpeed, dt);
+    clampPlayerPosition();
+    if (p.dodgeTimer <= 0) p.isDodging = false;
+  } else {
+    // Normal Player Movement
+    let mx = 0, my = 0;
+    if (keys['w'] || keys['arrowup']) my -= 1;
+    if (keys['s'] || keys['arrowdown']) my += 1;
+    if (keys['a'] || keys['arrowleft']) mx -= 1;
+    if (keys['d'] || keys['arrowright']) mx += 1;
+
+    if (mx !== 0 || my !== 0) {
+      const len = Math.hypot(mx, my);
+      mx /= len;
+      my /= len;
+
+      moveEntity(p, mx * p.speed, my * p.speed, dt);
+      p.isMoving = true;
+
+      if (Math.abs(mx) > Math.abs(my)) {
+        p.dir = mx > 0 ? 2 : 3; // East / West
+      } else {
+        p.dir = my > 0 ? 0 : 1; // South / North
+      }
+
+      p.animTimer += dt;
+      if (p.animTimer >= 0.16) {
+        p.animFrame = (p.animFrame + 1) % 4;
+        p.animTimer = 0;
+      }
+    } else {
+      p.isMoving = false;
+      p.animTimer += dt;
+      if (p.animTimer >= 0.5) {
+        p.animFrame = (p.animFrame + 1) % 2;
+        p.animTimer = 0;
+      }
+    }
+    clampPlayerPosition();
+  }
+
+  // --- PROJECTILES TICK ---
+  if (!gameState.projectiles) gameState.projectiles = [];
+  gameState.projectiles.forEach(proj => {
+    proj.x += proj.vx * dt;
+    proj.y += proj.vy * dt;
+    proj.life -= dt;
+
+    // Check collision with solid tiles/walls
+    if (isBoxColliding(proj.x - 2, proj.y - 2, 4, 4)) {
+      proj.life = 0;
+      return;
+    }
+
+    // Check collision with player
+    if (proj.shooter === 'enemy') {
+      const d = Math.hypot(proj.x - p.x, proj.y - p.y);
+      if (d < 10) {
+        if (p.invulnerableTimer <= 0) {
+          let dmg = Math.max(2, proj.damage - p.def);
+          if (gameState.astraActiveTimer > 0) dmg = Math.floor(dmg * 0.5); // Varuna shield
+          p.hp = Math.max(0, p.hp - dmg);
+          audio.play('hit');
+          addFloatingText(p.x, p.y - 12, `-${dmg}`, "#ef4444");
+          spawnChips(p.x, p.y, "#dc2626");
+
+          if (p.hp <= 0) {
+            gameState.screen = 'GAMEOVER';
+            setOverlay('screen-gameover');
+          }
+        }
+        proj.life = 0;
+      }
+    }
+  });
+  gameState.projectiles = gameState.projectiles.filter(proj => proj.life > 0);
+
+  // Count active attackers for concurrency throttling (max 2 active simultaneous melee attackers)
+  let activeMeleeAttackers = 0;
+  gameState.enemies.forEach(e => {
+    if (e.hp > 0 && e.state === 'windup') activeMeleeAttackers++;
+  });
+
+  // --- ENEMIES AI UPDATE ---
+  gameState.enemies.forEach(en => {
+    if (en.hp <= 0) return;
+
+    // Hit flash timer
+    if (en.hitFlashTimer > 0) en.hitFlashTimer = Math.max(0, en.hitFlashTimer - dt);
+
+    // Burn DOT tick
+    if (en.burnTimer > 0) {
+      en.burnTimer -= dt;
+      en.burnTickTimer -= dt;
+      if (en.burnTickTimer <= 0) {
+        en.burnTickTimer = 0.6;
+        en.hp -= 6;
+        addFloatingText(en.x, en.y - 10, "-6 BURN", "#ea580c");
+        spawnChips(en.x, en.y, "#f97316");
+        if (en.hp <= 0) {
+          onEnemyDefeated(en);
+          return;
+        }
+      }
+    }
+
+    // Boss Phase 2 Enrage Trigger (< 50% HP)
+    if (en.isBoss && en.phase === 1 && en.hp <= en.maxHp * 0.5) {
+      en.phase = 2;
+      en.attackCooldown *= 0.75; // Faster attack rhythm
+      audio.play('boss_roar');
+      addFloatingText(en.x, en.y - 16, "★ ENRAGED! ★", "#ef4444");
+      for (let i = 0; i < 16; i++) {
+        const a = (i / 16) * Math.PI * 2;
+        gameState.particles.push({
+          x: en.x, y: en.y,
+          vx: Math.cos(a) * 45, vy: Math.sin(a) * 45,
+          life: 0.5, maxLife: 0.5, color: '#dc2626', size: 3
+        });
+      }
+    }
+
+    // Boss Phase 2 Shockwave / Ground Slam
+    if (en.isBoss && en.phase === 2) {
+      en.shockwaveCooldown = (en.shockwaveCooldown || 4.0) - dt;
+      if (en.shockwaveCooldown <= 0) {
+        en.shockwaveCooldown = 4.2;
+        audio.play('boss_roar');
+        addFloatingText(en.x, en.y - 16, "GROUND SLAM!", "#f97316");
+        for (let i = 0; i < 18; i++) {
+          const a = (i / 18) * Math.PI * 2;
+          gameState.particles.push({
+            x: en.x, y: en.y,
+            vx: Math.cos(a) * 55, vy: Math.sin(a) * 55,
+            life: 0.45, maxLife: 0.45, color: '#ca8a04', size: 4
+          });
+        }
+        const distToPlayer = Math.hypot(p.x - en.x, p.y - en.y);
+        if (distToPlayer < 48 && p.invulnerableTimer <= 0) {
+          let slamDmg = Math.max(3, (en.atk - 2) - p.def);
+          if (gameState.astraActiveTimer > 0) slamDmg = Math.floor(slamDmg * 0.5);
+          p.hp = Math.max(0, p.hp - slamDmg);
+          const sa = Math.atan2(p.y - en.y, p.x - en.x);
+          p.x += Math.cos(sa) * 16;
+          p.y += Math.sin(sa) * 16;
+          clampPlayerPosition();
+          audio.play('hit');
+          addFloatingText(p.x, p.y - 12, `-${slamDmg} SLAM`, "#ef4444");
+          spawnChips(p.x, p.y, "#dc2626");
+          if (p.hp <= 0) {
+            gameState.screen = 'GAMEOVER';
+            setOverlay('screen-gameover');
+          }
+        }
+      }
+    }
+
+    en.attackTimer = Math.max(0, en.attackTimer - dt);
+    const distToPlayer = Math.hypot(p.x - en.x, p.y - en.y);
+    const angle = Math.atan2(p.y - en.y, p.x - en.x);
+
+    // Update enemy facing direction
+    if (en.state !== 'charging' && en.state !== 'recovery') {
+      en.dir = Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle)) ? (Math.cos(angle) > 0 ? 2 : 3) : (Math.sin(angle) > 0 ? 0 : 1);
+    }
+
+    // --- ARCHETYPE 1: ARCHER ---
+    if (en.type === 'archer') {
+      if (distToPlayer < 100) {
+        if (distToPlayer < 36) {
+          // Kiting: Retreat away from Shivaji
+          moveEntity(en, -Math.cos(angle) * en.speed, -Math.sin(angle) * en.speed, dt);
+          en.state = 'chase';
+        } else if (distToPlayer <= 100) {
+          // In range to shoot
+          if (en.attackTimer <= 0 && en.state !== 'aiming') {
+            en.state = 'aiming';
+            en.windupTimer = 0.4;
+          }
+          if (en.state === 'aiming') {
+            en.windupTimer -= dt;
+            if (en.windupTimer <= 0) {
+              // Fire arrow
+              gameState.projectiles.push({
+                x: en.x,
+                y: en.y,
+                vx: Math.cos(angle) * 85,
+                vy: Math.sin(angle) * 85,
+                damage: en.atk,
+                life: 1.8,
+                shooter: 'enemy'
+              });
+              audio.play('shoot');
+              en.attackTimer = en.attackCooldown;
+              en.state = 'chase';
+            }
+          }
+        }
+      } else if (en.state === 'patrol') {
+        const vx = en.dir === 2 ? en.speed * 0.5 : -en.speed * 0.5;
+        moveEntity(en, vx, 0, dt);
+        if (en.dir === 2 && en.x >= en.patrolEndX) en.dir = 3;
+        else if (en.dir === 3 && en.x <= en.patrolStartX) en.dir = 2;
+      }
+      return;
+    }
+
+    // --- ARCHETYPE 2: CHARGING SOLDIER ---
+    if (en.type === 'charging_soldier') {
+      if (en.state === 'windup') {
+        en.windupTimer -= dt;
+        if (en.windupTimer <= 0) {
+          en.state = 'charging';
+          en.chargeTimer = 0.55;
+        }
+        return;
+      } else if (en.state === 'charging') {
+        en.chargeTimer -= dt;
+        const moved = moveEntity(en, en.chargeDirX * 75, en.chargeDirY * 75, dt);
+        spawnChips(en.x, en.y + 8, "#d1d5db");
+
+        // Check if charge hits player
+        if (distToPlayer < 16) {
+          if (p.invulnerableTimer <= 0) {
+            let dmg = Math.max(4, Math.floor(en.atk * 1.3 - p.def));
+            if (gameState.astraActiveTimer > 0) dmg = Math.floor(dmg * 0.5);
+            p.hp = Math.max(0, p.hp - dmg);
+            p.x += en.chargeDirX * 16;
+            p.y += en.chargeDirY * 16;
+            clampPlayerPosition();
+            audio.play('hit');
+            addFloatingText(p.x, p.y - 12, `-${dmg} RUSH`, "#dc2626");
+            spawnChips(p.x, p.y, "#ef4444");
+            if (p.hp <= 0) {
+              gameState.screen = 'GAMEOVER';
+              setOverlay('screen-gameover');
+            }
+          }
+          en.state = 'recovery';
+          en.recoveryTimer = 0.7;
+          return;
+        }
+
+        if (en.chargeTimer <= 0 || !moved) {
+          en.state = 'recovery';
+          en.recoveryTimer = 0.7;
+          return;
+        }
+        return;
+      } else if (en.state === 'recovery') {
+        en.recoveryTimer -= dt;
+        if (en.recoveryTimer <= 0) {
+          en.state = 'chase';
+          en.attackTimer = en.attackCooldown;
+        }
+        return;
+      } else if (distToPlayer < 85 && en.attackTimer <= 0) {
+        // Initiate telegraphed rush
+        en.state = 'windup';
+        en.windupTimer = 0.5;
+        en.chargeDirX = Math.cos(angle);
+        en.chargeDirY = Math.sin(angle);
+        audio.play('charge');
+        addFloatingText(en.x, en.y - 12, "!", "#ef4444");
+        return;
+      }
+    }
+
+    // --- ARCHETYPES 3, 4, 5: SWORDSMAN, SHIELD GUARD, ELITE GUARD, SUBEDAR ---
+    const attackReach = en.type === 'elite_guard' ? 28 : 18;
+
+    if (distToPlayer < 90) {
+      if (en.state !== 'windup') en.state = 'chase';
+
+      if (distToPlayer > attackReach) {
+        const vx = Math.cos(angle) * en.speed;
+        const vy = Math.sin(angle) * en.speed;
+        moveEntity(en, vx, vy, dt);
+      } else {
+        // In Attack Reach
+        if (en.state === 'chase' && en.attackTimer <= 0) {
+          if (activeMeleeAttackers < 2) { // Concurrency throttle
+            en.state = 'windup';
+            en.windupTimer = en.type === 'elite_guard' ? 0.45 : 0.35;
+          }
+        } else if (en.state === 'windup') {
+          en.windupTimer -= dt;
+          if (en.windupTimer <= 0) {
+            en.attackTimer = en.attackCooldown;
+            en.state = 'chase';
+
+            if (distToPlayer <= attackReach + 6 && p.invulnerableTimer <= 0) {
+              let dmg = Math.max(2, en.atk - p.def);
+              if (gameState.astraActiveTimer > 0) dmg = Math.floor(dmg * 0.5);
+              p.hp = Math.max(0, p.hp - dmg);
+              audio.play('hit');
+              addFloatingText(p.x, p.y - 12, `-${dmg}`, "#ef4444");
+              spawnChips(p.x, p.y, "#dc2626");
+
+              if (p.hp <= 0) {
+                gameState.screen = 'GAMEOVER';
+                setOverlay('screen-gameover');
+              }
+            }
+          }
+        }
+      }
+    } else if (en.state === 'patrol') {
+      const vx = en.dir === 2 ? en.speed * 0.5 : -en.speed * 0.5;
+      moveEntity(en, vx, 0, dt);
+      if (en.dir === 2 && en.x >= en.patrolEndX) en.dir = 3;
+      else if (en.dir === 3 && en.x <= en.patrolStartX) en.dir = 2;
+    }
+  });
+
+  // Floating text tick
+  gameState.floatingTexts.forEach(ft => {
+    ft.y -= 15 * dt;
+    ft.life -= dt;
+  });
+  gameState.floatingTexts = gameState.floatingTexts.filter(ft => ft.life > 0);
+
+  // Particles tick
+  gameState.particles.forEach(pt => {
+    pt.x += pt.vx * dt;
+    pt.y += pt.vy * dt;
+    pt.life -= dt;
+  });
+  gameState.particles = gameState.particles.filter(pt => pt.life > 0);
+
+  // Update Camera clamped to map boundaries
+  const targetCamX = p.x - 80;
+  const targetCamY = p.y - 80;
+  const maxCamX = (gameState.mapCols * gameState.tileSize) - 160;
+  const maxCamY = (gameState.mapRows * gameState.tileSize) - 160;
+  gameState.camX = Math.max(0, Math.min(maxCamX, targetCamX));
+  gameState.camY = Math.max(0, Math.min(maxCamY, targetCamY));
+
+  updateHUD();
+}
+
+function clampPlayerPosition() {
+  const p = gameState.player;
+  const minX = 12;
+  const maxX = (gameState.mapCols * gameState.tileSize) - 16;
+  const minY = 16;
+  const maxY = (gameState.mapRows * gameState.tileSize) - 16;
+
+  // Solid Fort Gate barrier if closed
+  if (!gameState.gateOpen && p.x > 352 && p.x < 375 && p.y > 130 && p.y < 166) {
+    p.x = 352;
+  }
+
+  p.x = Math.max(minX, Math.min(maxX, p.x));
+  p.y = Math.max(minY, Math.min(maxY, p.y));
+}
+
+// ==========================================
+// 9. RENDER ENGINE (160x160 Logical Screen)
+// ==========================================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+function render() {
+  ctx.clearRect(0, 0, 160, 160);
+
+  const cx = Math.floor(gameState.camX);
+  const cy = Math.floor(gameState.camY);
+
+  // --- LAYER 1 & 2: GROUND TILES ---
+  renderGround(cx, cy);
+
+  // --- LAYER 3, 4, 5: Y-SORTED ENTITIES ---
+  renderYSortedScene(cx, cy);
+
+  // --- LAYER 6: PROJECTILES ---
+  renderProjectiles(cx, cy);
+
+  // --- LAYER 7: VISUAL EFFECTS & PARTICLES ---
+  renderParticles(cx, cy);
+  renderFloatingTexts(cx, cy);
+
+  // --- LAYER 8: ATMOSPHERIC & LIGHTING OVERLAYS ---
+  renderAtmosphericLighting(cx, cy);
+
+  // --- LAYER 9: TOP BOSS HEALTH BAR HUD ---
+  renderBossHUD();
+
+  // --- LAYER 10: LOW HEALTH VIGNETTE ---
+  renderLowHealthVignette();
+}
+
+function renderProjectiles(cx, cy) {
+  if (!gameState.projectiles) return;
+  gameState.projectiles.forEach(proj => {
+    const sx = Math.floor(proj.x - cx);
+    const sy = Math.floor(proj.y - cy);
+    if (sx < -8 || sx > 168 || sy < -8 || sy > 168) return;
+
+    ctx.save();
+    ctx.translate(sx, sy);
+    const ang = Math.atan2(proj.vy, proj.vx);
+    ctx.rotate(ang);
+
+    // Arrow shaft and head
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(-4, -1, 8, 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(4, 0);
+    ctx.lineTo(1, -2);
+    ctx.lineTo(1, 2);
+    ctx.fill();
+
+    ctx.restore();
+  });
+}
+
+function renderBossHUD() {
+  const boss = gameState.enemies.find(e => e.isBoss && e.hp > 0);
+  if (!boss) return;
+
+  const barW = 100;
+  const barH = 7;
+  const barX = 30;
+  const barY = 4;
+
+  // Background frame
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+  ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+  ctx.strokeStyle = boss.phase === 2 ? '#ef4444' : '#f59e0b';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(barX - 1, barY - 1, barW + 2, barH + 2);
+
+  // HP Bar fill
+  const pct = Math.max(0, boss.hp / boss.maxHp);
+  ctx.fillStyle = boss.phase === 2 ? '#dc2626' : '#d97706';
+  ctx.fillRect(barX, barY, Math.floor(barW * pct), barH);
+
+  // Title text
+  ctx.font = 'bold 5px monospace';
+  ctx.fillStyle = '#fef3c7';
+  const label = `${boss.bossTitle || boss.name} ${boss.phase === 2 ? '[ENRAGED]' : ''}`;
+  const tw = ctx.measureText(label).width;
+  ctx.fillText(label, barX + (barW - tw) / 2, barY + 5.5);
+}
+
+function renderLowHealthVignette() {
+  const p = gameState.player;
+  if (!p || p.hp >= p.maxHp * 0.25) return;
+
+  const pulse = 0.25 + 0.15 * Math.sin(performance.now() / 180);
+  const grad = ctx.createRadialGradient(80, 80, 50, 80, 80, 95);
+  grad.addColorStop(0, 'rgba(239, 68, 68, 0)');
+  grad.addColorStop(1, `rgba(220, 38, 38, ${pulse})`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 160, 160);
+}
+
+function renderAtmosphericLighting(cx, cy) {
+  const lvl = gameState.level;
+
+  if (lvl === 1) {
+    // Level 1: Sunbeams piercing forest canopy
+    const t = performance.now() / 3000;
+    ctx.save();
+    ctx.fillStyle = 'rgba(254, 240, 138, 0.07)';
+    for (let i = 0; i < 3; i++) {
+      const offset = (Math.sin(t + i * 2) * 8);
+      ctx.beginPath();
+      ctx.moveTo(10 + i * 50 + offset, 0);
+      ctx.lineTo(35 + i * 50 + offset, 0);
+      ctx.lineTo(55 + i * 50 + offset, 160);
+      ctx.lineTo(20 + i * 50 + offset, 160);
+      ctx.fill();
+    }
+    ctx.restore();
+  } else if (lvl === 2) {
+    // Level 2: Warm afternoon glow
+    ctx.fillStyle = 'rgba(245, 158, 11, 0.04)';
+    ctx.fillRect(0, 0, 160, 160);
+  } else if (lvl === 3) {
+    // Level 3: Mountain canyon mist & dust wisps
+    const t = performance.now() / 2000;
+    ctx.save();
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.06)';
+    for (let i = 0; i < 3; i++) {
+      const y = 30 + i * 45;
+      const x = ((performance.now() / 40 + i * 60) % 220) - 30;
+      ctx.beginPath();
+      ctx.ellipse(x, y, 35, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  } else if (lvl === 4) {
+    // Level 4: Dusk atmospheric grade
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+    ctx.fillRect(0, 0, 160, 160);
+  } else if (lvl === 5) {
+    // Level 5: Grand royal stronghold golden ambient warmth
+    ctx.fillStyle = 'rgba(217, 119, 6, 0.05)';
+    ctx.fillRect(0, 0, 160, 160);
+  }
+}
+
+function renderGround(cx, cy) {
+  if (!groundTiles || !groundTiles.length) {
+    initLevel1Map();
+  }
+  const maxCamX = (gameState.mapCols * 16) - 160;
+  const maxCamY = (gameState.mapRows * 16) - 160;
+  const safeCx = Math.max(0, Math.min(maxCamX, isNaN(cx) ? 0 : cx));
+  const safeCy = Math.max(0, Math.min(maxCamY, isNaN(cy) ? 0 : cy));
+
+  const startCol = Math.max(0, Math.floor(safeCx / 16));
+  const endCol = Math.min(gameState.mapCols - 1, Math.floor((safeCx + 160) / 16));
+  const startRow = Math.max(0, Math.floor(safeCy / 16));
+  const endRow = Math.min(gameState.mapRows - 1, Math.floor((safeCy + 160) / 16));
+
+  const grassImg = images['grass_tiles'];
+  const dirtImg = images['dirt_path_tiles'];
+  const stoneImg = images['stone_cliff_tiles'];
+  const waterImg = images['water_tiles'];
+  const fortWallsImg = images['fort_walls'];
+
+  for (let r = startRow; r <= endRow; r++) {
+    const row = groundTiles[r];
+    if (!row) continue;
+    for (let c = startCol; c <= endCol; c++) {
+      const code = row[c];
+      if (code === undefined) continue;
+      const screenX = c * 16 - safeCx;
+      const screenY = r * 16 - safeCy;
+
+      if (code >= 32) {
+        if (fortWallsImg && fortWallsImg.complete && fortWallsImg.naturalWidth > 0) {
+          if (code === 32) {
+            ctx.drawImage(fortWallsImg, 0, 0, 32, 16, screenX, screenY, 16, 16);
+          } else {
+            ctx.drawImage(fortWallsImg, 36, 0, 16, 32, screenX, screenY, 16, 16);
+          }
+        } else {
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(screenX, screenY, 16, 16);
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(screenX, screenY, 16, 3);
+        }
+      } else if (code >= 24) {
+        if (waterImg && waterImg.complete && waterImg.naturalWidth > 0) {
+          ctx.drawImage(waterImg, 0, 0, 16, 16, screenX, screenY, 16, 16);
+        } else {
+          ctx.fillStyle = '#1f487e';
+          ctx.fillRect(screenX, screenY, 16, 16);
+        }
+      } else if (code >= 16) {
+        if (stoneImg && stoneImg.complete && stoneImg.naturalWidth > 0) {
+          const tileIdx = (code - 16) % 8;
+          ctx.drawImage(stoneImg, tileIdx * 16, 0, 16, 16, screenX, screenY, 16, 16);
+        } else {
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(screenX, screenY, 16, 16);
+        }
+      } else if (code >= 8) {
+        if (dirtImg && dirtImg.complete && dirtImg.naturalWidth > 0) {
+          const tileIdx = (code - 8) % 8;
+          ctx.drawImage(dirtImg, tileIdx * 16, 0, 16, 16, screenX, screenY, 16, 16);
+        } else {
+          ctx.fillStyle = '#795538';
+          ctx.fillRect(screenX, screenY, 16, 16);
+        }
+      } else {
+        if (grassImg && grassImg.complete && grassImg.naturalWidth > 0) {
+          const tileIdx = code % 8;
+          ctx.drawImage(grassImg, tileIdx * 16, 0, 16, 16, screenX, screenY, 16, 16);
+        } else {
+          ctx.fillStyle = '#3a632a';
+          ctx.fillRect(screenX, screenY, 16, 16);
+        }
+      }
+    }
+  }
+
+  // --- THEMATIC GROUND DECALS & LIGHT POOLS ---
+  const lvl = gameState.level;
+  if (lvl === 1) {
+    // Level 1: Warm campfire glow on forest ground
+    const fireX = 96 - safeCx;
+    const fireY = 120 - safeCy;
+    if (fireX > -40 && fireX < 200 && fireY > -40 && fireY < 200) {
+      const rad = 28 + Math.sin(performance.now() / 150) * 2;
+      const grad = ctx.createRadialGradient(fireX, fireY, 4, fireX, fireY, rad);
+      grad.addColorStop(0, 'rgba(245, 158, 11, 0.22)');
+      grad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(fireX, fireY, rad, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (lvl === 2) {
+    // Level 2: Dirt road wheel ruts through village center (y: 154 and 162)
+    ctx.fillStyle = 'rgba(78, 52, 34, 0.35)';
+    const rutStartY = 154 - safeCy;
+    if (rutStartY > -20 && rutStartY < 180) {
+      ctx.fillRect(40 - safeCx, 154 - safeCy, 360, 2);
+      ctx.fillRect(40 - safeCx, 162 - safeCy, 360, 2);
+    }
+  } else if (lvl === 3) {
+    // Level 3: Canyon scree & basalt pebble clusters along gorge
+    ctx.fillStyle = 'rgba(30, 41, 59, 0.4)';
+    for (let i = 0; i < 12; i++) {
+      const px = (60 + i * 28) - safeCx;
+      const py = (138 + (i % 3) * 8) - safeCy;
+      if (px > 0 && px < 160 && py > 0 && py < 160) {
+        ctx.fillRect(px, py, 3, 2);
+        ctx.fillRect(px + 4, py + 2, 2, 2);
+      }
+    }
+  } else if (lvl === 4) {
+    // Level 4: Torchlight pools on courtyard stone paving
+    gameState.resources.forEach(r => {
+      if (r.type === 'torch') {
+        const tx = r.x - safeCx;
+        const ty = r.y - safeCy;
+        if (tx > -30 && tx < 190 && ty > -30 && ty < 190) {
+          const rad = 24 + Math.sin((performance.now() + r.x) / 120) * 3;
+          const grad = ctx.createRadialGradient(tx, ty, 3, tx, ty, rad);
+          grad.addColorStop(0, 'rgba(249, 115, 22, 0.28)');
+          grad.addColorStop(1, 'rgba(249, 115, 22, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(tx, ty, rad, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    });
+  } else if (lvl === 5) {
+    // Level 5: Grand Royal Red Runner / Darbar Carpet leading through fortress
+    const rx = 160 - safeCx;
+    const ry = 146 - safeCy;
+    const rw = 180;
+    const rh = 28;
+    // Red velvet body
+    ctx.fillStyle = 'rgba(185, 28, 28, 0.65)';
+    ctx.fillRect(rx, ry, rw, rh);
+    // Gold brocade borders
+    ctx.fillStyle = 'rgba(245, 158, 11, 0.85)';
+    ctx.fillRect(rx, ry, rw, 2);
+    ctx.fillRect(rx, ry + rh - 2, rw, 2);
+    // Gold fringe accents
+    for (let fx = rx; fx < rx + rw; fx += 12) {
+      ctx.fillRect(fx, ry + 1, 4, 1);
+      ctx.fillRect(fx, ry + rh - 2, 4, 1);
+    }
+  }
+}
+
+function renderYSortedScene(cx, cy) {
+  if (!gameState.resources || !gameState.enemies || !gameState.player) return;
+  const renderList = [];
+
+  // 1. Resources & Architecture
+  gameState.resources.forEach(res => {
+    let sortY = res.y;
+    if (res.type === 'sagwan') sortY = res.y + 70;
+    else if (res.type === 'forest_tree') sortY = res.y + 60;
+    else if (res.type === 'ore') sortY = res.y + 16;
+    else if (res.type === 'tower') sortY = res.y + 80;
+    else if (res.type === 'armoury') sortY = res.y + 60;
+    else if (res.type === 'gate') sortY = res.y + 32;
+
+    renderList.push({
+      type: res.type,
+      data: res,
+      sortY,
+      draw: () => drawResource(res, cx, cy)
+    });
+  });
+
+  // 2. Enemies
+  gameState.enemies.forEach(en => {
+    if (en.hp <= 0) return;
+    renderList.push({
+      type: 'enemy',
+      data: en,
+      sortY: en.y + 12,
+      draw: () => drawEnemy(en, cx, cy)
+    });
+  });
+
+  // 3. Shivaji Player
+  const p = gameState.player;
+  renderList.push({
+    type: 'player',
+    data: p,
+    sortY: p.y + 16,
+    draw: () => drawPlayer(p, cx, cy)
+  });
+
+  // Sort by Y position ascending
+  renderList.sort((a, b) => a.sortY - b.sortY);
+
+  // Draw sorted items
+  renderList.forEach(item => item.draw());
+}
+
+function drawPlayer(p, cx, cy) {
+  const sx = Math.floor(p.x - cx);
+  const sy = Math.floor(p.y - cy);
+
+  // Soft Drop Shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+  ctx.beginPath();
+  ctx.ellipse(sx, sy + 14, 8, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  let sheet = images['shivaji_idle'];
+  let col = p.animFrame % 2;
+  let row = p.dir;
+
+  if (p.isDodging) {
+    sheet = images['shivaji_dodge'] || sheet;
+    col = Math.floor((1 - (p.dodgeTimer / 0.28)) * 3) % 3;
+    row = p.dir;
+  } else if (p.isAttacking) {
+    sheet = images['shivaji_attack'] || sheet;
+    col = Math.floor((1 - (p.attackTimer / 0.28)) * 3) % 3;
+    row = p.dir;
+  } else if (p.isMoving) {
+    sheet = images['shivaji_walk'] || sheet;
+    col = p.animFrame % 4;
+    row = p.dir;
+  }
+
+  if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+    ctx.drawImage(sheet, col * 24, row * 32, 24, 32, sx - 12, sy - 18, 24, 32);
+  } else {
+    ctx.fillStyle = '#e66012'; // Saffron Pheta
+    ctx.fillRect(sx - 4, sy - 16, 8, 5);
+    ctx.fillStyle = '#c68642'; // Face
+    ctx.fillRect(sx - 3, sy - 11, 6, 4);
+    ctx.fillStyle = '#fef3c7'; // White Angarkha
+    ctx.fillRect(sx - 5, sy - 7, 10, 10);
+    ctx.fillStyle = '#b45309'; // Kamarbandh
+    ctx.fillRect(sx - 5, sy, 10, 2);
+    ctx.fillStyle = '#451a03'; // Mojari feet
+    ctx.fillRect(sx - 4, sy + 7, 3, 4);
+    ctx.fillRect(sx + 1, sy + 7, 3, 4);
+  }
+
+  // Draw Sword Slash Arc overlay if attacking
+  if (p.isAttacking && p.hasTalwar) {
+    if (images['slash_arc'] && images['slash_arc'].complete && images['slash_arc'].naturalWidth > 0) {
+      let arcX = sx - 12;
+      let arcY = sy - 12;
+      if (p.dir === 0) arcY += 14;
+      else if (p.dir === 1) arcY -= 14;
+      else if (p.dir === 2) arcX += 14;
+      else if (p.dir === 3) arcX -= 14;
+      ctx.drawImage(images['slash_arc'], arcX, arcY, 24, 24);
+    } else {
+      // Procedural luminous silver-orange slash arc
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (p.dir === 0) ctx.arc(sx, sy + 8, 12, 0.2, Math.PI - 0.2);
+      else if (p.dir === 1) ctx.arc(sx, sy - 8, 12, Math.PI + 0.2, -0.2);
+      else if (p.dir === 2) ctx.arc(sx + 8, sy, 12, -Math.PI / 2 + 0.2, Math.PI / 2 - 0.2);
+      else if (p.dir === 3) ctx.arc(sx - 8, sy, 12, Math.PI / 2 + 0.2, 3 * Math.PI / 2 - 0.2);
+      ctx.stroke();
+    }
+  }
+
+  // Varuna Protective Shield Aura
+  if (gameState.astraActiveTimer > 0) {
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(sx, sy - 2, 14, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawEnemy(en, cx, cy) {
+  const sx = Math.floor(en.x - cx);
+  const sy = Math.floor(en.y - cy);
+
+  // Drop Shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.beginPath();
+  ctx.ellipse(sx, sy + 10, 6, 2.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  let sheetKey = 'swordsman';
+  let fw = 16, fh = 24;
+  if (en.type === 'archer') {
+    sheetKey = 'archer'; fw = 16; fh = 24;
+  } else if (en.type === 'shield_guard') {
+    sheetKey = 'shield_guard'; fw = 18; fh = 24;
+  } else if (en.type === 'elite_guard') {
+    sheetKey = 'elite_guard'; fw = 22; fh = 28;
+  } else if (en.type === 'charging_soldier') {
+    sheetKey = 'charging_soldier'; fw = 20; fh = 24;
+  } else if (en.type === 'subedar') {
+    sheetKey = 'afzal_khan'; fw = 36; fh = 44;
+  }
+
+  const sheet = images[sheetKey] || images['swordsman'];
+  if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+    const row = en.isBoss ? (en.phase === 2 ? 1 : 2) : (en.state === 'chase' ? 1 : 0);
+    const col = Math.floor(performance.now() / 200) % 4;
+    ctx.drawImage(sheet, col * fw, row * fh, fw, fh, sx - fw / 2, sy - fh / 2, fw, fh);
+  } else {
+    ctx.fillStyle = en.isBoss ? '#b91c1c' : '#166534';
+    ctx.fillRect(sx - 6, sy - 12, 12, 16);
+    ctx.fillStyle = '#ca8a04';
+    ctx.fillRect(sx - 4, sy - 15, 8, 4);
+  }
+
+  // White Hit Flash Overlay
+  if (en.hitFlashTimer > 0) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.fillRect(sx - fw / 2, sy - fh / 2, fw, fh);
+  }
+
+  // Charging Soldier Telegraph Alert
+  if (en.state === 'windup' && en.type === 'charging_soldier') {
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(sx, sy - fh / 2 - 6, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 6px monospace';
+    ctx.fillText('!', sx - 2, sy - fh / 2 - 4);
+  }
+
+  // Shield Icon Indicator for Shield Guards
+  if (en.type === 'shield_guard' || en.hasShield) {
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(sx - fw / 2 - 3, sy - 3, 2, 6);
+  }
+
+  // Health Bar above enemy
+  const barW = en.isBoss ? 26 : 16;
+  const hpPct = Math.max(0, en.hp / en.maxHp);
+  ctx.fillStyle = '#17110d';
+  ctx.fillRect(sx - barW / 2, sy - (en.isBoss ? 20 : 15), barW, 2);
+  ctx.fillStyle = en.isBoss ? (en.phase === 2 ? '#dc2626' : '#f59e0b') : '#ef4444';
+  ctx.fillRect(sx - barW / 2, sy - (en.isBoss ? 20 : 15), Math.floor(barW * hpPct), 2);
+}
+
+function drawResource(res, cx, cy) {
+  const sx = Math.floor(res.x - cx);
+  const sy = Math.floor(res.y - cy);
+
+  if (res.type === 'sagwan') {
+    const sheet = images['sagwan_trees'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      // 42 x 96 px frame (mature = col 0, chopped = col 1)
+      const col = res.visualState === 1 ? 1 : 0;
+      ctx.drawImage(sheet, col * 42, 0, 42, 96, sx - 21, sy - 20, 42, 96);
+    } else {
+      ctx.fillStyle = '#422817';
+      ctx.fillRect(sx - 4, sy + 10, 8, 20);
+      ctx.fillStyle = '#65a30d';
+      ctx.fillRect(sx - 16, sy - 20, 32, 32);
+    }
+  } else if (res.type === 'forest_tree') {
+    const sheet = images['forest_trees'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      const col = res.variety || 0;
+      ctx.drawImage(sheet, col * 32, 0, 32, 96, sx - 16, sy - 20, 32, 96);
+    } else {
+      ctx.fillStyle = '#422817';
+      ctx.fillRect(sx - 4, sy + 10, 8, 20);
+      ctx.fillStyle = '#1e3f14';
+      ctx.fillRect(sx - 14, sy - 18, 28, 30);
+    }
+  } else if (res.type === 'ore') {
+    const sheet = images['ores'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      // 25 x 32 px frame (full = col 0, fractured = col 1, depleted = col 2)
+      const col = res.visualState || 0;
+      ctx.drawImage(sheet, col * 25, 0, 25, 32, sx - 12, sy - 12, 25, 32);
+    } else {
+      ctx.fillStyle = '#5e656e';
+      ctx.fillRect(sx - 6, sy - 6, 12, 12);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(sx - 3, sy - 3, 6, 6);
+    }
+  } else if (res.type === 'boulder') {
+    const sheet = images['rocks'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 64, 0, 32, 64, sx - 16, sy - 16, 32, 64);
+    } else {
+      ctx.fillStyle = '#5e656e';
+      ctx.fillRect(sx - 10, sy - 8, 20, 16);
+    }
+  } else if (res.type === 'gate') {
+    const sheet = images['fort_gates'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      // 42 x 64 px (col 0: closed, col 1: open)
+      const col = res.isOpen ? 1 : 0;
+      ctx.drawImage(sheet, col * 42, 0, 42, 64, sx - 21, sy - 32, 42, 64);
+    } else {
+      ctx.fillStyle = '#3c4046';
+      ctx.fillRect(sx - 16, sy - 24, 32, 48);
+      ctx.fillStyle = res.isOpen ? '#0f172a' : '#3b2516';
+      ctx.fillRect(sx - 10, sy - 16, 20, 40);
+    }
+  } else if (res.type === 'tower') {
+    const sheet = images['towers'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 0, 0, 42, 96, sx - 21, sy - 32, 42, 96);
+    } else {
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(sx - 14, sy - 30, 28, 60);
+    }
+  } else if (res.type === 'armoury') {
+    const sheet = images['towers'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 42, 0, 42, 96, sx - 21, sy - 24, 42, 96);
+    } else {
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(sx - 18, sy - 20, 36, 40);
+    }
+  } else if (res.type === 'flagpole') {
+    const sheet = images['fort_decor'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 0, 0, 25, 32, sx - 12, sy - 16, 25, 32);
+      if (res.hoisted) {
+        ctx.fillStyle = '#e66012';
+        ctx.fillRect(sx, sy - 14, 10, 6);
+      }
+    } else {
+      ctx.fillStyle = '#422817';
+      ctx.fillRect(sx - 1, sy - 20, 2, 28);
+      if (res.hoisted) {
+        ctx.fillStyle = '#e66012';
+        ctx.fillRect(sx, sy - 18, 12, 8);
+      }
+    }
+  } else if (res.type === 'torch') {
+    const sheet = images['vfx_torches'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      const frame = Math.floor(performance.now() / 150) % 4;
+      ctx.drawImage(sheet, frame * 16, 0, 16, 32, sx - 8, sy - 16, 16, 32);
+    } else {
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(sx - 1, sy - 4, 2, 10);
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(sx - 2, sy - 8, 4, 4);
+    }
+  } else if (res.type === 'village_hut') {
+    const sheet = images['village_assets'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 0, 0, 36, 48, sx - 18, sy - 24, 36, 48);
+    } else {
+      ctx.fillStyle = '#5c4033';
+      ctx.fillRect(sx - 16, sy - 10, 32, 20);
+      ctx.fillStyle = '#8b5a2b';
+      ctx.beginPath();
+      ctx.moveTo(sx - 18, sy - 10);
+      ctx.lineTo(sx, sy - 24);
+      ctx.lineTo(sx + 18, sy - 10);
+      ctx.fill();
+    }
+  } else if (res.type === 'village_well') {
+    const sheet = images['village_assets'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 36, 12, 24, 28, sx - 12, sy - 14, 24, 28);
+    } else {
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.arc(sx, sy, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (res.type === 'wooden_cart') {
+    const sheet = images['village_assets'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 90, 16, 32, 24, sx - 16, sy - 12, 32, 24);
+    } else {
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(sx - 14, sy - 8, 28, 16);
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(sx - 12, sy + 6, 8, 4);
+      ctx.fillRect(sx + 4, sy + 6, 8, 4);
+    }
+  } else if (res.type === 'clay_pots') {
+    ctx.fillStyle = '#c2410c';
+    ctx.beginPath(); ctx.arc(sx - 4, sy, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx + 4, sy + 2, 5, 0, Math.PI * 2); ctx.fill();
+  } else if (res.type === 'fence') {
+    const sheet = images['fences'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 32, 0, 16, 16, sx - 8, sy - 8, 16, 16);
+    } else {
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(sx - 8, sy - 2, 16, 4);
+      ctx.fillRect(sx - 6, sy - 6, 3, 10);
+      ctx.fillRect(sx + 3, sy - 6, 3, 10);
+    }
+  } else if (res.type === 'tent') {
+    const sheet = images['camp_assets'];
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+      ctx.drawImage(sheet, 0, 0, 32, 32, sx - 16, sy - 16, 32, 32);
+    } else {
+      ctx.fillStyle = '#991b1b';
+      ctx.beginPath();
+      ctx.moveTo(sx - 14, sy + 12);
+      ctx.lineTo(sx, sy - 14);
+      ctx.lineTo(sx + 14, sy + 12);
+      ctx.fill();
+    }
+  } else if (res.type === 'camp_crates') {
+    ctx.fillStyle = '#92400e';
+    ctx.fillRect(sx - 10, sy - 10, 20, 20);
+    ctx.strokeStyle = '#451a03';
+    ctx.strokeRect(sx - 10, sy - 10, 20, 20);
+  } else if (res.type === 'supply_crate') {
+    if (!res.collected) {
+      ctx.fillStyle = '#ca8a04';
+      ctx.fillRect(sx - 8, sy - 8, 16, 16);
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(sx - 8, sy - 8, 16, 16);
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText('[E]', sx - 6, sy + 4);
+    } else {
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(sx - 7, sy - 7, 14, 14);
+      ctx.fillStyle = '#4ade80';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText('✓', sx - 4, sy + 4);
+    }
+  } else if (res.type === 'village_elder') {
+    // Revered Elder NPC
+    ctx.fillStyle = '#ea580c';
+    ctx.fillRect(sx - 5, sy - 8, 10, 16);
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(sx - 4, sy - 14, 8, 6);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(sx - 3, sy - 6, 6, 4); // beard
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(sx + 6, sy - 12, 2, 20); // staff
+    ctx.font = 'bold 7px monospace';
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillText('[E] Elder', sx - 16, sy - 16);
+  } else if (res.type === 'wagon_master') {
+    // Caravan Scout NPC
+    ctx.fillStyle = '#0369a1';
+    ctx.fillRect(sx - 5, sy - 8, 10, 16);
+    ctx.fillStyle = '#fde047';
+    ctx.fillRect(sx - 4, sy - 14, 8, 6);
+    ctx.font = 'bold 7px monospace';
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText('[E] Scout', sx - 16, sy - 16);
+  } else if (res.type === 'command_pavilion') {
+    // Grand Maratha Command Pavilion
+    ctx.fillStyle = '#9a3412';
+    ctx.fillRect(sx - 20, sy - 8, 40, 24);
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.moveTo(sx - 24, sy - 8);
+    ctx.lineTo(sx, sy - 24);
+    ctx.lineTo(sx + 24, sy - 8);
+    ctx.fill();
+  } else if (res.type === 'command_desk') {
+    // War Table / Command Desk
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(sx - 14, sy - 6, 28, 14);
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(sx - 10, sy - 4, 12, 8); // scrolls & maps
+    ctx.font = 'bold 7px monospace';
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillText('[E] Stronghold', sx - 24, sy - 10);
+  }
+}
+
+function renderParticles(cx, cy) {
+  gameState.particles.forEach(p => {
+    ctx.fillStyle = p.color;
+    ctx.fillRect(Math.floor(p.x - cx), Math.floor(p.y - cy), p.size, p.size);
+  });
+}
+
+function renderFloatingTexts(cx, cy) {
+  ctx.font = 'bold 9px monospace';
+  gameState.floatingTexts.forEach(ft => {
+    ctx.fillStyle = '#000';
+    ctx.fillText(ft.text, Math.floor(ft.x - cx) + 1, Math.floor(ft.y - cy) + 1);
+    ctx.fillStyle = ft.color;
+    ctx.fillText(ft.text, Math.floor(ft.x - cx), Math.floor(ft.y - cy));
+  });
+}
+
+// ==========================================
+// 10. HUD & COMPANION PANELS UPDATE
+// ==========================================
+function updateHUD() {
+  const p = gameState.player;
+
+  // Mini Canvas Overlay
+  document.getElementById('hud-hp').innerText = `${p.hp}/${p.maxHp}`;
+  const badgeAstra = document.getElementById('hud-astra-badge');
+  if (gameState.astraCooldown > 0) {
+    badgeAstra.innerText = `Astra: ${Math.ceil(gameState.astraCooldown)}s`;
+    badgeAstra.style.borderColor = '#ef4444';
+  } else {
+    badgeAstra.innerText = 'Astra: Ready [Shift]';
+    badgeAstra.style.borderColor = '#b45309';
+  }
+
+  // Left Side Panel Stats
+  document.getElementById('ui-level').innerText = p.level;
+  document.getElementById('ui-hp-cur').innerText = p.hp;
+  document.getElementById('ui-hp-max').innerText = p.maxHp;
+  document.getElementById('ui-bar-hp').style.width = `${Math.max(0, (p.hp / p.maxHp) * 100)}%`;
+
+  document.getElementById('ui-xp-cur').innerText = p.xp;
+  document.getElementById('ui-xp-max').innerText = p.maxXp;
+  document.getElementById('ui-bar-xp').style.width = `${Math.min(100, (p.xp / p.maxXp) * 100)}%`;
+
+  document.getElementById('ui-atk').innerText = p.hasTalwar ? `${p.atk} (Steel Talwar)` : '4 (Fists)';
+  document.getElementById('ui-def').innerText = p.def;
+
+  // Inventory
+  document.getElementById('ui-wood').innerText = gameState.inventory.wood;
+  document.getElementById('ui-ore').innerText = gameState.inventory.ore;
+  document.getElementById('ui-gold').innerText = gameState.inventory.gold;
+  const keyEl = document.getElementById('ui-key');
+  if (gameState.inventory.hasKotKey) {
+    keyEl.innerText = 'Yes (Kot Gate)';
+    keyEl.style.color = '#4ade80';
+  } else {
+    keyEl.innerText = 'No';
+    keyEl.style.color = '#ef4444';
+  }
+
+  // Equipped Astra
+  const astraNames = { agni: 'Agni Astra', varuna: 'Varuna Astra', bhoomi: 'Bhoomi Astra' };
+  document.getElementById('ui-astra-name').innerText = astraNames[gameState.selectedAstra] || 'None Selected';
+  if (gameState.astraCooldown > 0) {
+    document.getElementById('ui-astra-status').innerText = `Cooldown: ${Math.ceil(gameState.astraCooldown)}s`;
+    const cdPct = (1 - (gameState.astraCooldown / gameState.astraMaxCooldown)) * 100;
+    document.getElementById('ui-bar-astra').style.width = `${cdPct}%`;
+  } else {
+    document.getElementById('ui-astra-status').innerText = 'Ready to Cast (Shift)';
+    document.getElementById('ui-bar-astra').style.width = '100%';
+  }
+}
+
+// ==========================================
+// 11. SAVE & LOAD (localStorage)
+// ==========================================
+function saveGame() {
+  try {
+    const data = {
+      level: gameState.level,
+      maxUnlockedLevel: Math.max(gameState.maxUnlockedLevel || 1, gameState.level),
+      selectedAstra: gameState.selectedAstra,
+      gateOpen: !!gameState.gateOpen,
+      flagHoisted: !!gameState.flagHoisted,
+      recoveredCrates: gameState.recoveredCrates || 0,
+      stronghold: gameState.stronghold,
+      player: {
+        hp: gameState.player.hp,
+        maxHp: gameState.player.maxHp,
+        xp: gameState.player.xp,
+        maxXp: gameState.player.maxXp,
+        level: gameState.player.level,
+        hasTalwar: gameState.player.hasTalwar,
+        atk: gameState.player.atk,
+        def: gameState.player.def
+      },
+      inventory: gameState.inventory,
+      quests: gameState.quests
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    showToast("Campaign Progress Saved!");
+  } catch(e) {
+    console.warn("Save game failed", e);
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    gameState.level = data.level || 1;
+    gameState.maxUnlockedLevel = data.maxUnlockedLevel || Math.max(1, data.level || 1);
+    gameState.selectedAstra = data.selectedAstra || 'agni';
+    if (data.gateOpen !== undefined) {
+      gameState.gateOpen = data.gateOpen;
+      const gate = gameState.resources.find(r => r.id === 'fort_gate');
+      if (gate) gate.isOpen = data.gateOpen;
+    }
+    if (data.flagHoisted !== undefined) gameState.flagHoisted = data.flagHoisted;
+    if (data.recoveredCrates !== undefined) gameState.recoveredCrates = data.recoveredCrates;
+    if (data.stronghold) Object.assign(gameState.stronghold, data.stronghold);
+    if (data.player) Object.assign(gameState.player, data.player);
+    if (data.inventory) Object.assign(gameState.inventory, data.inventory);
+    if (data.quests) Object.assign(gameState.quests, data.quests);
+    return true;
+  } catch(e) {
+    console.warn("Load game failed", e);
+    return false;
+  }
+}
+
+function checkSavedGame() {
+  const btnContinue = document.getElementById('btn-continue');
+  if (localStorage.getItem(SAVE_KEY)) {
+    btnContinue.disabled = false;
+  } else {
+    btnContinue.disabled = true;
+  }
+}
+
+// ==========================================
+// 12. UI EVENT BINDINGS
+// ==========================================
+// Title Screen Buttons
+document.getElementById('btn-new-campaign').addEventListener('click', () => {
+  audio.init();
+  startStoryCinematic();
+});
+
+document.getElementById('btn-continue').addEventListener('click', () => {
+  audio.init();
+  if (loadGame()) {
+    startLevel(gameState.level);
+    showToast(`Resumed Campaign at Level ${gameState.level}!`);
+  }
+});
+
+document.getElementById('btn-settings').addEventListener('click', () => {
+  openPauseMenu();
+});
+
+document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
+
+const btnCommence = document.getElementById('btn-commence-mission');
+if (btnCommence) btnCommence.addEventListener('click', commenceMission);
+
+document.getElementById('btn-credits').addEventListener('click', () => {
+  alert("CHRONICLES OF SWARAJYA: The Divine Blade\n\nInspired by Chhatrapati Shivaji Maharaj & the establishment of Hindavi Swarajya.\n16-bit Retro RPG Engine.\nPhase 3: Playable Desktop RPG Development.");
+});
+
+// Story Screen
+document.getElementById('btn-story-next').addEventListener('click', nextStoryScene);
+document.getElementById('btn-story-skip').addEventListener('click', openAstraSelection);
+
+// Astra Selection
+['agni', 'varuna', 'bhoomi'].forEach(astra => {
+  document.getElementById(`card-${astra}`).addEventListener('click', () => {
+    gameState.selectedAstra = astra;
+    updateAstraCardSelection();
+    audio.play('menu_select');
+  });
+});
+document.getElementById('btn-confirm-astra').addEventListener('click', confirmAstraSelection);
+
+// Crafting
+document.getElementById('btn-craft-forge').addEventListener('click', craftTalwar);
+document.getElementById('btn-craft-close').addEventListener('click', closeCrafting);
+
+// Pause Menu
+document.getElementById('btn-resume').addEventListener('click', resumeGame);
+document.getElementById('btn-pause-craft').addEventListener('click', openCrafting);
+document.getElementById('btn-replay-intro').addEventListener('click', startStoryCinematic);
+document.getElementById('btn-save-quit').addEventListener('click', () => {
+  saveGame();
+  gameState.screen = 'TITLE';
+  setOverlay('screen-title');
+  checkSavedGame();
+});
+
+// Victory & Game Over
+const btnNextVictory = document.getElementById('btn-victory-next');
+if (btnNextVictory) btnNextVictory.addEventListener('click', continueToNextLevel);
+
+const btnDialogueCont = document.getElementById('btn-dialogue-continue');
+if (btnDialogueCont) btnDialogueCont.addEventListener('click', closeDialogue);
+
+const btnShClose = document.getElementById('btn-stronghold-close');
+if (btnShClose) btnShClose.addEventListener('click', closeStrongholdMenu);
+const btnShWalls = document.getElementById('btn-sh-upgrade-walls');
+if (btnShWalls) btnShWalls.addEventListener('click', upgradeStrongholdWalls);
+const btnShForge = document.getElementById('btn-sh-upgrade-talwar');
+if (btnShForge) btnShForge.addEventListener('click', upgradeStrongholdForge);
+const btnShHp = document.getElementById('btn-sh-upgrade-hp');
+if (btnShHp) btnShHp.addEventListener('click', upgradeStrongholdGarrison);
+
+document.getElementById('btn-victory-continue').addEventListener('click', () => {
+  gameState.screen = 'PLAYING';
+  setOverlay(null);
+});
+document.getElementById('btn-victory-title').addEventListener('click', () => {
+  gameState.screen = 'TITLE';
+  setOverlay('screen-title');
+  checkSavedGame();
+});
+
+document.getElementById('btn-restart-level').addEventListener('click', restartLevelAtClearing);
+document.getElementById('btn-gameover-title').addEventListener('click', () => {
+  gameState.screen = 'TITLE';
+  setOverlay('screen-title');
+  checkSavedGame();
+});
+
+// Window resize handler: scale canvas container nicely
+function adjustCanvasScale() {
+  const container = document.getElementById('canvas-container');
+  const availableH = window.innerHeight - 36;
+  const scale = Math.max(2, Math.min(5, Math.floor(availableH / 160)));
+  canvas.style.width = `${160 * scale}px`;
+  canvas.style.height = `${160 * scale}px`;
+}
+window.addEventListener('resize', adjustCanvasScale);
+
+// Draw static preview canvases (Title emblem, Astra cards)
+function drawPreviewCanvases() {
+  // Title Emblem
+  const emblemCv = document.getElementById('title-emblem-canvas');
+  if (emblemCv) {
+    const ectx = emblemCv.getContext('2d');
+    ectx.imageSmoothingEnabled = false;
+    if (images['preview_fort']) {
+      ectx.drawImage(images['preview_fort'], 40, 40, 80, 80, 0, 0, 64, 64);
+    }
+  }
+
+  // Astra Card previews
+  const astraConfigs = [
+    { id: 'canvas-preview-agni', img: 'agni_effects' },
+    { id: 'canvas-preview-varuna', img: 'varuna_effects' },
+    { id: 'canvas-preview-bhoomi', img: 'bhoomi_effects' },
+    { id: 'hud-astra-icon', img: 'agni_effects' }
+  ];
+  astraConfigs.forEach(cfg => {
+    const el = document.getElementById(cfg.id);
+    if (el) {
+      const actx = el.getContext('2d');
+      actx.imageSmoothingEnabled = false;
+      const sheet = images[cfg.img];
+      if (sheet) {
+        actx.drawImage(sheet, 0, 0, 32, 32, 0, 0, el.width, el.height);
+      }
+    }
+  });
+}
+
+// ==========================================
+// 13. BOOTSTRAP INITIALIZATION
+// ==========================================
+initLevel1Map(); // Pre-initialize terrain tiles, resources and enemies
+adjustCanvasScale();
+checkSavedGame();
+
+preloadAssets(() => {
+  console.log("Chronicles of Swarajya: All assets successfully loaded!");
+  drawPreviewCanvases();
+  requestAnimationFrame(gameLoop);
+});
+</script>
+</body>
+</html>

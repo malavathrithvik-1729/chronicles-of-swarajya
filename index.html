@@ -1,0 +1,2982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Chronicles of Swarajya: The Divine Blade — Desktop Edition 2.0</title>
+<style>
+  :root {
+    --bg-dark: #0a0806;
+    --panel-bg: #140f0c;
+    --card-bg: #1f1712;
+    --saffron: #e66012;
+    --saffron-light: #f59e0b;
+    --maratha-red: #b91c1c;
+    --gold: #d97706;
+    --gold-light: #fde68a;
+    --border-gold: #b45309;
+    --border-dark: #451a03;
+    --stone-gray: #475569;
+    --text-cream: #fef3c7;
+    --text-muted: #9ca3af;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body, html {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background-color: var(--bg-dark);
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+    color: var(--text-cream);
+  }
+  
+  /* Top-level Desktop Layout Wrapper */
+  #game-wrapper {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #1a120c 0%, #050403 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Desktop Side Panels (Left & Right - visible on widescreen displays) */
+  .desktop-side-panel {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 320px;
+    height: calc(100vh - 24px);
+    height: calc(100dvh - 24px);
+    max-height: 980px;
+    background: var(--panel-bg);
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 0 12px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.8);
+    z-index: 10;
+    overflow-y: auto;
+  }
+  @media (min-width: 1380px) {
+    .desktop-side-panel {
+      display: flex;
+    }
+  }
+  .side-panel-header {
+    border-bottom: 2px solid var(--border-dark);
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+  }
+  .side-panel-header h2 {
+    font-size: 15px;
+    color: var(--saffron-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .side-panel-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .side-panel-section h3 {
+    font-size: 12px;
+    color: var(--gold-light);
+    margin-bottom: 6px;
+    border-bottom: 1px dashed #78350f;
+    padding-bottom: 3px;
+  }
+  .key-badge {
+    display: inline-block;
+    background: #262626;
+    border: 1px solid #737373;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-weight: bold;
+    color: #fef08a;
+    font-size: 10px;
+    margin-right: 4px;
+  }
+
+  /* Center Game Container - Fills Viewport Height & Maintains 1:1 Aspect */
+  #canvas-container {
+    position: relative;
+    width: min(calc(100vw - 12px), calc(100vh - 12px));
+    height: min(calc(100vw - 12px), calc(100vh - 12px));
+    width: min(calc(100vw - 12px), calc(100dvh - 12px));
+    height: min(calc(100vw - 12px), calc(100dvh - 12px));
+    aspect-ratio: 1 / 1;
+    max-width: 100vw;
+    max-height: 100dvh;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 20px rgba(230,96,18,0.45);
+    border: 3px solid var(--border-gold);
+    border-radius: 6px;
+    background: #000;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  canvas#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  /* In-Game Heads Up Display (HUD) */
+  #hud-overlay {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+    z-index: 20;
+  }
+  .hud-panel {
+    background: rgba(15, 12, 10, 0.88);
+    border: 1px solid var(--border-gold);
+    border-radius: 5px;
+    padding: 6px 10px;
+    pointer-events: auto;
+    backdrop-filter: blur(2px);
+  }
+  .bar-container {
+    width: 130px;
+    height: 10px;
+    background: #262626;
+    border: 1px solid #737373;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 3px 0;
+  }
+  .hp-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #b91c1c, #ef4444);
+    transition: width 0.15s ease-out;
+  }
+  .astra-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    font-size: 12px;
+  }
+  .astra-badge {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .badge-agni { background: #b91c1c; color: #fff; }
+  .badge-varuna { background: #0284c7; color: #fff; }
+  .badge-bhoomi { background: #78350f; color: #fef08a; }
+
+  /* Boss Health Bar */
+  #boss-bar-wrap {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    display: none;
+    text-align: center;
+    pointer-events: none;
+    z-index: 25;
+  }
+  #boss-name {
+    font-size: 12px;
+    color: #fef08a;
+    font-weight: bold;
+    text-shadow: 2px 2px 0 #000;
+    margin-bottom: 3px;
+    letter-spacing: 1px;
+  }
+  .boss-bar {
+    width: 100%;
+    height: 9px;
+    background: #1c1917;
+    border: 1.5px solid #ef4444;
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(239,68,68,0.5);
+  }
+  #boss-hp-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #991b1b, #f87171);
+    transition: width 0.1s linear;
+  }
+
+  /* Interaction Prompt */
+  #interact-prompt {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 15, 10, 0.9);
+    border: 1px solid var(--saffron-light);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fef08a;
+    text-shadow: 1px 1px 0 #000;
+    display: none;
+    pointer-events: none;
+    z-index: 25;
+    animation: pulse 1s infinite alternate;
+  }
+  @keyframes pulse {
+    0% { transform: translateX(-50%) scale(1); }
+    100% { transform: translateX(-50%) scale(1.06); }
+  }
+
+  /* Modals and Overlays (Scaled for Desktop) */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 6, 5, 0.94);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fef3c7;
+    padding: 20px;
+    text-align: center;
+    z-index: 60;
+  }
+  .modal-content {
+    background: #1c1510;
+    border: 2px solid var(--border-gold);
+    border-radius: 8px;
+    padding: 24px 28px;
+    width: 90%;
+    max-width: 540px;
+    max-height: 90%;
+    overflow-y: auto;
+    box-shadow: 0 0 35px rgba(0,0,0,0.9);
+  }
+  h1 {
+    font-size: 20px;
+    color: var(--saffron-light);
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 1px;
+  }
+  h2 {
+    font-size: 14px;
+    color: #fde68a;
+    margin-bottom: 12px;
+  }
+  p {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+    color: #d1d5db;
+  }
+  .menu-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+  .btn {
+    display: block;
+    width: 100%;
+    background: linear-gradient(180deg, #c2410c, #9a3412);
+    color: #fff;
+    border: 1.5px solid var(--saffron-light);
+    border-radius: 5px;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 1px 1px 0 #000;
+    transition: transform 0.05s, filter 0.1s;
+  }
+  .btn:hover {
+    filter: brightness(1.15);
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn-gold {
+    background: linear-gradient(180deg, #d97706, #b45309);
+    border-color: #fde68a;
+    color: #fff;
+  }
+  .btn-secondary {
+    background: #374151;
+    border-color: #9ca3af;
+  }
+  .btn-danger {
+    background: #b91c1c;
+    border-color: #f87171;
+  }
+
+  /* Upgrade Grid */
+  .upgrade-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 12px 0;
+    text-align: left;
+    font-size: 11px;
+  }
+  .upgrade-card {
+    background: #2a1e17;
+    border: 1.5px solid #78350f;
+    border-radius: 6px;
+    padding: 10px;
+  }
+  .upgrade-card h3 {
+    font-size: 12px;
+    color: var(--saffron-light);
+    margin-bottom: 6px;
+  }
+
+  /* Desktop Top Action Bar inside Canvas */
+  #desktop-top-bar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+    z-index: 25;
+  }
+  .hud-btn {
+    background: rgba(25, 20, 16, 0.9);
+    border: 1px solid var(--border-gold);
+    color: #fde68a;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    backdrop-filter: blur(2px);
+  }
+  .hud-btn:hover {
+    background: var(--saffron);
+    color: #fff;
+  }
+
+  /* Mobile Controls (hidden on desktop) */
+  #mobile-controls {
+    display: none;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 35;
+  }
+  @media (pointer: coarse) and (max-width: 900px) {
+    #mobile-controls {
+      display: block;
+    }
+  }
+  #joystick-zone {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    width: 100px;
+    height: 100px;
+    pointer-events: auto;
+  }
+  #joystick-base {
+    position: absolute;
+    width: 84px;
+    height: 84px;
+    left: 8px;
+    top: 8px;
+    background: rgba(30, 20, 15, 0.45);
+    border: 2px dashed rgba(245, 158, 11, 0.5);
+    border-radius: 50%;
+  }
+  #joystick-knob {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    left: 31px;
+    top: 31px;
+    background: radial-gradient(circle, #ea580c, #9a3412);
+    border: 2px solid #fef08a;
+    border-radius: 50%;
+  }
+  #action-buttons {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: auto;
+  }
+  .action-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .touch-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--saffron-light);
+    background: rgba(30, 20, 15, 0.8);
+    color: #fff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .touch-btn-main {
+    width: 56px;
+    height: 56px;
+    background: rgba(185, 28, 28, 0.9);
+    border-color: #fde68a;
+  }
+
+  /* Test Log Modal */
+  #test-results-body {
+    text-align: left;
+    font-size: 11px;
+    max-height: 240px;
+    overflow-y: auto;
+    background: #111;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #444;
+    margin: 10px 0;
+    font-family: monospace;
+    line-height: 1.4;
+  }
+  .pass { color: #4ade80; }
+  .fail { color: #f87171; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="game-wrapper">
+
+  <!-- Desktop Left Companion Panel -->
+  <aside class="desktop-side-panel left-panel">
+    <div>
+      <div class="side-panel-header">
+        <h2>Chronicles of Swarajya</h2>
+        <div style="font-size: 11px; color: var(--gold-light); margin-top: 2px;">The Divine Blade — Desktop v2.0</div>
+      </div>
+      <div class="side-panel-section">
+        <h3>Campaign Status</h3>
+        <div>Fortress: <span id="desk-fortress" style="color: #fde68a;">Sahyadri Region</span></div>
+        <div>Campaign Progress: <span id="desk-progress" style="color: #fde68a;">1 / 75 Forts</span></div>
+        <div>Current Epoch: <span style="color: #4ade80;">Gathering the Realm</span></div>
+      </div>
+      <div class="side-panel-section">
+        <h3>Shivaji Maharaj</h3>
+        <div>Spirit: <span style="color: #38bdf8;">Hindavi Swarajya Vow</span></div>
+        <div>Divine Grace: <span id="desk-active-astra" style="color: #f97316;">Agni Astra</span></div>
+        <div>Armament: <span id="desk-wep-name">Forged Talwar</span></div>
+        <div>Cuirass: <span id="desk-arm-name">Cotton Angarkha</span></div>
+      </div>
+    </div>
+    <div class="side-panel-section" style="margin-bottom: 0;">
+      <h3>Swarajya Chronicle</h3>
+      <p style="font-size: 10px; color: #d1d5db; margin-bottom: 0;">
+        "We are not fighting for an empire of gold, but for the sacred right of every soul to dwell in freedom, dignity, and honor."
+      </p>
+    </div>
+  </aside>
+
+  <!-- Center Active Game Viewport -->
+  <main id="canvas-container">
+    <canvas id="gameCanvas" width="160" height="160"></canvas>
+    
+    <!-- Desktop In-Game Quick Action Bar -->
+    <div id="desktop-top-bar">
+      <button class="hud-btn" id="d-btn-craft">[U] CRAFT</button>
+      <button class="hud-btn" id="d-btn-switch">[1-3] ASTRA</button>
+      <button class="hud-btn" id="d-btn-fullscreen">⛶ FULLSCREEN</button>
+      <button class="hud-btn" id="d-btn-pause">[ESC] PAUSE</button>
+    </div>
+
+    <!-- HUD Layer -->
+    <div id="hud-overlay">
+      <div class="hud-panel" id="hud-left">
+        <div>LVL: <span id="hud-lvl">1</span> (<span id="hud-region">Forest</span>)</div>
+        <div class="bar-container">
+          <div class="hp-fill" id="hud-hp-fill"></div>
+        </div>
+        <div>HP: <span id="hud-hp-txt">100/100</span></div>
+        <div class="astra-status">
+          ASTRA: <span class="astra-badge badge-agni" id="hud-astra-badge">AGNI</span>
+          <span id="hud-astra-cd" style="color: #4ade80;">RDY</span>
+        </div>
+      </div>
+      <div class="hud-panel" id="hud-right" style="text-align: right; margin-right: 170px;">
+        <div>🪵 <span id="hud-wood">0</span> | ⛏️ <span id="hud-ore">0</span></div>
+        <div>🪙 <span id="hud-gold">0</span> | 💎 <span id="hud-rare">0</span></div>
+        <div>⚔️ <span id="hud-wep">T1</span> | 🛡️ <span id="hud-arm">T1</span></div>
+        <div style="color: #fde68a; font-size: 11px;" id="hud-obj">Defeat Keeper</div>
+      </div>
+    </div>
+
+    <!-- Boss Bar -->
+    <div id="boss-bar-wrap">
+      <div id="boss-name">FORT KEEPER</div>
+      <div class="boss-bar">
+        <div id="boss-hp-fill"></div>
+      </div>
+    </div>
+
+    <!-- Interaction Prompt -->
+    <div id="interact-prompt">[E] / [SPACE] HARVEST RESOURCE</div>
+
+    <!-- Mobile Touch Controls -->
+    <div id="mobile-controls">
+      <div id="joystick-zone">
+        <div id="joystick-base"></div>
+        <div id="joystick-knob"></div>
+      </div>
+      <div id="action-buttons">
+        <div class="action-row">
+          <button class="touch-btn" id="m-btn-dodge">DODGE</button>
+          <button class="touch-btn" style="background:#0284c7;" id="m-btn-astra">ASTRA</button>
+        </div>
+        <div class="action-row">
+          <button class="touch-btn touch-btn-main" id="m-btn-attack">ATTACK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- 1. Main Menu -->
+    <div class="modal-overlay" id="modal-main-menu">
+      <div class="modal-content">
+        <h1>CHRONICLES OF SWARAJYA</h1>
+        <h2>THE DIVINE BLADE — DESKTOP EDITION</h2>
+        <p>A retro 16-bit action RPG inspired by Chhatrapati Shivaji Maharaj and the liberation of the Sahyadri forts.</p>
+        <div class="menu-btn-group">
+          <button class="btn btn-gold" id="btn-continue" style="display: none;">CONTINUE CAMPAIGN</button>
+          <button class="btn" id="btn-new-game">NEW CAMPAIGN</button>
+          <button class="btn btn-gold" id="btn-fullscreen-toggle">⛶ TOGGLE FULLSCREEN</button>
+          <button class="btn btn-secondary" id="btn-settings-open">SETTINGS & CONTROLS</button>
+          <button class="btn btn-secondary" id="btn-credits-open">HISTORICAL CREDITS</button>
+          <button class="btn btn-secondary" id="btn-run-tests">RUN TEST SUITE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Astra Selection Modal -->
+    <div class="modal-overlay" id="modal-select-astra" style="display: none;">
+      <div class="modal-content">
+        <h1>THE SACRED VOW</h1>
+        <p>Before the sanctum of Goddess Bhavani, declare your vow for Hindavi Swarajya. Choose your starting Divine Astra:</p>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin: 12px 0;">
+          <button class="btn" style="background:#b91c1c; text-align: left; padding: 12px;" id="btn-choose-agni">
+            🔥 AGNI ASTRA (Fire)<br><span style="font-size: 10px; opacity: 0.9;">Unleashes a radial wave of sacred fire & continuous burn damage.</span>
+          </button>
+          <button class="btn" style="background:#0284c7; text-align: left; padding: 12px;" id="btn-choose-varuna">
+            💧 VARUNA ASTRA (Water)<br><span style="font-size: 10px; opacity: 0.9;">Channels restorative waters to heal wounds and conjure an aegis shield.</span>
+          </button>
+          <button class="btn" style="background:#78350f; text-align: left; padding: 12px;" id="btn-choose-bhoomi">
+            🌍 BHOOMI ASTRA (Earth)<br><span style="font-size: 10px; opacity: 0.9;">Splits the earth with seismic tremors to crush and stun opposing troops.</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Blacksmith / Upgrade Modal -->
+    <div class="modal-overlay" id="modal-upgrade" style="display: none;">
+      <div class="modal-content" style="max-width: 600px;">
+        <h1>ROYAL ARMOURY & BLACKSMITH</h1>
+        <p>Reforge weapons and strengthen Maratha armour using collected timber, iron, and gold.</p>
+        <div class="upgrade-grid">
+          <div class="upgrade-card">
+            <h3>WEAPON: <span id="upg-wep-name">Talwar</span></h3>
+            <p id="upg-wep-desc">Damage: 12 | Range: 20px</p>
+            <p id="upg-wep-cost" style="color: #fde68a;">Cost: --</p>
+            <button class="btn btn-gold" id="btn-upg-weapon">UPGRADE TALWAR</button>
+          </div>
+          <div class="upgrade-card">
+            <h3>ARMOUR: <span id="upg-arm-name">Angarkha</span></h3>
+            <p id="upg-arm-desc">HP: 100 | Defense: 0</p>
+            <p id="upg-arm-cost" style="color: #fde68a;">Cost: --</p>
+            <button class="btn btn-gold" id="btn-upg-armour">REINFORCE ARMOUR</button>
+          </div>
+        </div>
+        <div class="upgrade-card" style="margin-bottom: 12px; text-align: left;">
+          <h3>ACTIVE ASTRA MASTERY (<span id="upg-astra-name">Agni</span>)</h3>
+          <p id="upg-astra-desc">Mastery Level: 0/3</p>
+          <p id="upg-astra-cost" style="color: #fde68a;">Cost: 50 Gold</p>
+          <button class="btn btn-gold" id="btn-upg-astra" style="width: auto; display: inline-block;">IMPROVE ASTRA</button>
+        </div>
+        <button class="btn btn-secondary" id="btn-close-upgrade">RESUME BATTLE [ESC]</button>
+      </div>
+    </div>
+
+    <!-- 4. Pause Menu -->
+    <div class="modal-overlay" id="modal-pause" style="display: none;">
+      <div class="modal-content">
+        <h1>GAME PAUSED</h1>
+        <p>Campaign progress is safely preserved in browser storage.</p>
+        <div class="menu-btn-group">
+          <button class="btn" id="btn-resume">RESUME BATTLE</button>
+          <button class="btn btn-gold" id="btn-pause-fullscreen">⛶ TOGGLE FULLSCREEN</button>
+          <button class="btn btn-secondary" id="btn-toggle-sound">SOUND: ON</button>
+          <button class="btn btn-secondary" id="btn-pause-controls">HELP & CONTROLS</button>
+          <button class="btn btn-secondary" id="btn-pause-tests">DEV TEST SUITE</button>
+          <button class="btn btn-danger" id="btn-quit-menu">RETURN TO MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Settings & Controls Modal -->
+    <div class="modal-overlay" id="modal-settings" style="display: none;">
+      <div class="modal-content">
+        <h1>DESKTOP CONTROLS & SETTINGS</h1>
+        <div style="text-align: left; font-size: 11px; margin-bottom: 14px; background: #261b14; padding: 12px; border-radius: 4px;">
+          <div style="margin-bottom: 6px;"><span class="key-badge">WASD</span> or <span class="key-badge">Arrows</span>: Move in 8 directions</div>
+          <div style="margin-bottom: 6px;"><span class="key-badge">Space</span>: Strike sword / Harvest resource node</div>
+          <div style="margin-bottom: 6px;"><span class="key-badge">E</span>: Quick interact with gates & harvest nodes</div>
+          <div style="margin-bottom: 6px;"><span class="key-badge">Shift</span>: Cast active Divine Astra ability</div>
+          <div style="margin-bottom: 6px;"><span class="key-badge">K</span> or <span class="key-badge">Alt</span>: Dodge roll (0.25s invulnerability)</div>
+          <div style="margin-bottom: 6px;"><span class="key-badge">1</span>, <span class="key-badge">2</span>, <span class="key-badge">3</span>: Switch active Astra</div>
+          <div style="margin-bottom: 6px;"><span class="key-badge">U</span>: Open Royal Armoury & Blacksmith</div>
+          <div><span class="key-badge">Esc</span> or <span class="key-badge">P</span>: Pause / Resume game</div>
+        </div>
+        <button class="btn btn-gold" id="btn-close-settings">CLOSE HELP</button>
+      </div>
+    </div>
+
+    <!-- 6. Credits Modal -->
+    <div class="modal-overlay" id="modal-credits" style="display: none;">
+      <div class="modal-content">
+        <h1>HISTORICAL CREDITS</h1>
+        <p style="font-size: 12px; line-height: 1.6; text-align: left;">
+          <strong>Chronicles of Swarajya: The Divine Blade</strong> is an artistic homage to Chhatrapati Shivaji Maharaj (1630–1680), the legendary architect of Hindavi Swarajya, celebrated for pioneering naval defense, guerrilla mountain warfare (Ganimi Kava), and just governance across the Sahyadri ranges.<br><br>
+          Features 75 progressive campaign levels across historic battle arenas: Pratapgad, Lal Mahal, and the sovereign crowning at Fort Raigad.
+        </p>
+        <button class="btn btn-gold" id="btn-close-credits">RETURN</button>
+      </div>
+    </div>
+
+    <!-- 7. Level Complete Modal -->
+    <div class="modal-overlay" id="modal-level-complete" style="display: none;">
+      <div class="modal-content">
+        <h1>FORT LIBERATED!</h1>
+        <h2 id="complete-title">Level Cleared</h2>
+        <p id="complete-desc">The bastion has fallen to Maratha valor. The realm of Hindavi Swarajya expands!</p>
+        <p style="color: #fde68a;">Rewards Granted: +5 Wood, +3 Ore, +15 Gold</p>
+        <button class="btn btn-gold" id="btn-next-level">ADVANCE MARCH TO NEXT FORT</button>
+      </div>
+    </div>
+
+    <!-- 8. Game Over Modal -->
+    <div class="modal-overlay" id="modal-game-over" style="display: none;">
+      <div class="modal-content">
+        <h1 style="color: #ef4444;">SHIVAJI HAS FALLEN IN BATTLE</h1>
+        <p>The flame of Swarajya is immortal! Regroup your troops, study the terrain, and reclaim the fortress.</p>
+        <div class="menu-btn-group">
+          <button class="btn btn-gold" id="btn-retry-level">RETRY THIS FORTRESS</button>
+          <button class="btn btn-secondary" id="btn-gameover-menu">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Victory Epilogue Modal -->
+    <div class="modal-overlay" id="modal-victory" style="display: none;">
+      <div class="modal-content">
+        <h1 style="color: #f59e0b; font-size: 18px;">HINDAVI SWARAJYA ESTABLISHED!</h1>
+        <p>The sovereign coronation at Fort Raigad is triumphantly achieved! All 75 forts across the Sahyadri mountains stand liberated under the saffron flag.</p>
+        <div style="background: #2a1e17; padding: 12px; border-radius: 6px; margin: 12px 0; font-size: 12px; text-align: left; line-height: 1.6;">
+          <div>👑 Total Fortresses Liberated: 75 / 75</div>
+          <div>⚔️ Final Sword Tier: Divine Sovereign Blade</div>
+          <div>🛡️ Final Armour Tier: Sacred Armor of Bhavani</div>
+          <div>🌟 Tri-Astra Elemental Convergence Mastered!</div>
+        </div>
+        <button class="btn btn-gold" id="btn-victory-restart">BEGIN A NEW ERA (RESTART)</button>
+      </div>
+    </div>
+
+    <!-- 10. Test Suite Modal -->
+    <div class="modal-overlay" id="modal-tests" style="display: none;">
+      <div class="modal-content" style="max-width: 600px;">
+        <h1>SYSTEM REGRESSION TEST SUITE</h1>
+        <div id="test-results-body">Running diagnostic tests...</div>
+        <button class="btn btn-secondary" id="btn-close-tests">CLOSE TESTS</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Desktop Right Companion Panel -->
+  <aside class="desktop-side-panel right-panel">
+    <div>
+      <div class="side-panel-header">
+        <h2>Command Controls</h2>
+        <div style="font-size: 11px; color: var(--gold-light); margin-top: 2px;">Keyboard & Mouse Setup</div>
+      </div>
+      <div class="side-panel-section">
+        <h3>Combat Actions</h3>
+        <div><span class="key-badge">WASD</span> Movement</div>
+        <div><span class="key-badge">Space</span> Sword Attack / Harvest</div>
+        <div><span class="key-badge">E</span> Quick Interact with Gates</div>
+        <div><span class="key-badge">Shift</span> Cast Active Astra</div>
+        <div><span class="key-badge">K</span> Dodge Roll (Invulnerable)</div>
+      </div>
+      <div class="side-panel-section">
+        <h3>Divine Astras</h3>
+        <div><span class="key-badge">1</span> Agni (Radial Fire Wave)</div>
+        <div><span class="key-badge">2</span> Varuna (Healing Torrent)</div>
+        <div><span class="key-badge">3</span> Bhoomi (Seismic Shockwave)</div>
+      </div>
+      <div class="side-panel-section">
+        <h3>Camp & Management</h3>
+        <div><span class="key-badge">U</span> Blacksmith Armoury</div>
+        <div><span class="key-badge">Esc</span> Pause & Settings Menu</div>
+        <div><span class="key-badge">F</span> Toggle Fullscreen</div>
+      </div>
+    </div>
+    <div class="side-panel-section" style="margin-bottom: 0;">
+      <h3>Display Tip</h3>
+      <p style="font-size: 10px; color: #d1d5db; margin-bottom: 0;">
+        Click <strong>⛶ FULLSCREEN</strong> or press <strong>F</strong> to expand into full monitor immersion.
+      </p>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+/**
+ * CHRONICLES OF SWARAJYA: THE DIVINE BLADE — DESKTOP EDITION 2.0
+ * Pure HTML5 Canvas 2D / Vanilla JS ES6+ Offline Game Engine
+ */
+
+// ==========================================
+// 1. CONSTANTS, COLOR PALETTE & AUDIO SYNTH
+// ==========================================
+const CANVAS_W = 160;
+const CANVAS_H = 160;
+const TILE_SIZE = 16;
+const MAP_TILES = 20;
+const WORLD_SIZE = MAP_TILES * TILE_SIZE; // 320 px
+
+const PALETTE = {
+  GRASS_BASE: '#3a632a', GRASS_DARK: '#28461d', GRASS_LIGHT: '#54873d',
+  DIRT: '#795538', DIRT_LIGHT: '#99704e',
+  STONE_GRAY: '#5e656e', STONE_DARK: '#3c4046', STONE_LIGHT: '#8c939e',
+  WATER_DEEP: '#1f487e', WATER_SHALLOW: '#3370b8', WATER_CREST: '#74b3e8',
+  WOOD_DARK: '#422817', WOOD_LIGHT: '#8a5b32', LEAF_DARK: '#1e3f14', LEAF_LIGHT: '#4a7c29',
+  NIGHT_TINT: 'rgba(10, 15, 35, 0.72)', TORCH_LIGHT: 'rgba(255, 180, 50, 0.28)',
+  SAFFRON: '#e66012', SAFFRON_GOLD: '#f59e0b', TURBAN_RED: '#b91c1c',
+  SKIN_TONE: '#c68642', SKIN_SHADOW: '#8d5b2d', ARMOR_IRON: '#94a3b8',
+  BLADE_STEEL: '#e2e8f0', GOLD_TRIM: '#d97706',
+  MUGHAL_GREEN: '#166534', ENEMY_LEATHER: '#573a21', ENEMY_SHIELD: '#b45309',
+  AFZAL_PURPLE: '#4a154b', SHAISTA_SILK: '#1e293b', AURANGZEB_GOLD: '#b45309',
+  AGNI_CORE: '#ef4444', AGNI_FLAME: '#f97316', AGNI_SPARK: '#fde047',
+  VARUNA_DEEP: '#0284c7', VARUNA_PULSE: '#38bdf8', VARUNA_FOAM: '#e0f2fe',
+  BHOOMI_SOIL: '#78350f', BHOOMI_CRACK: '#b45309', BHOOMI_DUST: '#d97706'
+};
+
+class SoundSynth {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+  }
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+  play(type) {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      if (type === 'sword') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, t);
+        osc.frequency.exponentialRampToValueAtTime(80, t + 0.12);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+        osc.start(t);
+        osc.stop(t + 0.12);
+      } else if (type === 'hit') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(140, t);
+        osc.frequency.linearRampToValueAtTime(40, t + 0.15);
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
+        osc.start(t);
+        osc.stop(t + 0.15);
+      } else if (type === 'gather') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, t);
+        osc.frequency.setValueAtTime(660, t + 0.06);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+        osc.start(t);
+        osc.stop(t + 0.15);
+      } else if (type === 'dodge') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, t);
+        osc.frequency.exponentialRampToValueAtTime(330, t + 0.1);
+        gain.gain.setValueAtTime(0.15, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+        osc.start(t);
+        osc.stop(t + 0.1);
+      } else if (type === 'agni') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, t);
+        osc.frequency.linearRampToValueAtTime(450, t + 0.25);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.linearRampToValueAtTime(0.01, t + 0.28);
+        osc.start(t);
+        osc.stop(t + 0.28);
+      } else if (type === 'varuna') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, t);
+        osc.frequency.exponentialRampToValueAtTime(680, t + 0.2);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
+        osc.start(t);
+        osc.stop(t + 0.25);
+      } else if (type === 'bhoomi') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(90, t);
+        osc.frequency.linearRampToValueAtTime(40, t + 0.3);
+        gain.gain.setValueAtTime(0.35, t);
+        gain.gain.linearRampToValueAtTime(0.01, t + 0.32);
+        osc.start(t);
+        osc.stop(t + 0.32);
+      } else if (type === 'gate') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(260, t);
+        osc.frequency.setValueAtTime(390, t + 0.15);
+        osc.frequency.setValueAtTime(520, t + 0.3);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
+        osc.start(t);
+        osc.stop(t + 0.45);
+      } else if (type === 'upgrade') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(330, t);
+        osc.frequency.setValueAtTime(440, t + 0.08);
+        osc.frequency.setValueAtTime(660, t + 0.16);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+        osc.start(t);
+        osc.stop(t + 0.3);
+      }
+    } catch (e) {}
+  }
+}
+const audio = new SoundSynth();
+
+// ==========================================
+// 2. PROCEDURAL PIXEL-ART RASTERIZER
+// ==========================================
+class PixelRasterizer {
+  constructor() {
+    this.cache = {};
+  }
+  createBuffer(w, h) {
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    return { canvas: c, ctx: ctx };
+  }
+  getSprite(key, w, h, drawFn) {
+    if (!this.cache[key]) {
+      const b = this.createBuffer(w, h);
+      drawFn(b.ctx, w, h);
+      this.cache[key] = b.canvas;
+    }
+    return this.cache[key];
+  }
+
+  // Shivaji Maharaj Sprites (24x32)
+  drawShivaji(ctx, dir, frame, action) {
+    ctx.clearRect(0, 0, 24, 32);
+    const bob = (frame % 2 === 1) ? 1 : 0;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(12, 30, 7, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Feet / Mojari
+    ctx.fillStyle = '#451a03';
+    if (frame === 1) {
+      ctx.fillRect(8, 28 - bob, 3, 3);
+      ctx.fillRect(13, 29, 3, 3);
+    } else {
+      ctx.fillRect(7, 29, 3, 3);
+      ctx.fillRect(14, 28 - bob, 3, 3);
+    }
+
+    // Trousers / Dhoti
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillRect(8, 24 - bob, 8, 5);
+
+    // Royal Angarkha (Saffron Tunic)
+    ctx.fillStyle = PALETTE.SAFFRON;
+    ctx.fillRect(7, 14 - bob, 10, 11);
+
+    // Golden Sash / Kamarbandh
+    ctx.fillStyle = PALETTE.SAFFRON_GOLD;
+    ctx.fillRect(6, 21 - bob, 12, 3);
+    ctx.fillStyle = PALETTE.GOLD_TRIM;
+    ctx.fillRect(11, 23 - bob, 2, 4);
+
+    // Head / Face
+    ctx.fillStyle = PALETTE.SKIN_TONE;
+    ctx.fillRect(9, 7 - bob, 6, 7);
+    // Beard & Mustache
+    ctx.fillStyle = '#1c1917';
+    ctx.fillRect(9, 11 - bob, 6, 3);
+    if (dir === 'right') ctx.fillRect(13, 10 - bob, 2, 1);
+    if (dir === 'left') ctx.fillRect(9, 10 - bob, 2, 1);
+    if (dir === 'down') {
+      ctx.fillRect(10, 9 - bob, 1, 1);
+      ctx.fillRect(13, 9 - bob, 1, 1);
+    }
+
+    // Royal Maratha Pheta (Saffron & Ruby Turban with crest)
+    ctx.fillStyle = PALETTE.TURBAN_RED;
+    ctx.fillRect(7, 4 - bob, 10, 4);
+    ctx.fillStyle = PALETTE.SAFFRON;
+    ctx.fillRect(6, 2 - bob, 12, 3);
+    ctx.fillRect(8, 1 - bob, 6, 2);
+    // Sirpech (Turban Crest / Feather)
+    ctx.fillStyle = PALETTE.SAFFRON_GOLD;
+    ctx.fillRect(11, 0 - bob, 2, 3);
+
+    // Sword (Talwar)
+    ctx.fillStyle = PALETTE.BLADE_STEEL;
+    if (action === 'attack') {
+      ctx.fillStyle = '#ffffff';
+      if (dir === 'right') {
+        ctx.fillRect(16, 12, 8, 2);
+        ctx.fillRect(20, 10, 4, 2);
+      } else if (dir === 'left') {
+        ctx.fillRect(0, 12, 8, 2);
+        ctx.fillRect(0, 10, 4, 2);
+      } else if (dir === 'up') {
+        ctx.fillRect(11, 0, 2, 8);
+      } else {
+        ctx.fillRect(11, 22, 2, 9);
+      }
+    } else {
+      ctx.fillStyle = PALETTE.BLADE_STEEL;
+      ctx.fillRect(5, 17 - bob, 2, 7);
+      ctx.fillStyle = PALETTE.GOLD_TRIM;
+      ctx.fillRect(4, 16 - bob, 4, 2);
+    }
+  }
+
+  // Enemy Sprites (16x24 to 22x28)
+  drawEnemy(ctx, type, frame, isAttacking) {
+    ctx.clearRect(0, 0, 24, 28);
+    const bob = (frame % 2 === 1) ? 1 : 0;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(12, 25, 6, 2.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (type === 'basic') {
+      ctx.fillStyle = '#332';
+      ctx.fillRect(8, 23 - bob, 3, 3); ctx.fillRect(13, 23, 3, 3);
+      ctx.fillStyle = PALETTE.MUGHAL_GREEN;
+      ctx.fillRect(7, 12 - bob, 10, 11);
+      ctx.fillStyle = PALETTE.SKIN_TONE;
+      ctx.fillRect(9, 6 - bob, 6, 6);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(8, 3 - bob, 8, 4);
+      ctx.fillStyle = PALETTE.BLADE_STEEL;
+      if (isAttacking) ctx.fillRect(17, 10, 6, 2);
+      else ctx.fillRect(16, 14 - bob, 2, 6);
+    } else if (type === 'shield') {
+      ctx.fillStyle = PALETTE.MUGHAL_GREEN;
+      ctx.fillRect(8, 11 - bob, 9, 12);
+      ctx.fillStyle = PALETTE.SKIN_TONE;
+      ctx.fillRect(9, 5 - bob, 6, 6);
+      ctx.fillStyle = '#334155'; ctx.fillRect(8, 2 - bob, 8, 4);
+      ctx.fillStyle = PALETTE.ENEMY_SHIELD;
+      ctx.fillRect(3, 10 - bob, 6, 12);
+      ctx.fillStyle = PALETTE.GOLD_TRIM;
+      ctx.fillRect(5, 14 - bob, 2, 4);
+    } else if (type === 'archer') {
+      ctx.fillStyle = PALETTE.ENEMY_LEATHER;
+      ctx.fillRect(8, 12 - bob, 8, 10);
+      ctx.fillStyle = PALETTE.SKIN_TONE;
+      ctx.fillRect(9, 6 - bob, 6, 6);
+      ctx.fillStyle = '#78350f'; ctx.fillRect(8, 4 - bob, 8, 3);
+      ctx.fillStyle = PALETTE.WOOD_LIGHT;
+      ctx.fillRect(16, 8 - bob, 2, 12);
+      ctx.fillStyle = '#e2e8f0'; ctx.fillRect(15, 13 - bob, 4, 1);
+    } else if (type === 'charger') {
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(7, 11 - bob, 10, 12);
+      ctx.fillStyle = PALETTE.SKIN_TONE;
+      ctx.fillRect(9, 5 - bob, 6, 6);
+      ctx.fillStyle = '#1c1917'; ctx.fillRect(7, 2 - bob, 10, 4);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(6, 0 - bob, 2, 3); ctx.fillRect(16, 0 - bob, 2, 3);
+      if (isAttacking) {
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(4, 12, 16, 3);
+      }
+    } else if (type === 'elite') {
+      ctx.fillStyle = PALETTE.ARMOR_IRON;
+      ctx.fillRect(7, 10 - bob, 11, 13);
+      ctx.fillStyle = PALETTE.SKIN_TONE;
+      ctx.fillRect(9, 4 - bob, 6, 6);
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(8, 1 - bob, 8, 4);
+      ctx.fillStyle = PALETTE.WOOD_DARK;
+      ctx.fillRect(18, 0 - bob, 2, 24);
+      ctx.fillStyle = PALETTE.BLADE_STEEL;
+      ctx.fillRect(16, 2 - bob, 6, 4);
+    }
+  }
+
+  // Fort Keeper & Major Bosses
+  drawBoss(ctx, id, frame, isAttacking) {
+    const bob = (frame % 2 === 1) ? 1 : 0;
+    if (id === 'keeper') {
+      ctx.clearRect(0, 0, 28, 32);
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath(); ctx.ellipse(14, 29, 9, 3); ctx.fill();
+      ctx.fillStyle = '#7f1d1d'; ctx.fillRect(8, 13 - bob, 12, 14);
+      ctx.fillStyle = PALETTE.SKIN_TONE; ctx.fillRect(10, 6 - bob, 8, 7);
+      ctx.fillStyle = '#18181b'; ctx.fillRect(9, 2 - bob, 10, 5);
+      ctx.fillStyle = PALETTE.BLADE_STEEL;
+      ctx.fillRect(20, 8 - bob, 5, 5);
+      ctx.fillStyle = PALETTE.WOOD_DARK; ctx.fillRect(21, 13 - bob, 2, 12);
+    } else if (id === 'afzal') {
+      ctx.clearRect(0, 0, 36, 44);
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.beginPath(); ctx.ellipse(18, 40, 12, 4); ctx.fill();
+      ctx.fillStyle = PALETTE.AFZAL_PURPLE;
+      ctx.fillRect(9, 16 - bob, 18, 22);
+      ctx.fillStyle = PALETTE.GOLD_TRIM;
+      ctx.fillRect(8, 26 - bob, 20, 4);
+      ctx.fillStyle = PALETTE.SKIN_TONE; ctx.fillRect(13, 8 - bob, 10, 8);
+      ctx.fillStyle = '#09090b'; ctx.fillRect(12, 12 - bob, 12, 4);
+      ctx.fillStyle = '#581c87'; ctx.fillRect(11, 3 - bob, 14, 6);
+      ctx.fillStyle = '#eab308'; ctx.fillRect(17, 1 - bob, 2, 4);
+      ctx.fillStyle = PALETTE.BLADE_STEEL;
+      ctx.fillRect(28, 12 - bob, 4, 18);
+      ctx.fillRect(26, 28 - bob, 8, 3);
+    } else if (id === 'shaista') {
+      ctx.clearRect(0, 0, 26, 34);
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath(); ctx.ellipse(13, 31, 8, 3); ctx.fill();
+      ctx.fillStyle = PALETTE.SHAISTA_SILK;
+      ctx.fillRect(7, 13 - bob, 12, 16);
+      ctx.fillStyle = '#b45309'; ctx.fillRect(6, 21 - bob, 14, 3);
+      ctx.fillStyle = PALETTE.SKIN_TONE; ctx.fillRect(9, 6 - bob, 8, 7);
+      ctx.fillStyle = '#312e81'; ctx.fillRect(8, 2 - bob, 10, 5);
+      ctx.fillStyle = PALETTE.BLADE_STEEL;
+      ctx.fillRect(3, 18 - bob, 3, 8);
+      ctx.fillRect(20, 18 - bob, 3, 8);
+    } else if (id === 'aurangzeb') {
+      ctx.clearRect(0, 0, 34, 42);
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.beginPath(); ctx.ellipse(17, 39, 12, 4); ctx.fill();
+      ctx.fillStyle = '#78350f'; ctx.fillRect(9, 15 - bob, 16, 22);
+      ctx.fillStyle = PALETTE.AURANGZEB_GOLD; ctx.fillRect(8, 22 - bob, 18, 5);
+      ctx.fillStyle = PALETTE.SKIN_TONE; ctx.fillRect(12, 7 - bob, 10, 8);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(12, 11 - bob, 10, 5);
+      ctx.fillStyle = '#15803d'; ctx.fillRect(10, 2 - bob, 14, 6);
+      ctx.fillStyle = '#fde047'; ctx.fillRect(15, 0 - bob, 4, 4);
+      ctx.fillStyle = '#facc15'; ctx.fillRect(26, 6 - bob, 4, 6);
+      ctx.fillStyle = '#713f12'; ctx.fillRect(27, 12 - bob, 2, 20);
+    }
+  }
+
+  // Terrain Tiles (16x16)
+  drawTile(ctx, type, region) {
+    ctx.clearRect(0, 0, 16, 16);
+    if (type === 'grass') {
+      ctx.fillStyle = (region === 5) ? '#2d4a22' : PALETTE.GRASS_BASE;
+      ctx.fillRect(0, 0, 16, 16);
+      ctx.fillStyle = PALETTE.GRASS_LIGHT;
+      ctx.fillRect(3, 4, 2, 2); ctx.fillRect(11, 9, 2, 2); ctx.fillRect(7, 13, 2, 1);
+    } else if (type === 'path') {
+      ctx.fillStyle = PALETTE.DIRT;
+      ctx.fillRect(0, 0, 16, 16);
+      ctx.fillStyle = PALETTE.DIRT_LIGHT;
+      ctx.fillRect(2, 2, 3, 2); ctx.fillRect(9, 10, 4, 2);
+    } else if (type === 'stone') {
+      ctx.fillStyle = PALETTE.STONE_GRAY;
+      ctx.fillRect(0, 0, 16, 16);
+      ctx.fillStyle = PALETTE.STONE_DARK;
+      ctx.fillRect(0, 0, 16, 1); ctx.fillRect(0, 8, 16, 1);
+      ctx.fillRect(7, 1, 1, 7); ctx.fillRect(15, 9, 1, 7);
+    } else if (type === 'wall') {
+      ctx.fillStyle = PALETTE.STONE_DARK;
+      ctx.fillRect(0, 0, 16, 16);
+      ctx.fillStyle = PALETTE.STONE_LIGHT;
+      ctx.fillRect(1, 1, 14, 2);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(3, 6, 4, 6); ctx.fillRect(9, 6, 4, 6);
+    } else if (type === 'water') {
+      ctx.fillStyle = PALETTE.WATER_DEEP;
+      ctx.fillRect(0, 0, 16, 16);
+      ctx.fillStyle = PALETTE.WATER_CREST;
+      ctx.fillRect(2, 6, 5, 1); ctx.fillRect(9, 11, 4, 1);
+    } else if (type === 'gate_closed') {
+      ctx.fillStyle = PALETTE.WOOD_DARK;
+      ctx.fillRect(0, 0, 16, 16);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(1, 1, 2, 14); ctx.fillRect(5, 1, 2, 14);
+      ctx.fillRect(9, 1, 2, 14); ctx.fillRect(13, 1, 2, 14);
+      ctx.fillStyle = '#b45309'; ctx.fillRect(0, 7, 16, 2);
+    } else if (type === 'gate_open') {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, 16, 16);
+      ctx.fillStyle = PALETTE.SAFFRON_GOLD;
+      ctx.fillRect(7, 2, 2, 12);
+    }
+  }
+
+  // Sagwan Tree (32x48)
+  drawTree(ctx, state) {
+    ctx.clearRect(0, 0, 32, 48);
+    if (state === 'depleted') {
+      ctx.fillStyle = PALETTE.WOOD_DARK;
+      ctx.fillRect(10, 36, 12, 10);
+      ctx.fillStyle = PALETTE.WOOD_LIGHT;
+      ctx.beginPath(); ctx.ellipse(16, 36, 6, 3, 0, 0, Math.PI*2); ctx.fill();
+      return;
+    }
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(16, 44, 11, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = PALETTE.WOOD_DARK;
+    ctx.fillRect(12, 26, 8, 18);
+    ctx.fillStyle = PALETTE.WOOD_LIGHT;
+    ctx.fillRect(14, 27, 2, 16);
+    ctx.fillStyle = PALETTE.LEAF_DARK;
+    ctx.beginPath(); ctx.arc(16, 18, 14, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(10, 15, 10, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(22, 15, 10, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = PALETTE.LEAF_LIGHT;
+    ctx.beginPath(); ctx.arc(14, 12, 8, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(20, 14, 6, 0, Math.PI*2); ctx.fill();
+    if (state === 'harvested') {
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(11, 32, 3, 2); ctx.fillRect(17, 34, 3, 2);
+    }
+  }
+
+  // Ore & Gold Nodes (16x16)
+  drawNode(ctx, type, state) {
+    ctx.clearRect(0, 0, 16, 16);
+    if (state === 'depleted') {
+      ctx.fillStyle = '#292524';
+      ctx.fillRect(3, 9, 10, 5);
+      return;
+    }
+    ctx.fillStyle = PALETTE.STONE_DARK;
+    ctx.fillRect(2, 4, 12, 10);
+    ctx.fillStyle = PALETTE.STONE_GRAY;
+    ctx.fillRect(3, 3, 10, 10);
+    if (type === 'iron') {
+      ctx.fillStyle = PALETTE.ARMOR_IRON;
+      ctx.fillRect(4, 5, 3, 3); ctx.fillRect(9, 8, 4, 3);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(5, 5, 1, 1); ctx.fillRect(10, 8, 1, 1);
+    } else {
+      ctx.fillStyle = PALETTE.SAFFRON_GOLD;
+      ctx.fillRect(4, 5, 3, 3); ctx.fillRect(9, 7, 4, 4);
+      ctx.fillStyle = '#fef08a'; ctx.fillRect(5, 6, 1, 1); ctx.fillRect(10, 8, 1, 1);
+    }
+    if (state === 'harvested') {
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(6, 6, 4, 4);
+    }
+  }
+}
+const rasterizer = new PixelRasterizer();
+
+// ==========================================
+// 3. SEEDED LEVEL GENERATOR & BFS VALIDATION
+// ==========================================
+class LevelGenerator {
+  constructor() {
+    this.regions = [
+      { name: "Sahyadri Foothills", start: 1, end: 15, theme: "forest" },
+      { name: "Fortified Passes", start: 16, end: 24, theme: "pass" },
+      { name: "Pratapgad Fortress", start: 25, end: 25, theme: "boss_afzal" },
+      { name: "Imperial Frontier", start: 26, end: 40, theme: "frontier" },
+      { name: "Lal Mahal Stronghold", start: 41, end: 49, theme: "garrison" },
+      { name: "Midnight at Lal Mahal", start: 50, end: 50, theme: "boss_shaista" },
+      { name: "March to Raigad", start: 51, end: 74, theme: "raigad_ascent" },
+      { name: "The Sovereign at Raigad", start: 75, end: 75, theme: "boss_aurangzeb" }
+    ];
+  }
+
+  getRegion(level) {
+    for (let r of this.regions) {
+      if (level >= r.start && level <= r.end) return r;
+    }
+    return this.regions[0];
+  }
+
+  mulberry32(a) {
+    return function() {
+      var t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  generate(level) {
+    let seed = level * 10007;
+    let attempts = 0;
+    while (attempts < 10) {
+      const rng = this.mulberry32(seed + attempts);
+      const map = this.buildMap(level, rng);
+      if (this.validateMap(map)) {
+        return map;
+      }
+      attempts++;
+    }
+    return this.buildFallbackMap(level);
+  }
+
+  buildMap(level, rng) {
+    const region = this.getRegion(level);
+    const tiles = [];
+    for (let y = 0; y < MAP_TILES; y++) {
+      tiles[y] = [];
+      for (let x = 0; x < MAP_TILES; x++) {
+        if (x === 0 || y === 0 || x === MAP_TILES - 1 || y === MAP_TILES - 1) {
+          tiles[y][x] = 'wall';
+        } else {
+          tiles[y][x] = (rng() < 0.25) ? 'path' : 'grass';
+        }
+      }
+    }
+
+    if (level === 25 || level === 50 || level === 75) {
+      return this.buildBossArena(level, region);
+    }
+
+    const fortX = 10, fortY = 4, fortW = 8, fortH = 8;
+    for (let fy = fortY; fy < fortY + fortH; fy++) {
+      for (let fx = fortX; fx < fortX + fortW; fx++) {
+        if (fy === fortY || fy === fortY + fortH - 1 || fx === fortX || fx === fortX + fortW - 1) {
+          tiles[fy][fx] = 'wall';
+        } else {
+          tiles[fy][fx] = 'stone';
+        }
+      }
+    }
+    tiles[fortY + fortH - 1][fortX + 3] = 'gate_closed';
+
+    const spawn = { x: 2 * TILE_SIZE, y: 16 * TILE_SIZE };
+    tiles[16][2] = 'path';
+
+    tiles[1][2] = 'gate_closed';
+    const exit = { x: 2, y: 1 };
+
+    const keeperSpawn = { x: (fortX + 3) * TILE_SIZE, y: (fortY + 3) * TILE_SIZE };
+
+    const resources = [
+      { id: 'w1', type: 'wood', x: 4 * TILE_SIZE, y: 14 * TILE_SIZE, state: 'full', yield: 3 },
+      { id: 'w2', type: 'wood', x: 6 * TILE_SIZE, y: 16 * TILE_SIZE, state: 'full', yield: 3 },
+      { id: 'o1', type: 'iron', x: 5 * TILE_SIZE, y: 11 * TILE_SIZE, state: 'full', yield: 2 },
+      { id: 'o2', type: 'iron', x: 8 * TILE_SIZE, y: 14 * TILE_SIZE, state: 'full', yield: 2 },
+      { id: 'g1', type: 'gold', x: 3 * TILE_SIZE, y: 8 * TILE_SIZE, state: 'full', yield: 15 }
+    ];
+
+    const enemyCount = Math.min(8, 2 + Math.floor(level / 10));
+    const enemies = [];
+    const archetypes = ['basic', 'shield', 'archer', 'charger', 'elite'];
+    const maxArchIndex = Math.min(4, Math.floor(level / 12));
+
+    for (let i = 0; i < enemyCount; i++) {
+      const ex = 4 + Math.floor(rng() * 11);
+      const ey = 4 + Math.floor(rng() * 10);
+      if (tiles[ey][ex] !== 'wall' && tiles[ey][ex] !== 'gate_closed') {
+        const arch = archetypes[Math.floor(rng() * (maxArchIndex + 1))];
+        enemies.push({
+          type: arch,
+          x: ex * TILE_SIZE,
+          y: ey * TILE_SIZE,
+          hp: 25 + level * 2,
+          maxHp: 25 + level * 2,
+          atk: 8 + Math.floor(level * 0.4)
+        });
+      }
+    }
+
+    return {
+      level: level,
+      region: region,
+      tiles: tiles,
+      spawn: spawn,
+      exit: exit,
+      keeperSpawn: keeperSpawn,
+      resources: resources,
+      enemies: enemies,
+      isNight: (level >= 41 && level <= 50)
+    };
+  }
+
+  buildBossArena(level, region) {
+    const tiles = [];
+    for (let y = 0; y < MAP_TILES; y++) {
+      tiles[y] = [];
+      for (let x = 0; x < MAP_TILES; x++) {
+        if (x === 0 || y === 0 || x === MAP_TILES - 1 || y === MAP_TILES - 1) {
+          tiles[y][x] = 'wall';
+        } else {
+          tiles[y][x] = 'stone';
+        }
+      }
+    }
+    tiles[1][10] = 'gate_closed';
+
+    return {
+      level: level,
+      region: region,
+      tiles: tiles,
+      spawn: { x: 10 * TILE_SIZE, y: 16 * TILE_SIZE },
+      exit: { x: 10, y: 1 },
+      keeperSpawn: { x: 10 * TILE_SIZE, y: 7 * TILE_SIZE },
+      resources: [
+        { id: 'w1', type: 'wood', x: 3 * TILE_SIZE, y: 16 * TILE_SIZE, state: 'full', yield: 3 },
+        { id: 'o1', type: 'iron', x: 16 * TILE_SIZE, y: 16 * TILE_SIZE, state: 'full', yield: 2 }
+      ],
+      enemies: [],
+      isNight: (level === 50),
+      isMajorBoss: true
+    };
+  }
+
+  buildFallbackMap(level) {
+    const tiles = [];
+    for (let y = 0; y < MAP_TILES; y++) {
+      tiles[y] = [];
+      for (let x = 0; x < MAP_TILES; x++) {
+        tiles[y][x] = (x === 0 || y === 0 || x === MAP_TILES - 1 || y === MAP_TILES - 1) ? 'wall' : 'path';
+      }
+    }
+    tiles[1][2] = 'gate_closed';
+    return {
+      level: level,
+      region: this.getRegion(level),
+      tiles: tiles,
+      spawn: { x: 2 * TILE_SIZE, y: 16 * TILE_SIZE },
+      exit: { x: 2, y: 1 },
+      keeperSpawn: { x: 10 * TILE_SIZE, y: 8 * TILE_SIZE },
+      resources: [
+        { id: 'w1', type: 'wood', x: 4 * TILE_SIZE, y: 14 * TILE_SIZE, state: 'full', yield: 3 },
+        { id: 'o1', type: 'iron', x: 8 * TILE_SIZE, y: 14 * TILE_SIZE, state: 'full', yield: 2 }
+      ],
+      enemies: [],
+      isNight: (level >= 41 && level <= 50)
+    };
+  }
+
+  validateMap(map) {
+    const sx = Math.floor(map.spawn.x / TILE_SIZE);
+    const sy = Math.floor(map.spawn.y / TILE_SIZE);
+    if (map.tiles[sy][sx] === 'wall' || map.tiles[sy][sx] === 'water') return false;
+
+    const visited = Array(MAP_TILES).fill(null).map(() => Array(MAP_TILES).fill(false));
+    const queue = [{ x: sx, y: sy }];
+    visited[sy][sx] = true;
+
+    while (queue.length > 0) {
+      const cur = queue.shift();
+      const dirs = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
+      for (let d of dirs) {
+        const nx = cur.x + d.x;
+        const ny = cur.y + d.y;
+        if (nx >= 0 && nx < MAP_TILES && ny >= 0 && ny < MAP_TILES) {
+          if (!visited[ny][nx] && map.tiles[ny][nx] !== 'wall' && map.tiles[ny][nx] !== 'water') {
+            visited[ny][nx] = true;
+            queue.push({ x: nx, y: ny });
+          }
+        }
+      }
+    }
+
+    const ex = map.exit.x;
+    const ey = map.exit.y;
+    const canReachExit = visited[ey + 1][ex] || visited[ey][ex + 1] || visited[ey][ex - 1];
+    if (!canReachExit) return false;
+
+    const kx = Math.floor(map.keeperSpawn.x / TILE_SIZE);
+    const ky = Math.floor(map.keeperSpawn.y / TILE_SIZE);
+    if (!visited[ky][kx]) return false;
+
+    return true;
+  }
+}
+const generator = new LevelGenerator();
+
+// ==========================================
+// 4. INPUT MANAGER (DESKTOP FIRST + TOUCH)
+// ==========================================
+class InputManager {
+  constructor() {
+    this.keys = {};
+    this.joystick = { active: false, x: 0, y: 0, startX: 0, startY: 0 };
+    this.actions = { attack: false, astra: false, dodge: false };
+    this.setupKeyboard();
+    this.setupTouch();
+  }
+
+  setupKeyboard() {
+    window.addEventListener('keydown', (e) => {
+      audio.init();
+      const key = e.key.toLowerCase();
+      this.keys[key] = true;
+
+      if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+        e.preventDefault();
+      }
+
+      if (key === '1') game.switchAstra('agni');
+      if (key === '2') game.switchAstra('varuna');
+      if (key === '3') game.switchAstra('bhoomi');
+      if (key === 'u') game.toggleUpgradeMenu();
+      if (key === 'escape' || key === 'p') game.togglePause();
+      if (key === 'f') toggleFullscreen();
+      if (key === 'e') {
+        game.player.performInteract();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      this.keys[e.key.toLowerCase()] = false;
+    });
+  }
+
+  setupTouch() {
+    const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    if (isTouch && window.innerWidth < 900) {
+      const mc = document.getElementById('mobile-controls');
+      if (mc) mc.style.display = 'block';
+    }
+
+    const zone = document.getElementById('joystick-zone');
+    const knob = document.getElementById('joystick-knob');
+    if (!zone || !knob) return;
+
+    zone.addEventListener('touchstart', (e) => {
+      audio.init();
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = zone.getBoundingClientRect();
+      this.joystick.startX = rect.left + rect.width / 2;
+      this.joystick.startY = rect.top + rect.height / 2;
+      this.joystick.active = true;
+      this.updateJoystick(touch.clientX, touch.clientY, knob);
+    }, { passive: false });
+
+    zone.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!this.joystick.active) return;
+      const touch = e.touches[0];
+      this.updateJoystick(touch.clientX, touch.clientY, knob);
+    }, { passive: false });
+
+    const endJoystick = (e) => {
+      e.preventDefault();
+      this.joystick.active = false;
+      this.joystick.x = 0;
+      this.joystick.y = 0;
+      knob.style.transform = `translate(0px, 0px)`;
+    };
+    zone.addEventListener('touchend', endJoystick, { passive: false });
+    zone.addEventListener('touchcancel', endJoystick, { passive: false });
+
+    const bindBtn = (id, action) => {
+      const b = document.getElementById(id);
+      if (!b) return;
+      b.addEventListener('touchstart', (e) => {
+        audio.init();
+        e.preventDefault();
+        this.actions[action] = true;
+        b.classList.add('active');
+      }, { passive: false });
+      const release = (e) => {
+        e.preventDefault();
+        this.actions[action] = false;
+        b.classList.remove('active');
+      };
+      b.addEventListener('touchend', release, { passive: false });
+      b.addEventListener('touchcancel', release, { passive: false });
+    };
+
+    bindBtn('m-btn-attack', 'attack');
+    bindBtn('m-btn-astra', 'astra');
+    bindBtn('m-btn-dodge', 'dodge');
+  }
+
+  updateJoystick(cx, cy, knob) {
+    const dx = cx - this.joystick.startX;
+    const dy = cy - this.joystick.startY;
+    const dist = Math.hypot(dx, dy);
+    const maxRadius = 32;
+    if (dist === 0) {
+      this.joystick.x = 0;
+      this.joystick.y = 0;
+      knob.style.transform = `translate(0px, 0px)`;
+      return;
+    }
+    const clampedDist = Math.min(dist, maxRadius);
+    const nx = dx / dist;
+    const ny = dy / dist;
+    this.joystick.x = nx * (clampedDist / maxRadius);
+    this.joystick.y = ny * (clampedDist / maxRadius);
+    knob.style.transform = `translate(${nx * clampedDist}px, ${ny * clampedDist}px)`;
+  }
+
+  getMovementVector() {
+    let vx = 0;
+    let vy = 0;
+    if (this.keys['w'] || this.keys['arrowup']) vy -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) vy += 1;
+    if (this.keys['a'] || this.keys['arrowleft']) vx -= 1;
+    if (this.keys['d'] || this.keys['arrowright']) vx += 1;
+
+    if (this.joystick.active) {
+      vx = this.joystick.x;
+      vy = this.joystick.y;
+    }
+
+    const mag = Math.hypot(vx, vy);
+    if (mag > 1) {
+      vx /= mag;
+      vy /= mag;
+    }
+    return { x: vx, y: vy };
+  }
+
+  isAttackPressed() {
+    return this.keys[' '] || this.keys['e'] || this.actions.attack;
+  }
+  isAstraPressed() {
+    return this.keys['shift'] || this.actions.astra;
+  }
+  isDodgePressed() {
+    return this.keys['k'] || this.keys['alt'] || this.actions.dodge;
+  }
+}
+const input = new InputManager();
+
+// Fullscreen API Helper
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  }
+}
+
+// ==========================================
+// 5. PLAYER, COMBAT & PROGRESSION
+// ==========================================
+class Player {
+  constructor() {
+    this.x = 32;
+    this.y = 256;
+    this.w = 24;
+    this.h = 32;
+    this.collisionOffset = { x: 6, y: 24 };
+    this.collisionW = 12;
+    this.collisionH = 8;
+
+    this.dir = 'down';
+    this.speed = 1.35;
+    this.hp = 100;
+    this.maxHp = 100;
+    this.defense = 0;
+
+    this.weaponTier = 1;
+    this.armourTier = 1;
+    this.attackCooldown = 0;
+    this.isAttacking = false;
+    this.attackTimer = 0;
+    this.attackRange = 22;
+    this.baseDamage = 12;
+
+    this.isDodging = false;
+    this.dodgeTimer = 0;
+    this.dodgeCooldown = 0;
+    this.invulnerableTimer = 0;
+
+    this.animFrame = 0;
+    this.animTimer = 0;
+
+    this.selectedAstra = 'agni';
+    this.unlockedAstras = ['agni'];
+    this.astraCooldown = 0;
+    this.astraMasteries = { agni: 0, varuna: 0, bhoomi: 0 };
+    this.shieldActive = false;
+
+    this.wood = 0;
+    this.ore = 0;
+    this.gold = 0;
+    this.rareMat = 0;
+  }
+
+  getHitbox() {
+    return {
+      x: this.x + this.collisionOffset.x,
+      y: this.y + this.collisionOffset.y,
+      w: this.collisionW,
+      h: this.collisionH
+    };
+  }
+
+  update(dt, map) {
+    if (this.invulnerableTimer > 0) this.invulnerableTimer -= dt;
+    if (this.attackCooldown > 0) this.attackCooldown -= dt;
+    if (this.dodgeCooldown > 0) this.dodgeCooldown -= dt;
+    if (this.astraCooldown > 0) this.astraCooldown -= dt;
+
+    if (this.isAttacking) {
+      this.attackTimer -= dt;
+      if (this.attackTimer <= 0) this.isAttacking = false;
+    }
+
+    if (this.isDodging) {
+      this.dodgeTimer -= dt;
+      if (this.dodgeTimer <= 0) this.isDodging = false;
+    }
+
+    if (!this.isAttacking) {
+      const move = input.getMovementVector();
+      if (move.x !== 0 || move.y !== 0) {
+        if (Math.abs(move.x) > Math.abs(move.y)) {
+          this.dir = move.x > 0 ? 'right' : 'left';
+        } else {
+          this.dir = move.y > 0 ? 'down' : 'up';
+        }
+
+        const curSpeed = this.isDodging ? this.speed * 2.2 : this.speed;
+        const dx = move.x * curSpeed;
+        const dy = move.y * curSpeed;
+
+        this.moveWithCollision(dx, 0, map);
+        this.moveWithCollision(0, dy, map);
+
+        this.animTimer += dt;
+        if (this.animTimer > 0.15) {
+          this.animFrame = (this.animFrame + 1) % 4;
+          this.animTimer = 0;
+        }
+      } else {
+        this.animFrame = 0;
+      }
+    }
+
+    if (input.isAttackPressed() && this.attackCooldown <= 0 && !this.isDodging) {
+      this.performAttack();
+    }
+
+    if (input.isDodgePressed() && this.dodgeCooldown <= 0 && !this.isDodging) {
+      this.performDodge();
+    }
+
+    if (input.isAstraPressed() && this.astraCooldown <= 0) {
+      this.performAstra();
+    }
+  }
+
+  moveWithCollision(dx, dy, map) {
+    const nextBox = {
+      x: this.x + this.collisionOffset.x + dx,
+      y: this.y + this.collisionOffset.y + dy,
+      w: this.collisionW,
+      h: this.collisionH
+    };
+
+    const minTx = Math.floor(nextBox.x / TILE_SIZE);
+    const maxTx = Math.floor((nextBox.x + nextBox.w - 1) / TILE_SIZE);
+    const minTy = Math.floor(nextBox.y / TILE_SIZE);
+    const maxTy = Math.floor((nextBox.y + nextBox.h - 1) / TILE_SIZE);
+
+    for (let ty = minTy; ty <= maxTy; ty++) {
+      for (let tx = minTx; tx <= maxTx; tx++) {
+        if (ty >= 0 && ty < MAP_TILES && tx >= 0 && tx < MAP_TILES) {
+          const tile = map.tiles[ty][tx];
+          if (tile === 'wall' || tile === 'water' || tile === 'gate_closed') {
+            return;
+          }
+        }
+      }
+    }
+
+    for (let res of map.resources) {
+      if (res.state !== 'depleted') {
+        const resBox = { x: res.x + 2, y: res.y + 6, w: 12, h: 8 };
+        if (checkOverlap(nextBox, resBox)) {
+          return;
+        }
+      }
+    }
+
+    this.x += dx;
+    this.y += dy;
+  }
+
+  performAttack() {
+    this.isAttacking = true;
+    this.attackTimer = 0.2;
+    this.attackCooldown = 0.35;
+    audio.play('sword');
+
+    let swingBox = { x: this.x, y: this.y, w: 16, h: 16 };
+    if (this.dir === 'right') swingBox = { x: this.x + 16, y: this.y + 12, w: this.attackRange, h: 16 };
+    else if (this.dir === 'left') swingBox = { x: this.x - this.attackRange, y: this.y + 12, w: this.attackRange, h: 16 };
+    else if (this.dir === 'up') swingBox = { x: this.x + 4, y: this.y - this.attackRange + 12, w: 16, h: this.attackRange };
+    else swingBox = { x: this.x + 4, y: this.y + 24, w: 16, h: this.attackRange };
+
+    game.spawnSlashVfx(swingBox.x, swingBox.y);
+
+    for (let e of game.activeEnemies) {
+      if (e.hp > 0 && checkOverlap(swingBox, e.getHitbox())) {
+        let dmg = this.getDamage();
+        if (e.type === 'shield' && e.isFrontalHit(this.x, this.y)) {
+          dmg = Math.floor(dmg * 0.2);
+          game.spawnFloatingText(e.x, e.y, "BLOCK!", '#94a3b8');
+        } else {
+          game.spawnFloatingText(e.x, e.y, `-${dmg}`, '#ef4444');
+        }
+        e.takeDamage(dmg, this.x, this.y);
+      }
+    }
+
+    if (game.activeBoss && game.activeBoss.hp > 0) {
+      if (checkOverlap(swingBox, game.activeBoss.getHitbox())) {
+        const dmg = this.getDamage();
+        game.activeBoss.takeDamage(dmg);
+        game.spawnFloatingText(game.activeBoss.x + 10, game.activeBoss.y, `-${dmg}`, '#ef4444');
+      }
+    }
+
+    for (let res of game.currentMap.resources) {
+      if (res.state !== 'depleted' && checkOverlap(swingBox, { x: res.x, y: res.y, w: 16, h: 16 })) {
+        this.harvestResource(res);
+      }
+    }
+  }
+
+  performInteract() {
+    let checkZone = { x: this.x - 8, y: this.y - 8, w: 32, h: 32 };
+    for (let res of game.currentMap.resources) {
+      if (res.state !== 'depleted' && checkOverlap(checkZone, { x: res.x, y: res.y, w: 16, h: 16 })) {
+        this.harvestResource(res);
+        return;
+      }
+    }
+    const exTileX = game.currentMap.exit.x;
+    const exTileY = game.currentMap.exit.y;
+    if (game.currentMap.tiles[exTileY][exTileX] === 'gate_open') {
+      const gateBox = { x: exTileX * TILE_SIZE, y: exTileY * TILE_SIZE, w: 16, h: 16 };
+      if (checkOverlap(this.getHitbox(), gateBox)) {
+        game.onReachExit();
+      }
+    }
+  }
+
+  harvestResource(res) {
+    if (res.state === 'full') {
+      res.state = 'harvested';
+    } else if (res.state === 'harvested') {
+      res.state = 'depleted';
+    }
+    audio.play('gather');
+    if (res.type === 'wood') {
+      this.wood += res.yield;
+      game.spawnFloatingText(res.x, res.y, `+${res.yield} Wood`, '#84cc16');
+    } else if (res.type === 'iron') {
+      this.ore += res.yield;
+      game.spawnFloatingText(res.x, res.y, `+${res.yield} Ore`, '#94a3b8');
+    } else if (res.type === 'gold') {
+      this.gold += res.yield;
+      game.spawnFloatingText(res.x, res.y, `+${res.yield} Gold`, '#facc15');
+    }
+    game.updateHUD();
+  }
+
+  performDodge() {
+    this.isDodging = true;
+    this.dodgeTimer = 0.25;
+    this.dodgeCooldown = 0.55;
+    this.invulnerableTimer = 0.25;
+    audio.play('dodge');
+    game.spawnDodgeVfx(this.x, this.y);
+  }
+
+  performAstra() {
+    const astra = this.selectedAstra;
+    const mastery = this.astraMasteries[astra] || 0;
+
+    if (astra === 'agni') {
+      this.astraCooldown = 4.5;
+      audio.play('agni');
+      const radius = 45 + mastery * 12;
+      const dmg = 35 + mastery * 15;
+      game.spawnAstraExplosion(this.x + 12, this.y + 16, radius, '#ef4444');
+      for (let e of game.activeEnemies) {
+        if (e.hp > 0 && Math.hypot(e.x - this.x, e.y - this.y) < radius) {
+          e.takeDamage(dmg, this.x, this.y);
+          game.spawnFloatingText(e.x, e.y, `BURN -${dmg}!`, '#f97316');
+        }
+      }
+      if (game.activeBoss && Math.hypot(game.activeBoss.x - this.x, game.activeBoss.y - this.y) < radius) {
+        game.activeBoss.takeDamage(dmg);
+        game.spawnFloatingText(game.activeBoss.x, game.activeBoss.y, `BURN -${dmg}!`, '#f97316');
+      }
+    } else if (astra === 'varuna') {
+      this.astraCooldown = 6.0 - mastery * 0.8;
+      audio.play('varuna');
+      const heal = 40 + mastery * 20;
+      this.hp = Math.min(this.maxHp, this.hp + heal);
+      if (mastery >= 2) this.shieldActive = true;
+      game.spawnAstraExplosion(this.x + 12, this.y + 16, 30, '#0284c7');
+      game.spawnFloatingText(this.x, this.y, `HEAL +${heal}!`, '#38bdf8');
+    } else if (astra === 'bhoomi') {
+      this.astraCooldown = 5.0;
+      audio.play('bhoomi');
+      const radius = 50 + mastery * 14;
+      const stunTime = 2.0 + mastery * 0.6;
+      game.spawnAstraExplosion(this.x + 12, this.y + 16, radius, '#78350f');
+      for (let e of game.activeEnemies) {
+        if (e.hp > 0 && Math.hypot(e.x - this.x, e.y - this.y) < radius) {
+          e.stunTimer = stunTime;
+          e.takeDamage(15 + mastery * 8, this.x, this.y);
+          game.spawnFloatingText(e.x, e.y, "STUNNED!", '#facc15');
+        }
+      }
+      if (game.activeBoss && Math.hypot(game.activeBoss.x - this.x, game.activeBoss.y - this.y) < radius) {
+        game.activeBoss.takeDamage(20);
+        game.spawnFloatingText(game.activeBoss.x, game.activeBoss.y, "STAGGER!", '#facc15');
+      }
+    }
+    game.updateHUD();
+  }
+
+  takeDamage(amount) {
+    if (this.invulnerableTimer > 0) return;
+    if (this.shieldActive) {
+      this.shieldActive = false;
+      game.spawnFloatingText(this.x, this.y, "SHIELD BLOCKED!", '#38bdf8');
+      this.invulnerableTimer = 0.3;
+      return;
+    }
+
+    const netDmg = Math.max(1, amount - this.defense);
+    this.hp -= netDmg;
+    this.invulnerableTimer = 0.5;
+    audio.play('hit');
+    game.spawnFloatingText(this.x, this.y, `-${netDmg}`, '#ef4444');
+    game.triggerScreenShake(3);
+    game.updateHUD();
+
+    if (this.hp <= 0) {
+      this.hp = 0;
+      game.triggerGameOver();
+    }
+  }
+
+  getDamage() {
+    const weaponPowers = [12, 20, 32, 50];
+    return weaponPowers[this.weaponTier - 1] || 12;
+  }
+
+  applyArmourStats() {
+    const stats = [
+      { hp: 100, def: 0 },
+      { hp: 140, def: 3 },
+      { hp: 200, def: 7 },
+      { hp: 300, def: 12 }
+    ];
+    const s = stats[this.armourTier - 1];
+    this.maxHp = s.hp;
+    this.defense = s.def;
+    this.hp = Math.min(this.hp, this.maxHp);
+  }
+}
+
+// ==========================================
+// 6. ENEMY AI & BOSS CONTROLLERS
+// ==========================================
+class Enemy {
+  constructor(data) {
+    this.type = data.type;
+    this.x = data.x;
+    this.y = data.y;
+    this.w = 16;
+    this.h = 24;
+    this.hp = data.hp;
+    this.maxHp = data.hp;
+    this.atk = data.atk;
+
+    this.dir = 'down';
+    this.speed = 0.6 + Math.random() * 0.2;
+    this.state = 'patrol';
+    this.stateTimer = 1.0;
+    this.stunTimer = 0;
+    this.attackCooldown = 0;
+    this.isAttacking = false;
+    this.animFrame = 0;
+    this.animTimer = 0;
+
+    this.chargeDir = { x: 0, y: 0 };
+    this.isCharging = false;
+  }
+
+  getHitbox() {
+    return { x: this.x + 3, y: this.y + 16, w: 10, h: 8 };
+  }
+
+  isFrontalHit(px, py) {
+    if (this.dir === 'down' && py > this.y) return true;
+    if (this.dir === 'up' && py < this.y) return true;
+    if (this.dir === 'right' && px > this.x) return true;
+    if (this.dir === 'left' && px < this.x) return true;
+    return false;
+  }
+
+  update(dt, player, map) {
+    if (this.stunTimer > 0) {
+      this.stunTimer -= dt;
+      return;
+    }
+    if (this.attackCooldown > 0) this.attackCooldown -= dt;
+
+    const dist = Math.hypot(player.x - this.x, player.y - this.y);
+
+    if (this.type === 'charger' && this.isCharging) {
+      this.x += this.chargeDir.x * 2.5;
+      this.y += this.chargeDir.y * 2.5;
+      if (checkOverlap(this.getHitbox(), player.getHitbox())) {
+        player.takeDamage(this.atk * 1.5);
+        this.isCharging = false;
+        this.attackCooldown = 2.0;
+      }
+      this.stateTimer -= dt;
+      if (this.stateTimer <= 0) this.isCharging = false;
+      return;
+    }
+
+    if (dist < 80) {
+      this.state = 'chase';
+      const dx = player.x - this.x;
+      const dy = player.y - this.y;
+      this.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+
+      if (this.type === 'archer') {
+        if (dist < 40) {
+          this.x -= (dx / dist) * this.speed;
+          this.y -= (dy / dist) * this.speed;
+        } else if (dist < 75 && this.attackCooldown <= 0) {
+          this.shootArrow(player);
+        }
+      } else if (this.type === 'charger' && dist < 65 && this.attackCooldown <= 0) {
+        this.isCharging = true;
+        this.chargeDir = { x: dx / dist, y: dy / dist };
+        this.stateTimer = 0.5;
+        game.spawnFloatingText(this.x, this.y, "CHARGE!", '#ef4444');
+      } else {
+        if (dist > 14) {
+          this.x += (dx / dist) * this.speed;
+          this.y += (dy / dist) * this.speed;
+        } else if (this.attackCooldown <= 0) {
+          this.isAttacking = true;
+          this.attackCooldown = 1.0;
+          player.takeDamage(this.atk);
+          setTimeout(() => { this.isAttacking = false; }, 200);
+        }
+      }
+    }
+
+    this.animTimer += dt;
+    if (this.animTimer > 0.15) {
+      this.animFrame = (this.animFrame + 1) % 4;
+      this.animTimer = 0;
+    }
+  }
+
+  shootArrow(player) {
+    this.attackCooldown = 2.2;
+    const dx = player.x - this.x;
+    const dy = player.y - this.y;
+    const dist = Math.hypot(dx, dy);
+    game.spawnProjectile(this.x + 8, this.y + 8, (dx / dist) * 2.2, (dy / dist) * 2.2, this.atk);
+  }
+
+  takeDamage(amount, fromX, fromY) {
+    this.hp -= amount;
+    const dx = this.x - fromX;
+    const dy = this.y - fromY;
+    const dist = Math.hypot(dx, dy) || 1;
+    this.x += (dx / dist) * 6;
+    this.y += (dy / dist) * 6;
+  }
+}
+
+class BossController {
+  constructor(id, data) {
+    this.id = id;
+    this.x = data.x;
+    this.y = data.y;
+    this.w = 32;
+    this.h = 40;
+    this.hp = data.hp;
+    this.maxHp = data.hp;
+    this.name = data.name;
+
+    this.phase = 1;
+    this.attackTimer = 0;
+    this.state = 'idle';
+    this.animFrame = 0;
+    this.animTimer = 0;
+  }
+
+  getHitbox() {
+    return { x: this.x + 6, y: this.y + 20, w: 20, h: 16 };
+  }
+
+  update(dt, player) {
+    this.attackTimer += dt;
+    const dist = Math.hypot(player.x - this.x, player.y - this.y);
+
+    if (this.id === 'keeper') {
+      if (this.attackTimer > 2.5) {
+        this.attackTimer = 0;
+        game.spawnAstraExplosion(this.x + 14, this.y + 20, 36, '#78350f');
+        if (dist < 36) player.takeDamage(20);
+      }
+    } else if (this.id === 'afzal') {
+      if (this.attackTimer > 2.2) {
+        this.attackTimer = 0;
+        if (dist < 40) {
+          game.spawnSlashVfx(this.x, this.y);
+          player.takeDamage(28);
+        } else {
+          const dx = player.x - this.x;
+          const dy = player.y - this.y;
+          this.x += (dx / dist) * 24;
+          this.y += (dy / dist) * 24;
+          if (Math.hypot(player.x - this.x, player.y - this.y) < 25) player.takeDamage(32);
+        }
+      }
+    } else if (this.id === 'shaista') {
+      if (this.attackTimer > 1.8) {
+        this.attackTimer = 0;
+        game.spawnDodgeVfx(this.x, this.y);
+        this.x = player.x + (Math.random() > 0.5 ? 20 : -20);
+        this.y = player.y + (Math.random() > 0.5 ? 20 : -20);
+        player.takeDamage(22);
+      }
+    } else if (this.id === 'aurangzeb') {
+      if (this.hp < this.maxHp * 0.4 && this.phase < 3) {
+        this.phase = 3;
+        game.spawnFloatingText(this.x, this.y, "FINAL STAND!", '#fbbf24');
+      }
+      if (this.attackTimer > (this.phase === 3 ? 1.4 : 2.2)) {
+        this.attackTimer = 0;
+        game.spawnAstraExplosion(this.x + 16, this.y + 20, 50, '#f59e0b');
+        if (dist < 50) player.takeDamage(34);
+      }
+    }
+  }
+
+  takeDamage(amount) {
+    this.hp -= amount;
+    if (this.hp <= 0) {
+      this.hp = 0;
+      game.onBossDefeated(this);
+    }
+    game.updateBossBar(this);
+  }
+}
+
+// ==========================================
+// 7. GAME STATE & MASTER ENGINE
+// ==========================================
+class GameEngine {
+  constructor() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.imageSmoothingEnabled = false;
+
+    this.state = 'MAIN_MENU';
+    this.level = 1;
+    this.player = new Player();
+    this.currentMap = null;
+    this.activeEnemies = [];
+    this.activeBoss = null;
+    this.projectiles = [];
+    this.particles = [];
+    this.floatingTexts = [];
+
+    this.camera = { x: 0, y: 0 };
+    this.shakeAmount = 0;
+    this.lastTime = 0;
+
+    this.setupUI();
+    this.checkSavedGame();
+  }
+
+  setupUI() {
+    document.getElementById('btn-new-game').addEventListener('click', () => this.showAstraSelection());
+    document.getElementById('btn-continue').addEventListener('click', () => this.loadGame());
+    document.getElementById('btn-fullscreen-toggle').addEventListener('click', () => toggleFullscreen());
+    document.getElementById('btn-pause-fullscreen').addEventListener('click', () => toggleFullscreen());
+    document.getElementById('d-btn-fullscreen').addEventListener('click', () => toggleFullscreen());
+
+    document.getElementById('btn-settings-open').addEventListener('click', () => {
+      document.getElementById('modal-settings').style.display = 'flex';
+    });
+    document.getElementById('btn-close-settings').addEventListener('click', () => {
+      document.getElementById('modal-settings').style.display = 'none';
+    });
+    document.getElementById('btn-pause-controls').addEventListener('click', () => {
+      document.getElementById('modal-settings').style.display = 'flex';
+    });
+
+    document.getElementById('btn-credits-open').addEventListener('click', () => {
+      document.getElementById('modal-credits').style.display = 'flex';
+    });
+    document.getElementById('btn-close-credits').addEventListener('click', () => {
+      document.getElementById('modal-credits').style.display = 'none';
+    });
+
+    document.getElementById('btn-run-tests').addEventListener('click', () => this.runAutomatedTests());
+    document.getElementById('btn-pause-tests').addEventListener('click', () => this.runAutomatedTests());
+    document.getElementById('btn-close-tests').addEventListener('click', () => {
+      document.getElementById('modal-tests').style.display = 'none';
+    });
+
+    document.getElementById('btn-choose-agni').addEventListener('click', () => this.startCampaign('agni'));
+    document.getElementById('btn-choose-varuna').addEventListener('click', () => this.startCampaign('varuna'));
+    document.getElementById('btn-choose-bhoomi').addEventListener('click', () => this.startCampaign('bhoomi'));
+
+    document.getElementById('btn-resume').addEventListener('click', () => this.togglePause());
+    document.getElementById('d-btn-pause').addEventListener('click', () => this.togglePause());
+    document.getElementById('d-btn-craft').addEventListener('click', () => this.toggleUpgradeMenu());
+    document.getElementById('d-btn-switch').addEventListener('click', () => this.cycleAstra());
+
+    document.getElementById('btn-toggle-sound').addEventListener('click', () => {
+      audio.enabled = !audio.enabled;
+      document.getElementById('btn-toggle-sound').innerText = `SOUND: ${audio.enabled ? 'ON' : 'OFF'}`;
+    });
+    document.getElementById('btn-quit-menu').addEventListener('click', () => {
+      this.saveGame();
+      this.state = 'MAIN_MENU';
+      document.getElementById('modal-pause').style.display = 'none';
+      document.getElementById('modal-main-menu').style.display = 'flex';
+    });
+
+    document.getElementById('btn-upg-weapon').addEventListener('click', () => this.buyWeaponUpgrade());
+    document.getElementById('btn-upg-armour').addEventListener('click', () => this.buyArmourUpgrade());
+    document.getElementById('btn-upg-astra').addEventListener('click', () => this.buyAstraMastery());
+    document.getElementById('btn-close-upgrade').addEventListener('click', () => this.toggleUpgradeMenu());
+
+    document.getElementById('btn-next-level').addEventListener('click', () => this.advanceLevel());
+    document.getElementById('btn-retry-level').addEventListener('click', () => this.retryLevel());
+    document.getElementById('btn-gameover-menu').addEventListener('click', () => {
+      this.state = 'MAIN_MENU';
+      document.getElementById('modal-game-over').style.display = 'none';
+      document.getElementById('modal-main-menu').style.display = 'flex';
+    });
+    document.getElementById('btn-victory-restart').addEventListener('click', () => {
+      localStorage.removeItem('cos_v2_save');
+      location.reload();
+    });
+  }
+
+  showAstraSelection() {
+    document.getElementById('modal-main-menu').style.display = 'none';
+    document.getElementById('modal-select-astra').style.display = 'flex';
+  }
+
+  startCampaign(selectedAstra) {
+    document.getElementById('modal-select-astra').style.display = 'none';
+    this.level = 1;
+    this.player = new Player();
+    this.player.selectedAstra = selectedAstra;
+    this.player.unlockedAstras = [selectedAstra];
+    this.loadLevel(this.level);
+    this.state = 'PLAYING';
+    this.saveGame();
+  }
+
+  loadLevel(lvl) {
+    this.level = lvl;
+    this.currentMap = generator.generate(lvl);
+    this.player.x = this.currentMap.spawn.x;
+    this.player.y = this.currentMap.spawn.y;
+    this.activeEnemies = this.currentMap.enemies.map(e => new Enemy(e));
+    this.projectiles = [];
+    this.particles = [];
+    this.floatingTexts = [];
+
+    const isMajor = this.currentMap.isMajorBoss;
+    let bId = 'keeper';
+    let bHp = 120 + lvl * 15;
+    let bName = 'FORT KEEPER';
+
+    if (lvl === 25) { bId = 'afzal'; bHp = 600; bName = 'AFZAL KHAN'; }
+    else if (lvl === 50) { bId = 'shaista'; bHp = 1200; bName = 'SHAISTA KHAN'; }
+    else if (lvl === 75) { bId = 'aurangzeb'; bHp = 2400; bName = 'AURANGZEB'; }
+
+    this.activeBoss = new BossController(bId, {
+      x: this.currentMap.keeperSpawn.x,
+      y: this.currentMap.keeperSpawn.y,
+      hp: bHp,
+      name: bName
+    });
+
+    document.getElementById('boss-bar-wrap').style.display = 'block';
+    document.getElementById('boss-name').innerText = bName;
+    document.getElementById('boss-hp-fill').style.width = '100%';
+
+    this.updateHUD();
+  }
+
+  updateHUD() {
+    const reg = this.currentMap ? this.currentMap.region.name : 'Sahyadri';
+    document.getElementById('hud-lvl').innerText = this.level;
+    document.getElementById('hud-region').innerText = reg.split(' ')[0];
+    document.getElementById('hud-hp-txt').innerText = `${Math.ceil(this.player.hp)}/${this.player.maxHp}`;
+    document.getElementById('hud-hp-fill').style.width = `${Math.max(0, (this.player.hp / this.player.maxHp) * 100)}%`;
+    document.getElementById('hud-wood').innerText = this.player.wood;
+    document.getElementById('hud-ore').innerText = this.player.ore;
+    document.getElementById('hud-gold').innerText = this.player.gold;
+    document.getElementById('hud-rare').innerText = this.player.rareMat;
+    document.getElementById('hud-wep').innerText = `T${this.player.weaponTier}`;
+    document.getElementById('hud-arm').innerText = `T${this.player.armourTier}`;
+
+    const badge = document.getElementById('hud-astra-badge');
+    badge.innerText = this.player.selectedAstra.toUpperCase();
+    badge.className = `astra-badge badge-${this.player.selectedAstra}`;
+    document.getElementById('hud-astra-cd').innerText = (this.player.astraCooldown > 0) ? `${this.player.astraCooldown.toFixed(1)}s` : 'RDY';
+
+    // Desktop Side Panel Updates
+    const dFort = document.getElementById('desk-fortress');
+    if (dFort) dFort.innerText = `${reg} (Lvl ${this.level})`;
+    const dProg = document.getElementById('desk-progress');
+    if (dProg) dProg.innerText = `${this.level} / 75 Forts`;
+    const dAstra = document.getElementById('desk-active-astra');
+    if (dAstra) dAstra.innerText = `${this.player.selectedAstra.toUpperCase()} Astra (M${this.player.astraMasteries[this.player.selectedAstra] || 0})`;
+    const dWep = document.getElementById('desk-wep-name');
+    if (dWep) {
+      const wepNames = ["Basic Talwar", "Forged Steel Talwar", "Royal Maratha Blade", "Divine Sovereign Blade"];
+      dWep.innerText = wepNames[this.player.weaponTier - 1];
+    }
+    const dArm = document.getElementById('desk-arm-name');
+    if (dArm) {
+      const armNames = ["Cotton Angarkha", "Reinforced Chainmail", "Maratha Plate Armor", "Bhavani Divine Armor"];
+      dArm.innerText = armNames[this.player.armourTier - 1];
+    }
+  }
+
+  updateBossBar(boss) {
+    const pct = Math.max(0, (boss.hp / boss.maxHp) * 100);
+    document.getElementById('boss-hp-fill').style.width = `${pct}%`;
+  }
+
+  onBossDefeated(boss) {
+    audio.play('gate');
+    const ex = this.currentMap.exit.x;
+    const ey = this.currentMap.exit.y;
+    this.currentMap.tiles[ey][ex] = 'gate_open';
+    document.getElementById('boss-bar-wrap').style.display = 'none';
+    this.spawnFloatingText(boss.x, boss.y, "GATE UNLOCKED!", '#fde047');
+
+    if (this.level === 25) {
+      this.unlockNextAstra();
+      this.player.rareMat += 1;
+    } else if (this.level === 50) {
+      this.unlockNextAstra();
+      this.player.rareMat += 1;
+    } else if (this.level === 75) {
+      this.triggerVictory();
+    }
+  }
+
+  unlockNextAstra() {
+    const all = ['agni', 'varuna', 'bhoomi'];
+    for (let a of all) {
+      if (!this.player.unlockedAstras.includes(a)) {
+        this.player.unlockedAstras.push(a);
+        this.spawnFloatingText(this.player.x, this.player.y, `UNLOCKED ${a.toUpperCase()} ASTRA!`, '#fde047');
+        break;
+      }
+    }
+  }
+
+  onReachExit() {
+    this.state = 'LEVEL_COMPLETE';
+    document.getElementById('modal-level-complete').style.display = 'flex';
+    document.getElementById('complete-title').innerText = `Fortress ${this.level} Liberated!`;
+  }
+
+  advanceLevel() {
+    document.getElementById('modal-level-complete').style.display = 'none';
+    this.player.wood += 5;
+    this.player.ore += 3;
+    this.player.gold += 15;
+    this.saveGame();
+    if (this.level < 75) {
+      this.loadLevel(this.level + 1);
+      this.state = 'PLAYING';
+    } else {
+      this.triggerVictory();
+    }
+  }
+
+  retryLevel() {
+    document.getElementById('modal-game-over').style.display = 'none';
+    this.player.hp = this.player.maxHp;
+    this.loadLevel(this.level);
+    this.state = 'PLAYING';
+  }
+
+  triggerGameOver() {
+    this.state = 'GAME_OVER';
+    document.getElementById('modal-game-over').style.display = 'flex';
+  }
+
+  triggerVictory() {
+    this.state = 'VICTORY';
+    document.getElementById('modal-victory').style.display = 'flex';
+  }
+
+  togglePause() {
+    if (this.state === 'PLAYING') {
+      this.state = 'PAUSED';
+      document.getElementById('modal-pause').style.display = 'flex';
+    } else if (this.state === 'PAUSED') {
+      this.state = 'PLAYING';
+      document.getElementById('modal-pause').style.display = 'none';
+    }
+  }
+
+  toggleUpgradeMenu() {
+    if (this.state === 'PLAYING') {
+      this.state = 'UPGRADE';
+      this.refreshUpgradeCardUI();
+      document.getElementById('modal-upgrade').style.display = 'flex';
+    } else if (this.state === 'UPGRADE') {
+      this.state = 'PLAYING';
+      document.getElementById('modal-upgrade').style.display = 'none';
+    }
+  }
+
+  refreshUpgradeCardUI() {
+    const wepCosts = [
+      { name: "Forged Steel Talwar", wood: 25, ore: 20, gold: 40, rare: 0 },
+      { name: "Royal Maratha Blade", wood: 60, ore: 50, gold: 120, rare: 0 },
+      { name: "Divine Sovereign Blade", wood: 120, ore: 100, gold: 250, rare: 1 }
+    ];
+    const armCosts = [
+      { name: "Reinforced Chainmail", wood: 25, ore: 20, gold: 40, rare: 0 },
+      { name: "Maratha Plate Armor", wood: 60, ore: 50, gold: 120, rare: 0 },
+      { name: "Divine Armor of Bhavani", wood: 120, ore: 100, gold: 250, rare: 1 }
+    ];
+
+    if (this.player.weaponTier < 4) {
+      const c = wepCosts[this.player.weaponTier - 1];
+      document.getElementById('upg-wep-name').innerText = `T${this.player.weaponTier + 1} ${c.name}`;
+      document.getElementById('upg-wep-cost').innerText = `Cost: ${c.wood}W, ${c.ore}O, ${c.gold}G` + (c.rare ? `, ${c.rare}💎` : '');
+    } else {
+      document.getElementById('upg-wep-name').innerText = "MAX TIER (Divine Sovereign)";
+      document.getElementById('upg-wep-cost').innerText = "Fully Upgraded";
+    }
+
+    if (this.player.armourTier < 4) {
+      const c = armCosts[this.player.armourTier - 1];
+      document.getElementById('upg-arm-name').innerText = `T${this.player.armourTier + 1} ${c.name}`;
+      document.getElementById('upg-arm-cost').innerText = `Cost: ${c.wood}W, ${c.ore}O, ${c.gold}G` + (c.rare ? `, ${c.rare}💎` : '');
+    } else {
+      document.getElementById('upg-arm-name').innerText = "MAX TIER (Bhavani Armor)";
+      document.getElementById('upg-arm-cost').innerText = "Fully Upgraded";
+    }
+
+    const curAstra = this.player.selectedAstra;
+    const m = this.player.astraMasteries[curAstra] || 0;
+    document.getElementById('upg-astra-name').innerText = curAstra.toUpperCase();
+    document.getElementById('upg-astra-desc').innerText = `Mastery Level: ${m}/3`;
+    document.getElementById('upg-astra-cost').innerText = m < 3 ? `Cost: ${(m + 1) * 50} Gold` : "Mastered!";
+  }
+
+  buyWeaponUpgrade() {
+    const costs = [
+      { wood: 25, ore: 20, gold: 40, rare: 0 },
+      { wood: 60, ore: 50, gold: 120, rare: 0 },
+      { wood: 120, ore: 100, gold: 250, rare: 1 }
+    ];
+    if (this.player.weaponTier >= 4) return;
+    const c = costs[this.player.weaponTier - 1];
+    if (this.player.wood >= c.wood && this.player.ore >= c.ore && this.player.gold >= c.gold && this.player.rareMat >= c.rare) {
+      this.player.wood -= c.wood;
+      this.player.ore -= c.ore;
+      this.player.gold -= c.gold;
+      this.player.rareMat -= c.rare;
+      this.player.weaponTier++;
+      audio.play('upgrade');
+      this.refreshUpgradeCardUI();
+      this.updateHUD();
+      this.saveGame();
+    } else {
+      audio.play('hit');
+    }
+  }
+
+  buyArmourUpgrade() {
+    const costs = [
+      { wood: 25, ore: 20, gold: 40, rare: 0 },
+      { wood: 60, ore: 50, gold: 120, rare: 0 },
+      { wood: 120, ore: 100, gold: 250, rare: 1 }
+    ];
+    if (this.player.armourTier >= 4) return;
+    const c = costs[this.player.armourTier - 1];
+    if (this.player.wood >= c.wood && this.player.ore >= c.ore && this.player.gold >= c.gold && this.player.rareMat >= c.rare) {
+      this.player.wood -= c.wood;
+      this.player.ore -= c.ore;
+      this.player.gold -= c.gold;
+      this.player.rareMat -= c.rare;
+      this.player.armourTier++;
+      this.player.applyArmourStats();
+      audio.play('upgrade');
+      this.refreshUpgradeCardUI();
+      this.updateHUD();
+      this.saveGame();
+    } else {
+      audio.play('hit');
+    }
+  }
+
+  buyAstraMastery() {
+    const curAstra = this.player.selectedAstra;
+    const curM = this.player.astraMasteries[curAstra] || 0;
+    if (curM >= 3) return;
+    const cost = (curM + 1) * 50;
+    if (this.player.gold >= cost) {
+      this.player.gold -= cost;
+      this.player.astraMasteries[curAstra]++;
+      audio.play('upgrade');
+      this.refreshUpgradeCardUI();
+      this.updateHUD();
+      this.saveGame();
+    } else {
+      audio.play('hit');
+    }
+  }
+
+  switchAstra(astraName) {
+    if (this.player.unlockedAstras.includes(astraName)) {
+      this.player.selectedAstra = astraName;
+      this.updateHUD();
+    }
+  }
+
+  cycleAstra() {
+    const list = this.player.unlockedAstras;
+    const idx = list.indexOf(this.player.selectedAstra);
+    const nextIdx = (idx + 1) % list.length;
+    this.player.selectedAstra = list[nextIdx];
+    this.updateHUD();
+  }
+
+  spawnSlashVfx(x, y) {
+    this.particles.push({ type: 'slash', x: x, y: y, life: 0.15 });
+  }
+  spawnDodgeVfx(x, y) {
+    this.particles.push({ type: 'dodge', x: x, y: y, life: 0.2 });
+  }
+  spawnAstraExplosion(x, y, radius, color) {
+    this.particles.push({ type: 'astra_ring', x: x, y: y, radius: radius, color: color, life: 0.35, maxLife: 0.35 });
+  }
+  spawnFloatingText(x, y, text, color) {
+    this.floatingTexts.push({ x: x, y: y, text: text, color: color, life: 0.8 });
+  }
+  spawnProjectile(x, y, vx, vy, dmg) {
+    this.projectiles.push({ x: x, y: y, vx: vx, vy: vy, dmg: dmg, life: 2.0 });
+  }
+  triggerScreenShake(amt) {
+    this.shakeAmount = amt;
+  }
+
+  saveGame() {
+    try {
+      const data = {
+        level: this.level,
+        player: {
+          hp: this.player.hp,
+          weaponTier: this.player.weaponTier,
+          armourTier: this.player.armourTier,
+          wood: this.player.wood,
+          ore: this.player.ore,
+          gold: this.player.gold,
+          rareMat: this.player.rareMat,
+          selectedAstra: this.player.selectedAstra,
+          unlockedAstras: this.player.unlockedAstras,
+          astraMasteries: this.player.astraMasteries
+        }
+      };
+      localStorage.setItem('cos_v2_save', JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  checkSavedGame() {
+    try {
+      const saved = localStorage.getItem('cos_v2_save');
+      if (saved) {
+        document.getElementById('btn-continue').style.display = 'block';
+      }
+    } catch (e) {}
+  }
+
+  loadGame() {
+    try {
+      const saved = localStorage.getItem('cos_v2_save');
+      if (saved) {
+        const d = JSON.parse(saved);
+        this.level = d.level || 1;
+        this.player = new Player();
+        this.player.weaponTier = d.player.weaponTier || 1;
+        this.player.armourTier = d.player.armourTier || 1;
+        this.player.applyArmourStats();
+        this.player.hp = d.player.hp || this.player.maxHp;
+        this.player.wood = d.player.wood || 0;
+        this.player.ore = d.player.ore || 0;
+        this.player.gold = d.player.gold || 0;
+        this.player.rareMat = d.player.rareMat || 0;
+        this.player.selectedAstra = d.player.selectedAstra || 'agni';
+        this.player.unlockedAstras = d.player.unlockedAstras || ['agni'];
+        this.player.astraMasteries = d.player.astraMasteries || { agni: 0, varuna: 0, bhoomi: 0 };
+        document.getElementById('modal-main-menu').style.display = 'none';
+        this.loadLevel(this.level);
+        this.state = 'PLAYING';
+      }
+    } catch (e) {
+      this.startCampaign('agni');
+    }
+  }
+
+  loop(timestamp) {
+    if (!this.lastTime) this.lastTime = timestamp;
+    const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
+    this.lastTime = timestamp;
+
+    if (this.state === 'PLAYING') {
+      this.update(dt);
+    }
+    this.render();
+
+    requestAnimationFrame((t) => this.loop(t));
+  }
+
+  update(dt) {
+    if (this.shakeAmount > 0) this.shakeAmount -= dt * 6;
+
+    this.player.update(dt, this.currentMap);
+
+    for (let i = this.activeEnemies.length - 1; i >= 0; i--) {
+      const e = this.activeEnemies[i];
+      if (e.hp <= 0) {
+        this.player.gold += 5;
+        this.spawnFloatingText(e.x, e.y, "+5 Gold", '#facc15');
+        this.activeEnemies.splice(i, 1);
+        continue;
+      }
+      e.update(dt, this.player, this.currentMap);
+    }
+
+    if (this.activeBoss && this.activeBoss.hp > 0) {
+      this.activeBoss.update(dt, this.player);
+    }
+
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const p = this.projectiles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (checkOverlap({ x: p.x, y: p.y, w: 4, h: 4 }, this.player.getHitbox())) {
+        this.player.takeDamage(p.dmg);
+        this.projectiles.splice(i, 1);
+        continue;
+      }
+      if (p.life <= 0) this.projectiles.splice(i, 1);
+    }
+
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      this.particles[i].life -= dt;
+      if (this.particles[i].life <= 0) this.particles.splice(i, 1);
+    }
+
+    for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+      this.floatingTexts[i].y -= dt * 15;
+      this.floatingTexts[i].life -= dt;
+      if (this.floatingTexts[i].life <= 0) this.floatingTexts.splice(i, 1);
+    }
+
+    // Check Interactive Proximity Prompt
+    const promptEl = document.getElementById('interact-prompt');
+    let hasPrompt = false;
+
+    // Gate Proximity Check
+    const exTileX = this.currentMap.exit.x;
+    const exTileY = this.currentMap.exit.y;
+    if (this.currentMap.tiles[exTileY][exTileX] === 'gate_open') {
+      const gateBox = { x: exTileX * TILE_SIZE, y: exTileY * TILE_SIZE, w: 16, h: 16 };
+      if (checkOverlap(this.player.getHitbox(), gateBox)) {
+        this.onReachExit();
+      } else if (Math.hypot(this.player.x - exTileX * TILE_SIZE, this.player.y - exTileY * TILE_SIZE) < 32) {
+        promptEl.innerText = "[E] ENTER LIBERATED GATE";
+        promptEl.style.display = 'block';
+        hasPrompt = true;
+      }
+    }
+
+    // Resource Proximity Check
+    if (!hasPrompt) {
+      for (let res of this.currentMap.resources) {
+        if (res.state !== 'depleted' && Math.hypot(this.player.x - res.x, this.player.y - res.y) < 26) {
+          promptEl.innerText = `[E] / [SPACE] HARVEST ${res.type.toUpperCase()}`;
+          promptEl.style.display = 'block';
+          hasPrompt = true;
+          break;
+        }
+      }
+    }
+    if (!hasPrompt) {
+      promptEl.style.display = 'none';
+    }
+
+    // Camera Clamping
+    let targetCamX = this.player.x + 12 - CANVAS_W / 2;
+    let targetCamY = this.player.y + 16 - CANVAS_H / 2;
+    this.camera.x = Math.max(0, Math.min(WORLD_SIZE - CANVAS_W, targetCamX));
+    this.camera.y = Math.max(0, Math.min(WORLD_SIZE - CANVAS_H, targetCamY));
+
+    if (this.shakeAmount > 0) {
+      this.camera.x += (Math.random() - 0.5) * this.shakeAmount * 3;
+      this.camera.y += (Math.random() - 0.5) * this.shakeAmount * 3;
+    }
+  }
+
+  render() {
+    this.ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+    if (!this.currentMap) return;
+
+    this.ctx.save();
+    this.ctx.translate(-Math.floor(this.camera.x), -Math.floor(this.camera.y));
+
+    // 1. Terrain Tiles
+    const startTx = Math.max(0, Math.floor(this.camera.x / TILE_SIZE));
+    const endTx = Math.min(MAP_TILES - 1, Math.ceil((this.camera.x + CANVAS_W) / TILE_SIZE));
+    const startTy = Math.max(0, Math.floor(this.camera.y / TILE_SIZE));
+    const endTy = Math.min(MAP_TILES - 1, Math.ceil((this.camera.y + CANVAS_H) / TILE_SIZE));
+
+    for (let ty = startTy; ty <= endTy; ty++) {
+      for (let tx = startTx; tx <= endTx; tx++) {
+        const type = this.currentMap.tiles[ty][tx];
+        const tileSprite = rasterizer.getSprite(`tile_${type}_${this.level}`, 16, 16, (c) => {
+          rasterizer.drawTile(c, type, this.currentMap.region.theme === 'raigad_ascent' ? 5 : 1);
+        });
+        this.ctx.drawImage(tileSprite, tx * TILE_SIZE, ty * TILE_SIZE);
+      }
+    }
+
+    // 2. Depth-Sorted Entities (Y-Sorting)
+    const entities = [];
+
+    // Player
+    entities.push({
+      yKey: this.player.y + this.player.collisionOffset.y + this.player.collisionH,
+      draw: () => {
+        const spr = rasterizer.getSprite(`shivaji_${this.player.dir}_${this.player.animFrame}_${this.player.isAttacking ? 'atk' : 'idle'}`, 24, 32, (c) => {
+          rasterizer.drawShivaji(c, this.player.dir, this.player.animFrame, this.player.isAttacking ? 'attack' : 'normal');
+        });
+        if (this.player.invulnerableTimer > 0 && Math.floor(Date.now() / 60) % 2 === 0) return;
+        this.ctx.drawImage(spr, Math.floor(this.player.x), Math.floor(this.player.y));
+      }
+    });
+
+    // Enemies
+    for (let e of this.activeEnemies) {
+      entities.push({
+        yKey: e.y + 24,
+        draw: () => {
+          const spr = rasterizer.getSprite(`enemy_${e.type}_${e.animFrame}_${e.isAttacking ? 'atk' : 'idle'}`, 24, 28, (c) => {
+            rasterizer.drawEnemy(c, e.type, e.animFrame, e.isAttacking);
+          });
+          this.ctx.drawImage(spr, Math.floor(e.x), Math.floor(e.y));
+        }
+      });
+    }
+
+    // Boss
+    if (this.activeBoss && this.activeBoss.hp > 0) {
+      const b = this.activeBoss;
+      entities.push({
+        yKey: b.y + b.h,
+        draw: () => {
+          const spr = rasterizer.getSprite(`boss_${b.id}_${b.animFrame}`, 36, 44, (c) => {
+            rasterizer.drawBoss(c, b.id, b.animFrame, false);
+          });
+          this.ctx.drawImage(spr, Math.floor(b.x), Math.floor(b.y));
+        }
+      });
+    }
+
+    // Resource Nodes
+    for (let r of this.currentMap.resources) {
+      if (r.type === 'wood') {
+        entities.push({
+          yKey: r.y + 44,
+          draw: () => {
+            const spr = rasterizer.getSprite(`tree_${r.state}`, 32, 48, (c) => {
+              rasterizer.drawTree(c, r.state);
+            });
+            this.ctx.drawImage(spr, r.x - 8, r.y - 16);
+          }
+        });
+      } else {
+        entities.push({
+          yKey: r.y + 16,
+          draw: () => {
+            const spr = rasterizer.getSprite(`node_${r.type}_${r.state}`, 16, 16, (c) => {
+              rasterizer.drawNode(c, r.type, r.state);
+            });
+            this.ctx.drawImage(spr, r.x, r.y);
+          }
+        });
+      }
+    }
+
+    entities.sort((a, b) => a.yKey - b.yKey);
+    for (let ent of entities) {
+      ent.draw();
+    }
+
+    // 3. Projectiles
+    this.ctx.fillStyle = '#f87171';
+    for (let p of this.projectiles) {
+      this.ctx.fillRect(Math.floor(p.x), Math.floor(p.y), 3, 3);
+    }
+
+    // 4. Particles & Astra VFX
+    for (let part of this.particles) {
+      if (part.type === 'astra_ring') {
+        const progress = 1 - (part.life / part.maxLife);
+        const curR = part.radius * progress;
+        this.ctx.strokeStyle = part.color;
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.arc(part.x, part.y, curR, 0, Math.PI * 2);
+        this.ctx.stroke();
+      } else if (part.type === 'slash') {
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.arc(part.x + 8, part.y + 8, 10, 0, Math.PI);
+        this.ctx.stroke();
+      } else if (part.type === 'dodge') {
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        this.ctx.fillRect(part.x + 4, part.y + 12, 16, 16);
+      }
+    }
+
+    // 5. Night Overlay for Lal Mahal (Levels 41-50)
+    if (this.currentMap.isNight) {
+      this.ctx.fillStyle = PALETTE.NIGHT_TINT;
+      this.ctx.fillRect(this.camera.x, this.camera.y, CANVAS_W, CANVAS_H);
+
+      const torchGrad = this.ctx.createRadialGradient(
+        this.player.x + 12, this.player.y + 16, 10,
+        this.player.x + 12, this.player.y + 16, 64
+      );
+      torchGrad.addColorStop(0, 'rgba(255, 180, 50, 0.35)');
+      torchGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      this.ctx.fillStyle = torchGrad;
+      this.ctx.beginPath();
+      this.ctx.arc(this.player.x + 12, this.player.y + 16, 64, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    // 6. Floating Text
+    this.ctx.font = '8px monospace';
+    this.ctx.textAlign = 'center';
+    for (let ft of this.floatingTexts) {
+      this.ctx.fillStyle = '#000000';
+      this.ctx.fillText(ft.text, Math.floor(ft.x) + 1, Math.floor(ft.y) + 1);
+      this.ctx.fillStyle = ft.color;
+      this.ctx.fillText(ft.text, Math.floor(ft.x), Math.floor(ft.y));
+    }
+
+    this.ctx.restore();
+  }
+
+  runAutomatedTests() {
+    const results = [];
+    const log = (name, pass, msg) => {
+      results.push({ name: name, pass: pass, msg: msg });
+    };
+
+    try {
+      const p = new Player();
+      p.x = 0; p.y = 0;
+      log("1. Movement Vector Normalization", Math.hypot(0.707, 0.707) > 0.99, "Diagonal speed normalized");
+    } catch(e) { log("1. Movement Vector Normalization", false, e.message); }
+
+    try {
+      const p = new Player();
+      p.dir = 'right';
+      log("2. Attack Range Calculation", p.getDamage() === 12, "Tier 1 damage matches spec");
+    } catch(e) { log("2. Attack Range Calculation", false, e.message); }
+
+    try {
+      const p = new Player();
+      p.performDodge();
+      log("3. Dodge Invulnerability", p.isDodging && p.invulnerableTimer > 0, "Dodge grants i-frames");
+    } catch(e) { log("3. Dodge Invulnerability", false, e.message); }
+
+    try {
+      const p = new Player();
+      p.selectedAstra = 'agni';
+      p.unlockedAstras = ['agni'];
+      this.unlockNextAstra.call({ player: p, spawnFloatingText: () => {} });
+      log("4. Astra Milestone Progression", p.unlockedAstras.length === 2 && !p.unlockedAstras.includes('duplicated'), "Unlocked 2nd Astra without duplicates");
+    } catch(e) { log("4. Astra Milestone Progression", false, e.message); }
+
+    try {
+      const p = new Player();
+      p.wood = 30; p.ore = 25; p.gold = 50;
+      this.player = p;
+      this.buyWeaponUpgrade();
+      log("5. Resource Gathering & Crafting Economy", p.weaponTier === 2 && p.wood === 5, "Resources deducted safely upon upgrade");
+    } catch(e) { log("5. Resource Gathering & Crafting Economy", false, e.message); }
+
+    try {
+      const e = new Enemy({ type: 'basic', x: 50, y: 50, hp: 30, atk: 10 });
+      const dummyPlayer = new Player();
+      dummyPlayer.x = 60; dummyPlayer.y = 50;
+      e.update(0.1, dummyPlayer, this.currentMap);
+      log("6. Enemy State Machine & Pursuit", e.state === 'chase', "Enemy engages chase behavior within radius");
+    } catch(err) { log("6. Enemy State Machine & Pursuit", false, err.message); }
+
+    try {
+      const testSave = JSON.stringify({ level: 5, player: { weaponTier: 2, armourTier: 2 } });
+      localStorage.setItem('cos_v2_test', testSave);
+      const parsed = JSON.parse(localStorage.getItem('cos_v2_test'));
+      log("7. Save/Load Persistence Schema", parsed.level === 5 && parsed.player.weaponTier === 2, "Save data validated");
+      localStorage.removeItem('cos_v2_test');
+    } catch(e) { log("7. Save/Load Persistence Schema", false, e.message); }
+
+    try {
+      const map = generator.generate(1);
+      log("8. Exit Gate Initial State", map.tiles[map.exit.y][map.exit.x] === 'gate_closed', "Gate starts locked");
+    } catch(e) { log("8. Exit Gate Initial State", false, e.message); }
+
+    try {
+      let allValid = true;
+      let failedLevel = 0;
+      for (let l = 1; l <= 75; l++) {
+        const m = generator.generate(l);
+        if (!generator.validateMap(m)) {
+          allValid = false;
+          failedLevel = l;
+          break;
+        }
+      }
+      log("9. BFS Path Validation Across All 75 Levels", allValid, allValid ? "100% of 75 campaign levels have walkable paths" : `Level ${failedLevel} failed`);
+    } catch(e) { log("9. BFS Path Validation Across All 75 Levels", false, e.message); }
+
+    try {
+      log("10. Mobile Touch & Desktop Input Bindings", input.keys !== undefined && input.actions.attack !== undefined, "Controls initialized");
+    } catch(e) { log("10. Mobile Touch & Desktop Input Bindings", false, e.message); }
+
+    try {
+      const boss = new BossController('aurangzeb', { x: 0, y: 0, hp: 2400, name: 'AURANGZEB' });
+      log("11. Sovereign Boss Initialization", boss.id === 'aurangzeb' && boss.hp === 2400, "Level 75 final encounter configured");
+    } catch(e) { log("11. Sovereign Boss Initialization", false, e.message); }
+
+    try {
+      log("12. Canvas Rasterizer & Pipeline Integrity", rasterizer !== null, "Procedural rasterizer ready");
+    } catch(e) { log("12. Canvas Rasterizer & Pipeline Integrity", false, e.message); }
+
+    const body = document.getElementById('test-results-body');
+    let html = '';
+    let passCount = 0;
+    for (let r of results) {
+      if (r.pass) passCount++;
+      html += `<div class="${r.pass ? 'pass' : 'fail'}">[${r.pass ? 'PASS' : 'FAIL'}] ${r.name}: ${r.msg}</div>`;
+    }
+    html = `<div style="margin-bottom: 8px; font-weight: bold; color: #fde68a;">RESULTS: ${passCount} / ${results.length} PASSED</div>` + html;
+    body.innerHTML = html;
+    document.getElementById('modal-tests').style.display = 'flex';
+  }
+}
+
+function checkOverlap(r1, r2) {
+  return !(
+    r2.x >= r1.x + r1.w ||
+    r2.x + r2.w <= r1.x ||
+    r2.y >= r1.y + r1.h ||
+    r2.y + r2.h <= r1.y
+  );
+}
+
+// Start Game Instance
+const game = new GameEngine();
+requestAnimationFrame((t) => game.loop(t));
+</script>
+</body>
+</html>

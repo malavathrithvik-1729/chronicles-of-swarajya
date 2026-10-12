@@ -1,0 +1,283 @@
+{
+  "project": "Chronicles of Swarajya: The Divine Blade",
+  "phase": "Phase 2: Environment, Nature, Terrain & Map Asset Production Pipeline",
+  "gridSize": 16,
+  "logicalResolution": "160x160",
+  "palette": {
+    "GRASS_BASE": "#3a632a",
+    "GRASS_DARK": "#28461d",
+    "GRASS_LIGHT": "#54873d",
+    "GRASS_MEADOW": "#65a30d",
+    "PINE_FLOOR": "#233818",
+    "MOSS": "#4d7c0f",
+    "FLOWER_YELLOW": "#facc15",
+    "FLOWER_WHITE": "#f8fafc",
+    "FLOWER_RED": "#ef4444",
+    "LEAF_FALLEN": "#a16207",
+    "DIRT_BASE": "#795538",
+    "DIRT_DARK": "#543310",
+    "DIRT_LIGHT": "#99704e",
+    "DIRT_MUD": "#3e240c",
+    "GRAVEL": "#71717a",
+    "STONE_GRAY": "#5e656e",
+    "STONE_DARK": "#3c4046",
+    "STONE_LIGHT": "#8c939e",
+    "STONE_CLIFF": "#27272a",
+    "STONE_CRACK": "#18181b",
+    "FLAGSTONE_BASE": "#475569",
+    "FLAGSTONE_TRIM": "#64748b",
+    "WATER_DEEP": "#1f487e",
+    "WATER_MID": "#3370b8",
+    "WATER_SHALLOW": "#60a5fa",
+    "WATER_CREST": "#93c5fd",
+    "WATER_FOAM": "#e0f2fe",
+    "TEAK_BARK": "#422817",
+    "TEAK_LIGHT": "#8a5b32",
+    "LEAF_DARK": "#1e3f14",
+    "LEAF_MID": "#365314",
+    "LEAF_LIGHT": "#4d7c0f",
+    "SAGWAN_LEAF": "#65a30d",
+    "SAGWAN_BRIGHT": "#84cc16",
+    "IRON_CORE": "#94a3b8",
+    "IRON_GLINT": "#f1f5f9",
+    "GOLD_ORE": "#f59e0b",
+    "GOLD_GLINT": "#fef08a",
+    "RARE_CRYSTAL": "#c084fc",
+    "SAFFRON_FLAG": "#e66012",
+    "SAFFRON_LIGHT": "#f59e0b",
+    "TIMBER_GATE": "#3b2516",
+    "IRON_SPIKE": "#1e293b",
+    "BRASS_STUD": "#ca8a04",
+    "THATCH_ROOF": "#a16207",
+    "THATCH_LIGHT": "#ca8a04",
+    "CLAY_WALL": "#78350f",
+    "FIRE_ORANGE": "#ea580c",
+    "FIRE_YELLOW": "#fde047"
+  },
+  "tilesets": {
+    "grass": {
+      "file": "07_TerrainTiles/grass_tiles.png",
+      "tileSize": 16,
+      "count": 8
+    },
+    "dirtPath": {
+      "file": "07_TerrainTiles/dirt_path_tiles.png",
+      "tileSize": 16,
+      "count": 8
+    },
+    "stoneCliff": {
+      "file": "07_TerrainTiles/stone_cliff_tiles.png",
+      "tileSize": 16,
+      "count": 8
+    },
+    "water": {
+      "file": "07_TerrainTiles/water_tiles.png",
+      "tileSize": 16,
+      "count": 8
+    },
+    "transitions": {
+      "file": "07_TerrainTiles/terrain_transitions.png",
+      "tileSize": 16,
+      "count": 8
+    }
+  },
+  "objects": {
+    "trees": [
+      {
+        "name": "forest_trees",
+        "file": "08_Trees/forest_trees.png",
+        "dimensions": "128x96",
+        "varieties": 4,
+        "collisionFootprint": "10x6 at base",
+        "layer": "Y-Sorted Canopy"
+      },
+      {
+        "name": "sagwan_trees",
+        "file": "08_Trees/sagwan_trees.png",
+        "dimensions": "128x96",
+        "varieties": 3,
+        "resourceType": "Sagwan Wood",
+        "collisionFootprint": "12x8 at trunk base",
+        "layer": "Y-Sorted Canopy"
+      },
+      {
+        "name": "stumps_and_logs",
+        "file": "08_Trees/stumps_and_fallen_trees.png",
+        "dimensions": "128x64",
+        "varieties": 4,
+        "collisionFootprint": "Variable solid base",
+        "layer": "Solid Base"
+      }
+    ],
+    "rocksAndMountains": [
+      {
+        "name": "rocks_and_boulders",
+        "file": "09_RocksAndMountains/rocks_and_boulders.png",
+        "dimensions": "128x64",
+        "varieties": 4,
+        "collisionFootprint": "Solid rock base",
+        "layer": "Y-Sorted Base"
+      },
+      {
+        "name": "cliffs_and_outcrops",
+        "file": "09_RocksAndMountains/cliffs_and_outcrops.png",
+        "dimensions": "128x64",
+        "varieties": 3,
+        "collisionFootprint": "Impassable Cliff Base",
+        "layer": "Impassable Wall"
+      },
+      {
+        "name": "iron_ore_nodes",
+        "file": "09_RocksAndMountains/iron_ore_nodes.png",
+        "dimensions": "128x32",
+        "varieties": 5,
+        "resourceType": "Iron Ore / Gold",
+        "collisionFootprint": "14x10 at base",
+        "layer": "Harvestable Node"
+      }
+    ],
+    "fortArchitecture": [
+      {
+        "name": "fort_walls",
+        "file": "10_FortArchitecture/fort_walls.png",
+        "dimensions": "128x48",
+        "modular": true,
+        "layer": "Solid Wall"
+      },
+      {
+        "name": "fort_gates",
+        "file": "10_FortArchitecture/fort_gates.png",
+        "dimensions": "128x64",
+        "states": [
+          "Closed",
+          "Open",
+          "Archway"
+        ],
+        "layer": "Gate Interactive"
+      },
+      {
+        "name": "towers_and_buildings",
+        "file": "10_FortArchitecture/towers_and_buildings.png",
+        "dimensions": "128x96",
+        "structures": [
+          "Buruj Watchtower",
+          "Armoury Blacksmith",
+          "Stairs"
+        ],
+        "layer": "Building Structure"
+      },
+      {
+        "name": "fort_decorations",
+        "file": "10_FortArchitecture/fort_decorations.png",
+        "dimensions": "128x32",
+        "items": [
+          "Bhagwa Zenda Banner",
+          "Torch Sconce",
+          "Weapon Rack",
+          "Supply Crates",
+          "Bhavani Shrine"
+        ],
+        "layer": "Decoration"
+      }
+    ],
+    "villageAndCamp": [
+      {
+        "name": "village_assets",
+        "file": "11_VillageAndCamp/village_assets.png",
+        "dimensions": "128x64",
+        "items": [
+          "Village Hut",
+          "Stone Well",
+          "Clay Pots",
+          "Wooden Cart"
+        ]
+      },
+      {
+        "name": "camp_assets",
+        "file": "11_VillageAndCamp/camp_assets.png",
+        "dimensions": "128x64",
+        "items": [
+          "Military Tent",
+          "Campfire",
+          "Crates Stack",
+          "Signpost"
+        ]
+      },
+      {
+        "name": "bridges_and_fences",
+        "file": "11_VillageAndCamp/bridges_and_fences.png",
+        "dimensions": "128x32",
+        "items": [
+          "Footbridge",
+          "Wooden Fence",
+          "Fence Gate"
+        ]
+      }
+    ],
+    "biomeAssets": [
+      "12_BiomeAssets/sahyadri_forest_assets.png",
+      "12_BiomeAssets/fortified_settlement_assets.png",
+      "12_BiomeAssets/frontier_assets.png",
+      "12_BiomeAssets/high_garrison_assets.png",
+      "12_BiomeAssets/raigad_assets.png"
+    ],
+    "environmentEffects": [
+      {
+        "name": "water_and_leaves",
+        "file": "13_EnvironmentEffects/water_and_leaves.png",
+        "frames": 4,
+        "fps": 4
+      },
+      {
+        "name": "torches_and_campfires",
+        "file": "13_EnvironmentEffects/torches_and_campfires.png",
+        "frames": 4,
+        "fps": 6
+      },
+      {
+        "name": "dust_and_debris",
+        "file": "13_EnvironmentEffects/dust_and_debris.png",
+        "frames": 4,
+        "fps": 6
+      }
+    ]
+  },
+  "mapPreviews": [
+    {
+      "name": "forest_clearing",
+      "file": "14_MapPreviews/forest_clearing.png",
+      "biome": "Sahyadri Forest",
+      "dimensions": "160x160"
+    },
+    {
+      "name": "forest_fort_entrance",
+      "file": "14_MapPreviews/forest_fort_entrance.png",
+      "biome": "Fortified Approach",
+      "dimensions": "160x160"
+    },
+    {
+      "name": "fort_courtyard",
+      "file": "14_MapPreviews/fort_courtyard.png",
+      "biome": "Fort Courtyard",
+      "dimensions": "160x160"
+    },
+    {
+      "name": "frontier_camp",
+      "file": "14_MapPreviews/frontier_camp.png",
+      "biome": "Frontier Wilderness",
+      "dimensions": "160x160"
+    },
+    {
+      "name": "high_garrison",
+      "file": "14_MapPreviews/high_garrison.png",
+      "biome": "High Garrison",
+      "dimensions": "160x160"
+    },
+    {
+      "name": "raigad_arena",
+      "file": "14_MapPreviews/raigad_arena.png",
+      "biome": "Raigad Climax",
+      "dimensions": "160x160"
+    }
+  ]
+}

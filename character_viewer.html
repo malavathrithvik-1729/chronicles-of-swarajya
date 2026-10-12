@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chronicles of Swarajya — Character Art & Animation Viewer</title>
+<style>
+  :root {
+    --bg-dark: #0d0a08;
+    --panel-bg: #17110d;
+    --card-bg: #221a14;
+    --saffron: #e66012;
+    --saffron-light: #f59e0b;
+    --gold: #d97706;
+    --gold-light: #fde68a;
+    --border-gold: #b45309;
+    --border-dark: #451a03;
+    --text-cream: #fef3c7;
+    --text-muted: #9ca3af;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+  }
+  body, html {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-dark);
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--text-cream);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  header {
+    background: #140d09;
+    border-bottom: 2px solid var(--border-gold);
+    padding: 10px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 {
+    font-size: 16px;
+    color: var(--saffron-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  header .subtitle {
+    font-size: 11px;
+    color: var(--gold-light);
+  }
+  #viewer-container {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  /* Left Sidebar: Character & Asset Selector */
+  #sidebar {
+    width: 280px;
+    background: var(--panel-bg);
+    border-right: 2px solid var(--border-dark);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 12px;
+  }
+  .category-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--gold-light);
+    margin: 12px 0 6px 0;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-dark);
+    padding-bottom: 3px;
+  }
+  .category-title:first-child {
+    margin-top: 0;
+  }
+  .asset-btn {
+    background: var(--card-bg);
+    border: 1px solid #573315;
+    border-radius: 4px;
+    color: var(--text-cream);
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    text-align: left;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .asset-btn:hover {
+    background: #332317;
+    border-color: var(--saffron-light);
+  }
+  .asset-btn.active {
+    background: linear-gradient(90deg, #9a3412, #c2410c);
+    border-color: var(--gold-light);
+    color: #fff;
+    font-weight: bold;
+  }
+  /* Center Viewport Stage */
+  #stage-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #090706;
+    overflow: hidden;
+  }
+  #canvas-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .bg-checker {
+    background-color: #1a1614;
+    background-image:
+      linear-gradient(45deg, #120f0e 25%, transparent 25%),
+      linear-gradient(-45deg, #120f0e 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #120f0e 75%),
+      linear-gradient(-45deg, transparent 75%, #120f0e 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  }
+  .bg-dark { background: #000; }
+  .bg-forest { background: #1c3516; }
+  .bg-stone { background: #334155; }
+  canvas#animCanvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    box-shadow: 0 0 25px rgba(0,0,0,0.8);
+    border: 2px solid var(--border-gold);
+    background: transparent;
+  }
+  /* Sheet View Panel */
+  #sheet-preview-wrap {
+    margin: 10px;
+    padding: 10px;
+    background: #140e0a;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    max-height: 180px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #sheet-preview-wrap h4 {
+    font-size: 11px;
+    color: var(--gold-light);
+    margin-bottom: 6px;
+  }
+  canvas#sheetCanvas {
+    display: block;
+    image-rendering: pixelated;
+    border: 1px solid #78350f;
+  }
+  /* Bottom Controls Toolbar */
+  #toolbar {
+    background: var(--panel-bg);
+    border-top: 2px solid var(--border-dark);
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+  }
+  .tool-btn {
+    background: #3b2516;
+    border: 1px solid var(--border-gold);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .tool-btn:hover { background: var(--saffron); }
+  .tool-btn:active { transform: scale(0.96); }
+  select, input[type=range] {
+    background: #2b1c12;
+    border: 1px solid var(--border-gold);
+    color: #fff;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 3px;
+  }
+  /* Right Inspector Panel */
+  #inspector {
+    width: 250px;
+    background: var(--panel-bg);
+    border-left: 2px solid var(--border-dark);
+    padding: 14px;
+    overflow-y: auto;
+    font-size: 11px;
+  }
+  #inspector h3 {
+    font-size: 13px;
+    color: var(--saffron-light);
+    border-bottom: 1px solid var(--border-dark);
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    border-bottom: 1px dashed #332014;
+    padding-bottom: 3px;
+  }
+  .info-label { color: var(--text-muted); }
+  .info-val { color: var(--gold-light); font-weight: bold; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>CHRONICLES OF SWARAJYA</h1>
+    <div class="subtitle">Phase 1: Character Art & Animation Production Viewer</div>
+  </div>
+  <div style="font-size: 11px; color: #4ade80;">
+    ● Offline Pixel-Art Pipeline Verified
+  </div>
+</header>
+
+<div id="viewer-container">
+  <!-- Left Asset Selection Tree -->
+  <nav id="sidebar">
+    <div class="category-title">Shivaji Maharaj</div>
+    <button class="asset-btn active" data-asset="shivaji_idle">Shivaji — Idle (4 Directions)</button>
+    <button class="asset-btn" data-asset="shivaji_walk">Shivaji — Walk Cycle (4 Directions)</button>
+    <button class="asset-btn" data-asset="shivaji_attack">Shivaji — Sword Attack (4 Directions)</button>
+    <button class="asset-btn" data-asset="shivaji_dodge">Shivaji — Evasive Dodge Roll</button>
+    <button class="asset-btn" data-asset="shivaji_astra_cast">Shivaji — Divine Astra Cast</button>
+    <button class="asset-btn" data-asset="shivaji_hurt_victory">Shivaji — Hurt & Victory Salutes</button>
+
+    <div class="category-title">Enemy Combatants</div>
+    <button class="asset-btn" data-asset="swordsman">Basic Swordsman</button>
+    <button class="asset-btn" data-asset="shield_guard">Shielded Fortress Guard</button>
+    <button class="asset-btn" data-asset="archer">Ranged Archer</button>
+    <button class="asset-btn" data-asset="charging_soldier">Charging Soldier</button>
+    <button class="asset-btn" data-asset="elite_guard">Elite Halberd Guard</button>
+
+    <div class="category-title">Major Bosses</div>
+    <button class="asset-btn" data-asset="afzal_khan">Afzal Khan (Lvl 25 Boss)</button>
+    <button class="asset-btn" data-asset="shaista_khan">Shaista Khan (Lvl 50 Boss)</button>
+    <button class="asset-btn" data-asset="aurangzeb">Aurangzeb (Lvl 75 Sovereign)</button>
+
+    <div class="category-title">Divine Astras</div>
+    <button class="asset-btn" data-asset="agni_effects">Agni Astra (Radial Fire Wave)</button>
+    <button class="asset-btn" data-asset="varuna_effects">Varuna Astra (Water Pulse & Shield)</button>
+    <button class="asset-btn" data-asset="bhoomi_effects">Bhoomi Astra (Earth Shockwave)</button>
+
+    <div class="category-title">Phase 2: Terrain & Tilesets</div>
+    <button class="asset-btn" data-asset="grass_tiles">Grass Tiles (16x16 Autotile)</button>
+    <button class="asset-btn" data-asset="dirt_path_tiles">Dirt Footpaths & Trails</button>
+    <button class="asset-btn" data-asset="stone_cliff_tiles">Stone, Paving & Basalt Cliffs</button>
+    <button class="asset-btn" data-asset="water_tiles">Water Shallows, Moats & Rivers</button>
+    <button class="asset-btn" data-asset="terrain_transitions">Edge & Shoreline Transitions</button>
+
+    <div class="category-title">Phase 2: Trees & Nature</div>
+    <button class="asset-btn" data-asset="forest_trees">Forest Broadleaf Trees (4 Varieties)</button>
+    <button class="asset-btn" data-asset="sagwan_trees">Sagwan Teak Trees (Harvest States)</button>
+    <button class="asset-btn" data-asset="stumps_and_fallen_trees">Stumps, Mossy Logs & Saplings</button>
+    <button class="asset-btn" data-asset="rocks_and_boulders">Basalt Boulders & Rock Clusters</button>
+    <button class="asset-btn" data-asset="cliffs_and_outcrops">Mountain Outcrops & Cliff Edges</button>
+    <button class="asset-btn" data-asset="iron_ore_nodes">Iron Ore & Gold Nodes (3 States)</button>
+
+    <div class="category-title">Phase 2: Fort & Village</div>
+    <button class="asset-btn" data-asset="fort_walls">Modular Fort Walls & Battlements</button>
+    <button class="asset-btn" data-asset="fort_gates">Fort Gates (Closed, Open, Archway)</button>
+    <button class="asset-btn" data-asset="towers_and_buildings">Buruj Towers, Armoury & Stairs</button>
+    <button class="asset-btn" data-asset="fort_decorations">Bhagwa Zenda, Sconces & Shrines</button>
+    <button class="asset-btn" data-asset="village_assets">Sahyadri Huts, Wells & Carts</button>
+    <button class="asset-btn" data-asset="camp_assets">Military Pavilions, Campfires & Crates</button>
+    <button class="asset-btn" data-asset="bridges_and_fences">Footbridges & Rustic Fences</button>
+
+    <div class="category-title">Phase 2: Animated VFX</div>
+    <button class="asset-btn" data-asset="water_and_leaves">Water Ripples & Falling Teak Leaves</button>
+    <button class="asset-btn" data-asset="torches_and_campfires">Torch Flame & Campfire Smoke</button>
+    <button class="asset-btn" data-asset="dust_and_debris">Footstep Dust & Wall Debris</button>
+
+    <div class="category-title">Phase 2: Map Previews (160x160)</div>
+    <button class="asset-btn" data-asset="preview_forest_clearing">Map 1: Sahyadri Forest Clearing</button>
+    <button class="asset-btn" data-asset="preview_fort_entrance">Map 2: Bastion Approach & Gate</button>
+    <button class="asset-btn" data-asset="preview_fort_courtyard">Map 3: Fort Courtyard & Armoury</button>
+    <button class="asset-btn" data-asset="preview_frontier_camp">Map 4: Frontier Mountain Camp</button>
+    <button class="asset-btn" data-asset="preview_high_garrison">Map 5: High Garrison Watchtower</button>
+    <button class="asset-btn" data-asset="preview_raigad_arena">Map 6: Raigad Sovereign Darbar Arena</button>
+
+    <div class="category-title">Roster Overview</div>
+    <button class="asset-btn" data-asset="character_gallery">Character Lineup Showcase</button>
+  </nav>
+
+  <!-- Center Stage Preview -->
+  <main id="stage-panel">
+    <div id="canvas-wrapper" class="bg-checker">
+      <canvas id="animCanvas" width="128" height="128"></canvas>
+    </div>
+
+    <!-- Raw Sprite Sheet Grid with Active Highlight -->
+    <div id="sheet-preview-wrap">
+      <h4>Full Sprite Sheet (Active Frame Boxed)</h4>
+      <canvas id="sheetCanvas"></canvas>
+    </div>
+
+    <!-- Playback Toolbar -->
+    <div id="toolbar">
+      <button class="tool-btn" id="btn-play">PAUSE</button>
+      <button class="tool-btn" id="btn-prev">◀ STEP</button>
+      <button class="tool-btn" id="btn-next">STEP ▶</button>
+      
+      <label>DIR:
+        <select id="sel-dir">
+          <option value="0">South (Down)</option>
+          <option value="1">North (Up)</option>
+          <option value="2">East (Right)</option>
+          <option value="3">West (Left)</option>
+        </select>
+      </label>
+
+      <label>FPS: <span id="fps-val">6</span>
+        <input type="range" id="slider-fps" min="1" max="24" value="6">
+      </label>
+
+      <label>ZOOM: <span id="zoom-val">4x</span>
+        <input type="range" id="slider-zoom" min="1" max="8" value="4">
+      </label>
+
+      <label>BG:
+        <select id="sel-bg">
+          <option value="bg-checker">Checkerboard</option>
+          <option value="bg-dark">Pitch Black</option>
+          <option value="bg-forest">Forest Green</option>
+          <option value="bg-stone">Fortress Stone</option>
+        </select>
+      </label>
+    </div>
+  </main>
+
+  <!-- Right Inspector & Metadata -->
+  <aside id="inspector">
+    <h3>Asset Metadata</h3>
+    <div class="info-row"><span class="info-label">Name:</span><span class="info-val" id="meta-name">shivaji_idle</span></div>
+    <div class="info-row"><span class="info-label">File:</span><span class="info-val" id="meta-file">shivaji_idle.png</span></div>
+    <div class="info-row"><span class="info-label">Cell Size:</span><span class="info-val" id="meta-size">24 x 32 px</span></div>
+    <div class="info-row"><span class="info-label">Grid Layout:</span><span class="info-val" id="meta-grid">2 cols x 4 rows</span></div>
+    <div class="info-row"><span class="info-label">Total Frames:</span><span class="info-val" id="meta-frames">8 frames</span></div>
+    <div class="info-row"><span class="info-label">Active Frame:</span><span class="info-val" id="meta-cur-frame">0</span></div>
+    <div class="info-row"><span class="info-label">Frame Time:</span><span class="info-val" id="meta-duration">166 ms</span></div>
+    <div class="info-row"><span class="info-label">Alpha Mode:</span><span class="info-val" style="color: #4ade80;">Transparent RGBA</span></div>
+
+    <h3 style="margin-top: 16px;">Animation Notes</h3>
+    <p id="meta-notes" style="font-size: 11px; line-height: 1.4; color: #d1d5db;">
+      Authentic 16-bit Maratha regalia featuring royal saffron pheta, kamalbandh sash, steel talwar, and dhoti.
+    </p>
+  </aside>
+</div>
+
+<script>
+// Asset Database Definition matching asset_manifest.json
+const ASSET_REGISTRY = {
+  shivaji_idle: {
+    name: "Shivaji Maharaj — Idle",
+    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png",
+    frameW: 24, frameH: 32, cols: 2, rows: 4, defaultFps: 2,
+    hasDirections: true,
+    notes: "2-frame subtle breathing loop across South, North, East, and West directions."
+  },
+  shivaji_walk: {
+    name: "Shivaji Maharaj — Walk Cycle",
+    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_walk.png",
+    frameW: 24, frameH: 32, cols: 4, rows: 4, defaultFps: 6,
+    hasDirections: true,
+    notes: "4-frame walk cycle per cardinal direction with foot contact and passing positions."
+  },
+  shivaji_attack: {
+    name: "Shivaji Maharaj — Sword Attack",
+    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_attack.png",
+    frameW: 24, frameH: 32, cols: 3, rows: 4, defaultFps: 8,
+    hasDirections: true,
+    notes: "3-frame combat slash sequence: anticipation windup, active blade sweep arc, and recovery."
+  },
+  shivaji_dodge: {
+    name: "Shivaji Maharaj — Evasive Dodge Roll",
+    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_dodge.png",
+    frameW: 24, frameH: 32, cols: 3, rows: 4, defaultFps: 10,
+    hasDirections: true,
+    notes: "Directional evasive tumble with crouch entry, mid-roll frame, and landing recovery."
+  },
+  shivaji_astra_cast: {
+    name: "Shivaji Maharaj — Astra Cast",
+    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_astra_cast.png",
+    frameW: 24, frameH: 32, cols: 3, rows: 3, defaultFps: 6,
+    hasDirections: false,
+    notes: "Channeling poses for Agni (Row 1), Varuna (Row 2), and Bhoomi (Row 3)."
+  },
+  shivaji_hurt_victory: {
+    name: "Shivaji Maharaj — Hurt & Victory",
+    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_hurt_victory.png",
+    frameW: 24, frameH: 32, cols: 2, rows: 2, defaultFps: 4,
+    hasDirections: false,
+    notes: "Damage recoil flinch (Row 1) and royal Talwar salute victory celebration (Row 2)."
+  },
+  swordsman: {
+    name: "Basic Swordsman",
+    file: "ChroniclesOfSwarajya_Art/02_Enemies/swordsman.png",
+    frameW: 16, frameH: 24, cols: 4, rows: 4, defaultFps: 4,
+    hasDirections: false,
+    notes: "Row 0: Idle | Row 1: Walk | Row 2: Attack Slash | Row 3: Hurt & Defeat."
+  },
+  shield_guard: {
+    name: "Shielded Fortress Guard",
+    file: "ChroniclesOfSwarajya_Art/02_Enemies/shield_guard.png",
+    frameW: 18, frameH: 24, cols: 4, rows: 4, defaultFps: 4,
+    hasDirections: false,
+    notes: "Heavy brass & leather kite shield with forward defensive stance and spear point."
+  },
+  archer: {
+    name: "Ranged Archer",
+    file: "ChroniclesOfSwarajya_Art/02_Enemies/archer.png",
+    frameW: 16, frameH: 24, cols: 4, rows: 4, defaultFps: 4,
+    hasDirections: false,
+    notes: "Composite recurve bow with drawing sequence and shoulder quiver."
+  },
+  charging_soldier: {
+    name: "Charging Soldier",
+    file: "ChroniclesOfSwarajya_Art/02_Enemies/charging_soldier.png",
+    frameW: 20, frameH: 24, cols: 4, rows: 4, defaultFps: 5,
+    hasDirections: false,
+    notes: "Heavy crimson brigandine and horned helmet communicating telegraphed rush."
+  },
+  elite_guard: {
+    name: "Elite Halberd Guard",
+    file: "ChroniclesOfSwarajya_Art/02_Enemies/elite_guard.png",
+    frameW: 22, frameH: 28, cols: 4, rows: 4, defaultFps: 4,
+    hasDirections: false,
+    notes: "Heavy iron plate armor and halberd with wide sweeping cleave."
+  },
+  afzal_khan: {
+    name: "Afzal Khan (Lvl 25 Boss)",
+    file: "ChroniclesOfSwarajya_Art/03_Bosses/afzal_khan.png",
+    frameW: 36, frameH: 44, cols: 3, rows: 4, defaultFps: 4,
+    hasDirections: false,
+    notes: "Commanding silhouette in Bijapur velvet and massive curved talwar."
+  },
+  shaista_khan: {
+    name: "Shaista Khan (Lvl 50 Boss)",
+    file: "ChroniclesOfSwarajya_Art/03_Bosses/shaista_khan.png",
+    frameW: 28, frameH: 36, cols: 3, rows: 4, defaultFps: 4,
+    hasDirections: false,
+    notes: "Midnight infiltration katar specialist with smoke vanish evasive maneuvers."
+  },
+  aurangzeb: {
+    name: "Aurangzeb (Lvl 75 Sovereign)",
+    file: "ChroniclesOfSwarajya_Art/03_Bosses/aurangzeb.png",
+    frameW: 36, frameH: 44, cols: 3, rows: 4, defaultFps: 4,
+    hasDirections: false,
+    notes: "Imperial golden battle armor, white beard, imperial crown, and scepter slam."
+  },
+  agni_effects: {
+    name: "Agni Astra Fire Wave",
+    file: "ChroniclesOfSwarajya_Art/04_AstraEffects/agni_effects.png",
+    frameW: 32, frameH: 32, cols: 4, rows: 2, defaultFps: 8,
+    hasDirections: false,
+    notes: "Radial flame expansion with incandescent white core, yellow mid-fire, and flying embers."
+  },
+  varuna_effects: {
+    name: "Varuna Astra Water Wave",
+    file: "ChroniclesOfSwarajya_Art/04_AstraEffects/varuna_effects.png",
+    frameW: 32, frameH: 32, cols: 4, rows: 2, defaultFps: 8,
+    hasDirections: false,
+    notes: "Swirling restorative water ring and protective shield wave."
+  },
+  bhoomi_effects: {
+    name: "Bhoomi Astra Earth Shockwave",
+    file: "ChroniclesOfSwarajya_Art/04_AstraEffects/bhoomi_effects.png",
+    frameW: 32, frameH: 32, cols: 4, rows: 2, defaultFps: 8,
+    hasDirections: false,
+    notes: "Ground fractures and flying stone dust shockwave."
+  },
+  character_gallery: {
+    name: "Character Lineup Showcase",
+    file: "ChroniclesOfSwarajya_Art/06_Previews/character_gallery.png",
+    frameW: 280, frameH: 50, cols: 1, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Side-by-side roster showcase of Shivaji, enemies, and bosses."
+  },
+  grass_tiles: {
+    name: "Grass & Flora Tilesets (16x16)",
+    file: "ChroniclesOfSwarajya_Art/07_TerrainTiles/grass_tiles.png",
+    frameW: 16, frameH: 16, cols: 8, rows: 1, defaultFps: 2,
+    hasDirections: false,
+    notes: "8 seamless 16x16 tiles: Base Sahyadri grass, thick clover, wildflower blossoms, and forest floor."
+  },
+  dirt_path_tiles: {
+    name: "Dirt Footpaths & Trails (16x16)",
+    file: "ChroniclesOfSwarajya_Art/07_TerrainTiles/dirt_path_tiles.png",
+    frameW: 16, frameH: 16, cols: 8, rows: 1, defaultFps: 2,
+    hasDirections: false,
+    notes: "8 trail tiles: Hard-packed mountain soil, ruts, footpaths, and gravelly ground."
+  },
+  stone_cliff_tiles: {
+    name: "Stone, Paving & Basalt Cliffs (16x16)",
+    file: "ChroniclesOfSwarajya_Art/07_TerrainTiles/stone_cliff_tiles.png",
+    frameW: 16, frameH: 16, cols: 8, rows: 1, defaultFps: 2,
+    hasDirections: false,
+    notes: "8 stone tiles: Flagstone courtyards, basalt cliff edges, rocky slopes, scree."
+  },
+  water_tiles: {
+    name: "Water Shallows, Moats & Rivers (16x16)",
+    file: "ChroniclesOfSwarajya_Art/07_TerrainTiles/water_tiles.png",
+    frameW: 16, frameH: 16, cols: 8, rows: 1, defaultFps: 4,
+    hasDirections: false,
+    notes: "8 water tiles: Deep mountain pools, shallow riverbeds, water edges with foam, animated crests."
+  },
+  terrain_transitions: {
+    name: "Terrain Edge Transitions (16x16)",
+    file: "ChroniclesOfSwarajya_Art/07_TerrainTiles/terrain_transitions.png",
+    frameW: 16, frameH: 16, cols: 8, rows: 1, defaultFps: 2,
+    hasDirections: false,
+    notes: "8 transition tiles: Grass-to-dirt blend, stone-to-water docks, cliff drop boundaries."
+  },
+  forest_trees: {
+    name: "Forest Broadleaf Trees (4 Varieties)",
+    file: "ChroniclesOfSwarajya_Art/08_Trees/forest_trees.png",
+    frameW: 32, frameH: 96, cols: 4, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "4 tree varieties: Small sapling tree, medium broadleaf, dense canopy, mountain pine. Drop shadows included."
+  },
+  sagwan_trees: {
+    name: "Sagwan Teak Trees (Harvest States)",
+    file: "ChroniclesOfSwarajya_Art/08_Trees/sagwan_trees.png",
+    frameW: 42, frameH: 96, cols: 3, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Col 0: Mature harvestable Sagwan | Col 1: Harvested with fresh axe cuts | Col 2: Grand Royal Teak."
+  },
+  stumps_and_fallen_trees: {
+    name: "Stumps, Logs & Fallen Trees",
+    file: "ChroniclesOfSwarajya_Art/08_Trees/stumps_and_fallen_trees.png",
+    frameW: 32, frameH: 64, cols: 4, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Fresh teak stump with ring count, mossy depleted stump, horizontal fallen log, young sapling."
+  },
+  rocks_and_boulders: {
+    name: "Basalt Boulders & Rock Formations",
+    file: "ChroniclesOfSwarajya_Art/09_RocksAndMountains/rocks_and_boulders.png",
+    frameW: 32, frameH: 64, cols: 4, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Pebble cluster, medium basalt stone, heavy shaded boulder, moss-covered ancient monolith."
+  },
+  cliffs_and_outcrops: {
+    name: "Mountain Outcrops & Cliff Edges",
+    file: "ChroniclesOfSwarajya_Art/09_RocksAndMountains/cliffs_and_outcrops.png",
+    frameW: 42, frameH: 64, cols: 3, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Jagged rocky outcrop, fortified cliff crest, solid basalt mountain wall block."
+  },
+  iron_ore_nodes: {
+    name: "Iron Ore & Mineral Nodes (3 States)",
+    file: "ChroniclesOfSwarajya_Art/09_RocksAndMountains/iron_ore_nodes.png",
+    frameW: 25, frameH: 32, cols: 5, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "State 1: Full Iron Node | State 2: Fractured Node | State 3: Depleted Pit | Col 3: Gold Vein | Col 4: Rare Crystal."
+  },
+  fort_walls: {
+    name: "Modular Fort Walls & Battlements",
+    file: "ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_walls.png",
+    frameW: 32, frameH: 48, cols: 4, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Horizontal parapet wall with merlons, vertical bastion wall, 90-degree corner, breached wall gap."
+  },
+  fort_gates: {
+    name: "Fort Gates & Portcullis (3 States)",
+    file: "ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_gates.png",
+    frameW: 42, frameH: 64, cols: 3, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Col 0: Reinforced Iron Spike Timber Gate (Closed) | Col 1: Raised Portcullis (Open) | Col 2: Stone Sentry Archway."
+  },
+  towers_and_buildings: {
+    name: "Buruj Towers, Armoury & Stairs",
+    file: "ChroniclesOfSwarajya_Art/10_FortArchitecture/towers_and_buildings.png",
+    frameW: 42, frameH: 96, cols: 3, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Round Buruj watchtower, blacksmith armoury with forge chimney, stone battlement stairs."
+  },
+  fort_decorations: {
+    name: "Fort Decorations, Banners & Shrines",
+    file: "ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_decorations.png",
+    frameW: 25, frameH: 32, cols: 5, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Saffron Bhagwa Zenda swallowtail banner, torch sconce, weapon rack with talwars, supply crates, Bhavani shrine."
+  },
+  village_assets: {
+    name: "Sahyadri Village Huts & Implements",
+    file: "ChroniclesOfSwarajya_Art/11_VillageAndCamp/village_assets.png",
+    frameW: 32, frameH: 64, cols: 4, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Thatch-roof clay hut, stone drawing well with crossbeam, earthen matkas (pots), wooden bullock cart."
+  },
+  camp_assets: {
+    name: "Military War Camp Pavilions & Gear",
+    file: "ChroniclesOfSwarajya_Art/11_VillageAndCamp/camp_assets.png",
+    frameW: 32, frameH: 64, cols: 4, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Maratha military pavilion tent, stone campfire ring, stacked logistics crates, wooden route signpost."
+  },
+  bridges_and_fences: {
+    name: "Footbridges & Rustic Enclosures",
+    file: "ChroniclesOfSwarajya_Art/11_VillageAndCamp/bridges_and_fences.png",
+    frameW: 42, frameH: 32, cols: 3, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Teak plank footbridge with railings, post-and-rail wooden fence, rustic fence gate."
+  },
+  water_and_leaves: {
+    name: "Water Ripples & Falling Teak Leaves",
+    file: "ChroniclesOfSwarajya_Art/13_EnvironmentEffects/water_and_leaves.png",
+    frameW: 16, frameH: 16, cols: 4, rows: 2, defaultFps: 5,
+    hasDirections: false,
+    notes: "4-frame looping animated water ripples and 4-frame drifting amber teak foliage particles."
+  },
+  torches_and_campfires: {
+    name: "Torch Flame & Campfire Animation",
+    file: "ChroniclesOfSwarajya_Art/13_EnvironmentEffects/torches_and_campfires.png",
+    frameW: 16, frameH: 32, cols: 4, rows: 1, defaultFps: 8,
+    hasDirections: false,
+    notes: "4-frame incandescent flickering torch flame with embers."
+  },
+  dust_and_debris: {
+    name: "Footstep Dust & Impact Debris",
+    file: "ChroniclesOfSwarajya_Art/13_EnvironmentEffects/dust_and_debris.png",
+    frameW: 16, frameH: 32, cols: 4, rows: 1, defaultFps: 8,
+    hasDirections: false,
+    notes: "4-frame running dust cloud puff and stone chipping impact burst."
+  },
+  preview_forest_clearing: {
+    name: "Map Preview 1: Sahyadri Forest Clearing (160x160)",
+    file: "ChroniclesOfSwarajya_Art/14_MapPreviews/forest_clearing.png",
+    frameW: 160, frameH: 160, cols: 1, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Dense teak forest clearing, footpath trails, Sagwan nodes, stream, and harvestable timber."
+  },
+  preview_fort_entrance: {
+    name: "Map Preview 2: Bastion Approach & Gate (160x160)",
+    file: "ChroniclesOfSwarajya_Art/14_MapPreviews/forest_fort_entrance.png",
+    frameW: 160, frameH: 160, cols: 1, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Clifftop fortress threshold, spiked timber gate, outer battlement walls, and stone approach."
+  },
+  preview_fort_courtyard: {
+    name: "Map Preview 3: Fort Courtyard & Armoury (160x160)",
+    file: "ChroniclesOfSwarajya_Art/14_MapPreviews/fort_courtyard.png",
+    frameW: 160, frameH: 160, cols: 1, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Fortified inner bailey, blacksmith armoury forge, Buruj tower, Bhagwa Zenda banner, crates."
+  },
+  preview_frontier_camp: {
+    name: "Map Preview 4: Frontier Mountain Camp (160x160)",
+    file: "ChroniclesOfSwarajya_Art/14_MapPreviews/frontier_camp.png",
+    frameW: 160, frameH: 160, cols: 1, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Scout outpost, military pavilion tents, blazing campfires, watch posts in the rugged hills."
+  },
+  preview_high_garrison: {
+    name: "Map Preview 5: High Garrison Watchtower (160x160)",
+    file: "ChroniclesOfSwarajya_Art/14_MapPreviews/high_garrison.png",
+    frameW: 160, frameH: 160, cols: 1, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "High Sahyadri ridge outpost, mounted cannons (toph), stone battlements overlooking deep valleys."
+  },
+  preview_raigad_arena: {
+    name: "Map Preview 6: Raigad Sovereign Darbar Arena (160x160)",
+    file: "ChroniclesOfSwarajya_Art/14_MapPreviews/raigad_arena.png",
+    frameW: 160, frameH: 160, cols: 1, rows: 1, defaultFps: 1,
+    hasDirections: false,
+    notes: "Grand capital throne arena, ornate ceremonial stone pillars, golden trim, royal battle hall."
+  }
+};
+
+// Application State
+let currentKey = 'shivaji_idle';
+let currentImg = new Image();
+let isPlaying = true;
+let currentFrame = 0;
+let currentDirectionRow = 0;
+let fps = 6;
+let zoom = 4;
+let lastFrameTime = 0;
+
+// DOM Elements
+const animCanvas = document.getElementById('animCanvas');
+const animCtx = animCanvas.getContext('2d');
+animCtx.imageSmoothingEnabled = false;
+
+const sheetCanvas = document.getElementById('sheetCanvas');
+const sheetCtx = sheetCanvas.getContext('2d');
+sheetCtx.imageSmoothingEnabled = false;
+
+const selDir = document.getElementById('sel-dir');
+const btnPlay = document.getElementById('btn-play');
+const sliderFps = document.getElementById('slider-fps');
+const sliderZoom = document.getElementById('slider-zoom');
+
+function loadAsset(key) {
+  currentKey = key;
+  const def = ASSET_REGISTRY[key];
+  if (!def) return;
+
+  // Update UI selection
+  document.querySelectorAll('.asset-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.asset === key);
+  });
+
+  // Enable/disable direction dropdown
+  selDir.disabled = !def.hasDirections;
+  currentDirectionRow = 0;
+  selDir.value = "0";
+
+  fps = def.defaultFps;
+  sliderFps.value = fps;
+  document.getElementById('fps-val').innerText = fps;
+
+  currentFrame = 0;
+  currentImg = new Image();
+  currentImg.onload = () => {
+    updateMetadata();
+    drawSheetOverview();
+  };
+  const isInsideArtFolder = window.location.pathname.includes('ChroniclesOfSwarajya_Art');
+  const cleanPath = def.file.replace('ChroniclesOfSwarajya_Art/', '');
+  currentImg.src = isInsideArtFolder ? cleanPath : ('ChroniclesOfSwarajya_Art/' + cleanPath);
+}
+
+function updateMetadata() {
+  const def = ASSET_REGISTRY[currentKey];
+  document.getElementById('meta-name').innerText = currentKey;
+  document.getElementById('meta-file').innerText = def.file.split('/').pop();
+  document.getElementById('meta-size').innerText = `${def.frameW} x ${def.frameH} px`;
+  document.getElementById('meta-grid').innerText = `${def.cols} cols x ${def.rows} rows`;
+  document.getElementById('meta-frames').innerText = `${def.cols * def.rows} frames`;
+  document.getElementById('meta-cur-frame').innerText = currentFrame;
+  document.getElementById('meta-duration').innerText = `${Math.round(1000 / fps)} ms`;
+  document.getElementById('meta-notes').innerText = def.notes;
+
+  // Resize animation canvas to match frame size * zoom
+  animCanvas.width = def.frameW * zoom;
+  animCanvas.height = def.frameH * zoom;
+  animCtx.imageSmoothingEnabled = false;
+}
+
+function drawSheetOverview() {
+  const def = ASSET_REGISTRY[currentKey];
+  if (!currentImg.complete) return;
+  sheetCanvas.width = currentImg.width;
+  sheetCanvas.height = currentImg.height;
+  sheetCtx.imageSmoothingEnabled = false;
+  sheetCtx.clearRect(0, 0, sheetCanvas.width, sheetCanvas.height);
+  sheetCtx.drawImage(currentImg, 0, 0);
+
+  // Draw red highlight around current active frame
+  const col = currentFrame;
+  const row = def.hasDirections ? currentDirectionRow : Math.floor(currentDirectionRow);
+  const fx = col * def.frameW;
+  const fy = row * def.frameH;
+  sheetCtx.strokeStyle = '#ef4444';
+  sheetCtx.lineWidth = 1;
+  sheetCtx.strokeRect(fx, fy, def.frameW, def.frameH);
+}
+
+function renderAnimFrame() {
+  const def = ASSET_REGISTRY[currentKey];
+  if (!currentImg.complete) return;
+
+  animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
+
+  const col = currentFrame % def.cols;
+  const row = def.hasDirections ? currentDirectionRow : 0;
+  const sx = col * def.frameW;
+  const sy = row * def.frameH;
+
+  animCtx.drawImage(
+    currentImg,
+    sx, sy, def.frameW, def.frameH,
+    0, 0, animCanvas.width, animCanvas.height
+  );
+
+  document.getElementById('meta-cur-frame').innerText = `${currentFrame} (Col ${col}, Row ${row})`;
+  drawSheetOverview();
+}
+
+function loop(timestamp) {
+  if (isPlaying) {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    const interval = 1000 / fps;
+    if (timestamp - lastFrameTime >= interval) {
+      const def = ASSET_REGISTRY[currentKey];
+      currentFrame = (currentFrame + 1) % def.cols;
+      renderAnimFrame();
+      lastFrameTime = timestamp;
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+// Event Bindings
+document.querySelectorAll('.asset-btn').forEach(btn => {
+  btn.addEventListener('click', () => loadAsset(btn.dataset.asset));
+});
+
+btnPlay.addEventListener('click', () => {
+  isPlaying = !isPlaying;
+  btnPlay.innerText = isPlaying ? "PAUSE" : "PLAY";
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  const def = ASSET_REGISTRY[currentKey];
+  isPlaying = false;
+  btnPlay.innerText = "PLAY";
+  currentFrame = (currentFrame - 1 + def.cols) % def.cols;
+  renderAnimFrame();
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  const def = ASSET_REGISTRY[currentKey];
+  isPlaying = false;
+  btnPlay.innerText = "PLAY";
+  currentFrame = (currentFrame + 1) % def.cols;
+  renderAnimFrame();
+});
+
+selDir.addEventListener('change', (e) => {
+  currentDirectionRow = parseInt(e.target.value);
+  currentFrame = 0;
+  renderAnimFrame();
+});
+
+sliderFps.addEventListener('input', (e) => {
+  fps = parseInt(e.target.value);
+  document.getElementById('fps-val').innerText = fps;
+  document.getElementById('meta-duration').innerText = `${Math.round(1000 / fps)} ms`;
+});
+
+sliderZoom.addEventListener('input', (e) => {
+  zoom = parseInt(e.target.value);
+  document.getElementById('zoom-val').innerText = `${zoom}x`;
+  updateMetadata();
+  renderAnimFrame();
+});
+
+document.getElementById('sel-bg').addEventListener('change', (e) => {
+  document.getElementById('canvas-wrapper').className = e.target.value;
+});
+
+// Boot initial asset
+loadAsset('shivaji_idle');
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
