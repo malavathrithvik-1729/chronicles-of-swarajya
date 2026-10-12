@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Chronicles of Swarajya: The Divine Blade — Open-World Edition (Gate D)</title>
+<style>
+  :root {
+    --bg-dark: #080705;
+    --panel-bg: #140e0b;
+    --card-bg: #1e1510;
+    --saffron: #e66012;
+    --saffron-hi: #f59e0b;
+    --gold: #d97706;
+    --gold-hi: #fef08a;
+    --border-gold: #b45309;
+    --border-dark: #451a03;
+    --text-cream: #fef3c7;
+    --text-muted: #9ca3af;
+    --hp-green: #16a34a;
+    --xp-blue: #0284c7;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body, html {
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-dark);
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+    color: var(--text-cream);
+  }
+  #game-wrapper {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #1c130d 0%, #050403 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Canvas Container with nearest-neighbor crisp pixel scaling */
+  #canvas-container {
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.9), 0 0 0 2px var(--border-gold);
+    background-color: #000;
+  }
+  #gameCanvas {
+    display: block;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  /* HUD Overlays (Top Bar) */
+  #top-hud {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .hud-badge {
+    background: rgba(20, 14, 11, 0.85);
+    border: 1px solid var(--border-gold);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bar-container {
+    width: 80px;
+    height: 8px;
+    background: #2a1b12;
+    border: 1px solid #5a3820;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    transition: width 0.15s ease;
+  }
+
+  /* Region / Subzone Banner */
+  #zone-banner {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 14, 11, 0.9);
+    border: 1px solid var(--saffron);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--gold-hi);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 10;
+  }
+  #zone-banner.visible {
+    opacity: 1;
+  }
+
+  /* Bottom Controls & Interaction Pill */
+  #interaction-pill {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--saffron);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(230, 96, 18, 0.5);
+    display: none;
+    z-index: 12;
+    animation: pulse 1.2s infinite alternate;
+  }
+  @keyframes pulse {
+    0% { transform: translateX(-50%) scale(1); }
+    100% { transform: translateX(-50%) scale(1.06); }
+  }
+
+  /* Modals: Crafting, Inventory, Dialogue, Village Smith */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+  .modal-overlay.active {
+    display: flex;
+  }
+  .modal-panel {
+    width: 440px;
+    max-height: 250px;
+    background: var(--panel-bg);
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    background: #251610;
+    border-bottom: 1px solid var(--border-gold);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--saffron-hi);
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .modal-close:hover { color: #fff; }
+  .modal-body {
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .recipe-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-dark);
+    padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .recipe-card:hover {
+    border-color: var(--border-gold);
+  }
+  .btn-craft {
+    background: var(--saffron);
+    color: #fff;
+    border: 1px solid var(--border-gold);
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-craft:disabled {
+    background: #3a2a22;
+    color: #776a60;
+    cursor: not-allowed;
+    border-color: #4a3a30;
+  }
+
+  /* Dialogue Box with Illustrated Portrait */
+  #dialogue-modal {
+    position: absolute;
+    bottom: 12px;
+    left: 20px;
+    right: 20px;
+    height: 100px;
+    background: rgba(20, 14, 11, 0.95);
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    display: none;
+    padding: 8px;
+    z-index: 120;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  }
+  #dialogue-modal.active {
+    display: flex;
+    gap: 12px;
+  }
+  #dialogue-portrait {
+    width: 80px;
+    height: 80px;
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    object-fit: cover;
+    background: #100b08;
+  }
+  #dialogue-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  #dialogue-speaker {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--gold-hi);
+  }
+  #dialogue-text {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-cream);
+  }
+  #dialogue-prompt {
+    align-self: flex-end;
+    font-size: 9px;
+    color: var(--saffron);
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div id="game-wrapper">
+  <div id="canvas-container">
+    <canvas id="gameCanvas" width="480" height="270"></canvas>
+
+    <!-- Top HUD -->
+    <div id="top-hud">
+      <div class="hud-badge">
+        <span style="color:var(--saffron-hi); font-weight:bold;">CHHATRAPATI SHIVAJI</span>
+        <span id="hud-level">LVL 1</span>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <span>HP</span>
+          <div class="bar-container"><div id="bar-hp" class="bar-fill" style="background:var(--hp-green); width:100%;"></div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <span>XP</span>
+          <div class="bar-container"><div id="bar-xp" class="bar-fill" style="background:var(--xp-blue); width:0%;"></div></div>
+        </div>
+      </div>
+
+      <div class="hud-badge">
+        <span>🪵 <b id="inv-wood">0</b></span>
+        <span>⛏️ <b id="inv-ore">0</b></span>
+        <span>🪙 <b id="inv-gold">15</b></span>
+        <span id="hud-weapon">⚔️ FISTS</span>
+      </div>
+    </div>
+
+    <!-- Subzone Banner -->
+    <div id="zone-banner">Sacred Awakening Forest</div>
+
+    <!-- Interaction Pill -->
+    <div id="interaction-pill">[E] Interact</div>
+
+    <!-- Universal Crafting Modal -->
+    <div id="crafting-modal" class="modal-overlay">
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div class="modal-title" id="crafting-title">Field Smithing Anvil</div>
+          <button class="modal-close" onclick="closeCraftingModal()">✕</button>
+        </div>
+        <div class="modal-body" id="recipe-list">
+          <!-- Populated dynamically from CRAFTING_RECIPES -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Dialogue Box with Portrait -->
+    <div id="dialogue-modal">
+      <img id="dialogue-portrait" src="ChroniclesOfSwarajya_Art/05_Portraits_OptionB/bhavani_portrait.png" alt="Portrait">
+      <div id="dialogue-content">
+        <div id="dialogue-speaker">Goddess Bhavani</div>
+        <div id="dialogue-text">"Rise, Shivba! The rugged Sahyadri calls for its protector. Forge your steel talwar and bring Swarajya to the land."</div>
+        <div id="dialogue-prompt">Press [SPACE] or [E] to continue</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Load Database Registries -->
+<script src="data/data_registries.js"></script>
+
+<script>
+// =============================================================================
+// OPEN-WORLD GAME ENGINE (GATE D IMPLEMENTATION)
+// Viewport: 480 x 270 (16:9 widescreen) | Connected World: 80 x 40 tiles (16px)
+// =============================================================================
+
+const V_WIDTH = 480;
+const V_HEIGHT = 270;
+const TILE_SIZE = 16;
+const WORLD_COLS = 80;
+const WORLD_ROWS = 40;
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// Audio Synthesizer (Zero-dependency Web Audio API)
+class OpenWorldAudio {
+  constructor() {
+    this.ctx = null;
+  }
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+  play(type) {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    if (type === 'slash') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(120, now + 0.12);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.12);
+      osc.start(now); osc.stop(now + 0.12);
+    } else if (type === 'hit') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.linearRampToValueAtTime(40, now + 0.08);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.08);
+      osc.start(now); osc.stop(now + 0.08);
+    } else if (type === 'craft') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.18);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.18);
+      osc.start(now); osc.stop(now + 0.18);
+    } else if (type === 'fanfare') {
+      [261, 329, 392, 523].forEach((f, idx) => {
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.connect(g); g.connect(this.ctx.destination);
+        o.type = 'sine';
+        o.frequency.setValueAtTime(f, now + idx * 0.1);
+        g.gain.setValueAtTime(0.15, now + idx * 0.1);
+        g.gain.linearRampToValueAtTime(0, now + idx * 0.1 + 0.25);
+        o.start(now + idx * 0.1); o.stop(now + idx * 0.1 + 0.25);
+      });
+    }
+  }
+}
+const audio = new OpenWorldAudio();
+
+// Asset Preloading
+const ASSETS = {
+  // Shivaji Maharaj Benchmark Option B
+  shivaji_idle: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png',
+  shivaji_walk: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_walk.png',
+  shivaji_attack: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_attack.png',
+  // Refined Option B Enemies
+  swordsman_idle: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_idle.png',
+  swordsman_walk: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_walk.png',
+  swordsman_attack: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_attack.png',
+  shield_guard_idle: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_idle.png',
+  shield_guard_walk: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_walk.png',
+  shield_guard_attack: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_attack.png',
+  // Environment Tiles & Nature
+  grass_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/grass_tiles.png',
+  dirt_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/dirt_path_tiles.png',
+  stone_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/stone_cliff_tiles.png',
+  water_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/water_tiles.png',
+  forest_trees: 'ChroniclesOfSwarajya_Art/08_Trees/forest_trees.png',
+  sagwan_trees: 'ChroniclesOfSwarajya_Art/08_Trees/sagwan_trees.png',
+  fort_walls: 'ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_walls.png',
+  fort_gates: 'ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_gates.png',
+  village_assets: 'ChroniclesOfSwarajya_Art/11_VillageAndCamp/village_assets.png',
+  camp_assets: 'ChroniclesOfSwarajya_Art/11_VillageAndCamp/camp_assets.png',
+  // Weapons
+  talwar_basic: 'ChroniclesOfSwarajya_Art/06_Weapons_OptionB/talwar_basic.png',
+  talwar_upgraded: 'ChroniclesOfSwarajya_Art/06_Weapons_OptionB/talwar_upgraded.png',
+  dhal_shield: 'ChroniclesOfSwarajya_Art/06_Weapons_OptionB/maratha_dhal_shield.png',
+  // Portraits
+  bhavani_portrait: 'ChroniclesOfSwarajya_Art/05_Portraits_OptionB/bhavani_portrait.png',
+  shivaji_portrait: 'ChroniclesOfSwarajya_Art/05_Portraits_OptionB/shivaji_portrait.png',
+  blacksmith_portrait: 'ChroniclesOfSwarajya_Art/05_Portraits_OptionB/blacksmith.png',
+  elder_portrait: 'ChroniclesOfSwarajya_Art/05_Portraits_OptionB/village_elder.png',
+};
+
+const images = {};
+let loadedCount = 0;
+for (const [k, src] of Object.entries(ASSETS)) {
+  const img = new Image();
+  img.src = src;
+  img.onload = () => { loadedCount++; };
+  img.onerror = () => { console.warn('Could not load:', src); loadedCount++; };
+  images[k] = img;
+}
+
+// =============================================================================
+// PERSISTENT GAME STATE & INVENTORY MODEL
+// =============================================================================
+const SAVE_KEY = 'swarajya_open_world_save_v1';
+
+const state = {
+  // Player
+  player: {
+    x: 120, // Spawn in Forest Clearing
+    y: 280,
+    dir: 0, // 0: S, 1: N, 2: E, 3: W
+    vx: 0,
+    vy: 0,
+    speed: 75,
+    hp: 100,
+    maxHp: 100,
+    xp: 0,
+    maxXp: 100,
+    level: 1,
+    atk: 6, // Base fist attack
+    def: 2,
+    isAttacking: false,
+    attackTimer: 0,
+    equipped: {
+      weapon: null,
+      shield: null,
+      body: "angarkha_traditional",
+      head: "pheta_royal",
+      feet: "mojari_leather"
+    }
+  },
+
+  // Inventory (Items registry IDs and stack quantities)
+  inventory: {
+    wood_sagwan: 0,
+    ore_iron: 0,
+    leather_hide: 0,
+    gold_huns: 15,
+    salve_healing: 1
+  },
+
+  // World State
+  worldState: {
+    currentZone: 'forest_clearing',
+    gateUnlocked: false,
+    flagHoisted: false,
+    villageLiberated: false,
+    blacksmithUnlocked: false,
+    kotFortLiberated: false,
+    defeatedEnemies: [],
+    harvestedNodes: []
+  },
+
+  // Active Missions
+  activeMissions: [
+    {
+      id: "quest_1_awakening_and_forge",
+      progress: { materials: 0, crafted: false },
+      completed: false
+    }
+  ],
+
+  // Camera Position (Upper-left world coords)
+  camX: 0,
+  camY: 0,
+
+  // Entities in World
+  entities: [],
+  harvestNodes: [],
+  particles: []
+};
+
+// =============================================================================
+// WORLD GENERATOR & CONNECTED REGION MAP
+// 80 cols x 40 rows (1280px x 640px world)
+// =============================================================================
+let groundTiles = [];
+let collisionMap = []; // 0: walkable, 1: solid cliff/wall, 2: river/water, 3: bridge
+
+function buildConnectedSahyadriWorld() {
+  groundTiles = [];
+  collisionMap = [];
+
+  for (let r = 0; r < WORLD_ROWS; r++) {
+    const tileRow = [];
+    const colRow = [];
+    for (let c = 0; c < WORLD_COLS; c++) {
+      // 1. Natural Boundary Mountain Cliffs (North rows 0..2, South rows 37..39)
+      if (r <= 2 || r >= 37 || c === 0 || c === WORLD_COLS - 1) {
+        tileRow.push({ type: 'cliff', idx: (c % 4) });
+        colRow.push(1);
+        continue;
+      }
+
+      // 2. Koyna River Channel (Cols 28..31, crossing at r 18..22)
+      if (c >= 28 && c <= 31) {
+        if (r >= 18 && r <= 22) {
+          // Timber Bridge Walkway
+          tileRow.push({ type: 'bridge', idx: 0 });
+          colRow.push(0);
+        } else {
+          // Deep impassable water
+          tileRow.push({ type: 'water', idx: (c + r) % 4 });
+          colRow.push(2);
+        }
+        continue;
+      }
+
+      // 3. Fort Enclosure & Stone Courtyard (Cols 60..78)
+      if (c >= 60) {
+        if (c === 60 && (r < 18 || r > 22)) {
+          // Fort Outer Bastion Wall
+          tileRow.push({ type: 'fort_wall', idx: 0 });
+          colRow.push(1);
+        } else if (c === 60 && r >= 18 && r <= 22) {
+          // Fort Gate Entrance
+          tileRow.push({ type: 'gate', idx: 0 });
+          colRow.push(state.worldState.gateUnlocked ? 0 : 1);
+        } else {
+          // Courtyard Dressed Flagstones
+          tileRow.push({ type: 'stone', idx: (c % 4) });
+          colRow.push(0);
+        }
+        continue;
+      }
+
+      // 4. Village of Bhavani Nagar (Cols 40..54, Rows 5..20)
+      if (c >= 40 && c <= 54 && r >= 5 && r <= 20) {
+        if ((c === 47 && r === 12)) {
+          // Central Stone Well
+          tileRow.push({ type: 'village_well', idx: 0 });
+          colRow.push(1);
+        } else if (r % 4 === 0 || c % 5 === 0) {
+          tileRow.push({ type: 'dirt', idx: 0 });
+          colRow.push(0);
+        } else {
+          tileRow.push({ type: 'grass', idx: (c + r) % 4 });
+          colRow.push(0);
+        }
+        continue;
+      }
+
+      // 5. Connecting Dirt Roads & Red Trails
+      if ((r >= 19 && r <= 21) || (c >= 46 && c <= 48 && r >= 12 && r <= 30)) {
+        tileRow.push({ type: 'dirt', idx: 1 });
+        colRow.push(0);
+        continue;
+      }
+
+      // 6. Lush Sahyadri Forest Base
+      tileRow.push({ type: 'grass', idx: (c * 7 + r * 13) % 4 });
+      colRow.push(0);
+    }
+    groundTiles.push(tileRow);
+    collisionMap.push(colRow);
+  }
+
+  // Populate Interactive Harvest Nodes (Teak Trees & Iron Ore)
+  state.harvestNodes = [
+    // Forest Clearing Nodes
+    { id: 'tree_1', type: 'wood_sagwan', x: 80, y: 180, hp: 3, name: 'Sagwan Teak Tree' },
+    { id: 'tree_2', type: 'wood_sagwan', x: 160, y: 220, hp: 3, name: 'Sagwan Teak Tree' },
+    { id: 'tree_3', type: 'wood_sagwan', x: 110, y: 340, hp: 3, name: 'Sagwan Teak Tree' },
+    { id: 'tree_4', type: 'wood_sagwan', x: 220, y: 150, hp: 3, name: 'Sagwan Teak Tree' },
+    { id: 'ore_1', type: 'ore_iron', x: 140, y: 110, hp: 3, name: 'Hematite Ore Vein' },
+    { id: 'ore_2', type: 'ore_iron', x: 260, y: 380, hp: 3, name: 'Hematite Ore Vein' },
+    { id: 'ore_3', type: 'ore_iron', x: 70, y: 260, hp: 3, name: 'Hematite Ore Vein' },
+    // Near River & Village
+    { id: 'tree_5', type: 'wood_sagwan', x: 370, y: 140, hp: 3, name: 'Sagwan Teak Tree' },
+    { id: 'ore_4', type: 'ore_iron', x: 420, y: 360, hp: 3, name: 'Hematite Ore Vein' },
+  ];
+
+  // Populate World Interactive Stations & NPCs
+  state.entities = [
+    // Field Anvil in Forest
+    { id: 'station_field_anvil', type: 'station', name: 'Field Smithing Anvil', x: 200, y: 300, stationType: 'field_or_anvil' },
+    // Village Elder NPC
+    { id: 'npc_elder', type: 'npc', name: 'Village Elder', x: 680, y: 160, role: 'elder', portrait: 'elder_portrait' },
+    // Village Blacksmith Forge
+    { id: 'station_village_forge', type: 'station', name: 'Bhavani Nagar Blacksmith Forge', x: 760, y: 180, stationType: 'village_blacksmith' },
+    // Fort Gate Landmark
+    { id: 'fort_gate_obj', type: 'gate_barrier', name: 'Kot Fort Dilli Darwaja', x: 960, y: 320 },
+    // High Saffron Bastion Flag
+    { id: 'bhagwa_zenda_obj', type: 'flag_point', name: 'Bastion Bhagwa Zenda Staff', x: 1160, y: 220 },
+
+    // Hostile Enemies (Using Refined Option B Models)
+    // 1. Forest Outpost Raider
+    { id: 'enemy_1', type: 'enemy', model: 'swordsman', name: 'Deccan Scout', x: 320, y: 310, hp: 45, maxHp: 45, atk: 8, state: 'patrol', dir: 3 },
+    // 2. Raider Camp Sentries
+    { id: 'enemy_2', type: 'enemy', model: 'swordsman', name: 'Deccan Swordsman', x: 700, y: 440, hp: 55, maxHp: 55, atk: 10, state: 'patrol', dir: 1 },
+    { id: 'enemy_3', type: 'enemy', model: 'shield_guard', name: 'Camp Shield Guard', x: 760, y: 460, hp: 80, maxHp: 80, atk: 12, state: 'patrol', dir: 3 },
+    // 3. Fort Gateway Elite Guards
+    { id: 'enemy_4', type: 'enemy', model: 'shield_guard', name: 'Citadel Gatekeeper Guard', x: 920, y: 300, hp: 90, maxHp: 90, atk: 14, state: 'patrol', dir: 3 },
+    { id: 'enemy_5', type: 'enemy', model: 'swordsman', name: 'Fort Bastion Swordsman', x: 1050, y: 280, hp: 65, maxHp: 65, atk: 12, state: 'patrol', dir: 0 }
+  ];
+}
+
+// =============================================================================
+// REUSABLE CRAFTING & INVENTORY SYSTEM
+// =============================================================================
+function recalculatePlayerStats() {
+  const p = state.player;
+  let baseAtk = 6;
+  let baseDef = 2;
+  let hpBonus = 0;
+
+  // Evaluate Weapon
+  if (p.equipped.weapon && ITEM_DATABASE[p.equipped.weapon]) {
+    baseAtk += ITEM_DATABASE[p.equipped.weapon].stats.atk || 0;
+  }
+  // Evaluate Shield
+  if (p.equipped.shield && ITEM_DATABASE[p.equipped.shield]) {
+    baseDef += ITEM_DATABASE[p.equipped.shield].stats.def || 0;
+  }
+  // Evaluate Body Armour
+  if (p.equipped.body && ITEM_DATABASE[p.equipped.body]) {
+    baseDef += ITEM_DATABASE[p.equipped.body].stats.def || 0;
+    hpBonus += ITEM_DATABASE[p.equipped.body].stats.maxHp || 0;
+  }
+  // Evaluate Headgear & Footwear
+  if (p.equipped.head && ITEM_DATABASE[p.equipped.head]) {
+    baseDef += ITEM_DATABASE[p.equipped.head].stats.def || 0;
+  }
+  if (p.equipped.feet && ITEM_DATABASE[p.equipped.feet]) {
+    baseDef += ITEM_DATABASE[p.equipped.feet].stats.def || 0;
+  }
+
+  p.atk = baseAtk;
+  p.def = baseDef;
+  p.maxHp = 100 + hpBonus;
+  p.hp = Math.min(p.hp, p.maxHp);
+
+  // Update HUD
+  document.getElementById('hud-weapon').innerText = p.equipped.weapon ? `⚔️ ${ITEM_DATABASE[p.equipped.weapon].name.toUpperCase()}` : '⚔️ FISTS';
+  updateHUD();
+}
+
+function openCraftingModal(stationType) {
+  audio.init();
+  const modal = document.getElementById('crafting-modal');
+  const title = document.getElementById('crafting-title');
+  const list = document.getElementById('recipe-list');
+
+  title.innerText = stationType === 'village_blacksmith' ? 'Bhavani Nagar Master Blacksmith' : 'Field Smithing Anvil';
+  list.innerHTML = '';
+
+  const availableRecipes = CRAFTING_RECIPES.filter(r => {
+    if (stationType === 'village_blacksmith') return true;
+    return r.station === 'field_or_anvil';
+  });
+
+  availableRecipes.forEach(rec => {
+    const item = ITEM_DATABASE[rec.outputItem];
+    if (!item) return;
+
+    // Check cost requirements
+    let canAfford = true;
+    let costStr = [];
+    for (const [resKey, reqQty] of Object.entries(rec.costs)) {
+      if (reqQty <= 0) continue;
+      const curQty = state.inventory[resKey] || (state.player.equipped.weapon === resKey ? 1 : (state.player.equipped.shield === resKey ? 1 : 0));
+      const hasEnough = curQty >= reqQty;
+      if (!hasEnough) canAfford = false;
+      const resName = ITEM_DATABASE[resKey] ? ITEM_DATABASE[resKey].name : resKey;
+      costStr.push(`<span style="color:${hasEnough ? '#86efac' : '#f87171'}">${resName}: ${curQty}/${reqQty}</span>`);
+    }
+
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.innerHTML = `
+      <div>
+        <div style="font-weight:bold; color:var(--gold-hi);">${item.name}</div>
+        <div style="color:var(--text-muted); font-size:10px;">${rec.description}</div>
+        <div style="margin-top:4px; font-size:10px; display:flex; gap:8px;">${costStr.join(' | ')}</div>
+      </div>
+      <button class="btn-craft" ${canAfford ? '' : 'disabled'} onclick="executeCraft('${rec.id}')">CRAFT</button>
+    `;
+    list.appendChild(card);
+  });
+
+  modal.classList.add('active');
+}
+
+function closeCraftingModal() {
+  document.getElementById('crafting-modal').classList.remove('active');
+}
+
+function executeCraft(recipeId) {
+  const rec = CRAFTING_RECIPES.find(r => r.id === recipeId);
+  if (!rec) return;
+
+  // Deduct materials atomically
+  for (const [resKey, reqQty] of Object.entries(rec.costs)) {
+    if (reqQty <= 0) continue;
+    if (state.inventory[resKey] !== undefined) {
+      state.inventory[resKey] -= reqQty;
+    } else if (state.player.equipped.weapon === resKey) {
+      state.player.equipped.weapon = null;
+    } else if (state.player.equipped.shield === resKey) {
+      state.player.equipped.shield = null;
+    }
+  }
+
+  // Grant crafted item
+  const item = ITEM_DATABASE[rec.outputItem];
+  if (item.category === 'weapon') {
+    state.player.equipped.weapon = item.id;
+  } else if (item.category === 'shield') {
+    state.player.equipped.shield = item.id;
+  } else if (item.category === 'armour') {
+    state.player.equipped[item.slot] = item.id;
+  } else {
+    state.inventory[item.id] = (state.inventory[item.id] || 0) + rec.outputQty;
+  }
+
+  audio.play('craft');
+  recalculatePlayerStats();
+  checkMissionProgression();
+  saveGame();
+
+  // Refresh UI
+  openCraftingModal(rec.station);
+}
+
+// =============================================================================
+// MISSION & PROGRESSION SYSTEM
+// =============================================================================
+function checkMissionProgression() {
+  const m1 = state.activeMissions.find(m => m.id === 'quest_1_awakening_and_forge');
+  if (m1 && !m1.completed) {
+    if (state.player.equipped.weapon === 'talwar_basic') {
+      m1.completed = true;
+      gainXP(150);
+      audio.play('fanfare');
+      showZoneBanner('TALWAR FORGED! TRAVEL EAST TOWARDS BHAVANI NAGAR');
+    }
+  }
+
+  const m3 = state.activeMissions.find(m => m.id === 'quest_3_liberate_village');
+  if (m3 && !m3.completed && state.worldState.villageLiberated) {
+    m3.completed = true;
+    gainXP(350);
+    audio.play('fanfare');
+    showZoneBanner('BHAVANI NAGAR LIBERATED! BLACKSMITH UNLOCKED');
+  }
+}
+
+function gainXP(amt) {
+  const p = state.player;
+  p.xp += amt;
+  while (p.xp >= p.maxXp) {
+    p.xp -= p.maxXp;
+    p.level++;
+    p.maxXp = Math.floor(p.maxXp * 1.5);
+    p.maxHp += 15;
+    p.hp = p.maxHp;
+    showZoneBanner(`LEVEL UP! SHIVAJI IS NOW LEVEL ${p.level}`);
+  }
+  updateHUD();
+}
+
+function updateHUD() {
+  const p = state.player;
+  document.getElementById('hud-level').innerText = `LVL ${p.level}`;
+  document.getElementById('bar-hp').style.width = `${Math.max(0, (p.hp / p.maxHp) * 100)}%`;
+  document.getElementById('bar-xp').style.width = `${Math.min(100, (p.xp / p.maxXp) * 100)}%`;
+  document.getElementById('inv-wood').innerText = state.inventory.wood_sagwan || 0;
+  document.getElementById('inv-ore').innerText = state.inventory.ore_iron || 0;
+  document.getElementById('inv-gold').innerText = state.inventory.gold_huns || 0;
+}
+
+function showZoneBanner(text) {
+  const banner = document.getElementById('zone-banner');
+  banner.innerText = text;
+  banner.classList.add('visible');
+  setTimeout(() => { banner.classList.remove('visible'); }, 3500);
+}
+
+// =============================================================================
+// INPUT & CONTROLS
+// =============================================================================
+const keys = {};
+window.addEventListener('keydown', (e) => {
+  audio.init();
+  keys[e.key.toLowerCase()] = true;
+
+  if (e.key === 'c' || e.key === 'C') {
+    openCraftingModal('field_or_anvil');
+  }
+  if (e.key === 'e' || e.key === 'E') {
+    handleInteraction();
+  }
+  if (e.key === ' ') {
+    performAttack();
+  }
+});
+window.addEventListener('keyup', (e) => {
+  keys[e.key.toLowerCase()] = false;
+});
+
+function performAttack() {
+  const p = state.player;
+  if (p.isAttacking) return;
+  p.isAttacking = true;
+  p.attackTimer = 0.28;
+  audio.play('slash');
+
+  // Melee Hitbox detection
+  const reach = p.equipped.weapon ? (ITEM_DATABASE[p.equipped.weapon].stats.reach || 30) : 20;
+  let hitX = p.x;
+  let hitY = p.y;
+  if (p.dir === 0) hitY += reach;
+  else if (p.dir === 1) hitY -= reach;
+  else if (p.dir === 2) hitX += reach;
+  else if (p.dir === 3) hitX -= reach;
+
+  // Check harvest nodes
+  state.harvestNodes.forEach(node => {
+    if (node.hp <= 0) return;
+    const dist = Math.hypot(hitX - node.x, hitY - node.y);
+    if (dist < 26) {
+      node.hp--;
+      audio.play('hit');
+      if (node.type === 'wood_sagwan') state.inventory.wood_sagwan = (state.inventory.wood_sagwan || 0) + 1;
+      if (node.type === 'ore_iron') state.inventory.ore_iron = (state.inventory.ore_iron || 0) + 1;
+      updateHUD();
+      if (node.hp <= 0) showZoneBanner(`HARVESTED: ${node.name}`);
+    }
+  });
+
+  // Check enemy hits
+  state.entities.forEach(en => {
+    if (en.type !== 'enemy' || en.hp <= 0) return;
+    const dist = Math.hypot(hitX - en.x, hitY - en.y);
+    if (dist < 32) {
+      const dmg = Math.max(1, p.atk - (en.def || 2));
+      en.hp -= dmg;
+      audio.play('hit');
+      if (en.hp <= 0) {
+        gainXP(45);
+        state.inventory.gold_huns = (state.inventory.gold_huns || 0) + 8;
+        showZoneBanner(`DEFEATED: ${en.name} (+45 XP, +8 HUNS)`);
+        checkVillageStatus();
+      }
+    }
+  });
+}
+
+function checkVillageStatus() {
+  const aliveRaiders = state.entities.filter(e => e.type === 'enemy' && (e.id === 'enemy_2' || e.id === 'enemy_3') && e.hp > 0);
+  if (aliveRaiders.length === 0 && !state.worldState.villageLiberated) {
+    state.worldState.villageLiberated = true;
+    state.worldState.blacksmithUnlocked = true;
+    checkMissionProgression();
+  }
+}
+
+function handleInteraction() {
+  const p = state.player;
+  // Check nearby interactive entities
+  for (const ent of state.entities) {
+    const dist = Math.hypot(p.x - ent.x, p.y - ent.y);
+    if (dist < 38) {
+      if (ent.type === 'station') {
+        openCraftingModal(ent.stationType);
+        return;
+      } else if (ent.type === 'npc' && ent.role === 'elder') {
+        showDialogue('Village Elder', 'elder_portrait', 'Bhavani Nagar is eternally grateful to you, Shivba! The forge is yours, and our people stand with Swarajya.');
+        return;
+      } else if (ent.type === 'gate_barrier') {
+        if (state.worldState.villageLiberated) {
+          state.worldState.gateUnlocked = true;
+          collisionMap[19][60] = 0; collisionMap[20][60] = 0; collisionMap[21][60] = 0;
+          showZoneBanner('KOT FORT GATEWAY BREACHED! ASCEND TO THE CITADEL');
+          audio.play('fanfare');
+        } else {
+          showDialogue('Gatekeeper Inscription', 'bhavani_portrait', 'The heavy Dilli Darwaja iron spikes remain locked. Liberate Bhavani Nagar to secure the fortress key.');
+        }
+        return;
+      } else if (ent.type === 'flag_point') {
+        state.worldState.flagHoisted = true;
+        audio.play('fanfare');
+        showZoneBanner('SWARAJYA VICTORIOUS! SAFFRON BHAGWA ZENDA HOISTED OVER KOT FORT');
+        return;
+      }
+    }
+  }
+}
+
+function showDialogue(speaker, portraitKey, text) {
+  const modal = document.getElementById('dialogue-modal');
+  document.getElementById('dialogue-speaker').innerText = speaker;
+  document.getElementById('dialogue-portrait').src = ASSETS[portraitKey] || ASSETS['bhavani_portrait'];
+  document.getElementById('dialogue-text').innerText = text;
+  modal.classList.add('active');
+  setTimeout(() => {
+    window.addEventListener('keydown', function closeDlg(e) {
+      if (e.key === ' ' || e.key === 'e' || e.key === 'E') {
+        modal.classList.remove('active');
+        window.removeEventListener('keydown', closeDlg);
+      }
+    });
+  }, 200);
+}
+
+// =============================================================================
+// PHYSICS & COLLISION
+// =============================================================================
+function isSolid(worldX, worldY) {
+  const c = Math.floor(worldX / TILE_SIZE);
+  const r = Math.floor(worldY / TILE_SIZE);
+  if (r < 0 || r >= WORLD_ROWS || c < 0 || c >= WORLD_COLS) return true;
+  return collisionMap[r][c] === 1 || collisionMap[r][c] === 2;
+}
+
+function update(dt) {
+  const p = state.player;
+
+  // Movement input
+  let dx = 0, dy = 0;
+  if (keys['arrowup'] || keys['w']) { dy -= 1; p.dir = 1; }
+  if (keys['arrowdown'] || keys['s']) { dy += 1; p.dir = 0; }
+  if (keys['arrowleft'] || keys['a']) { dx -= 1; p.dir = 3; }
+  if (keys['arrowright'] || keys['d']) { dx += 1; p.dir = 2; }
+
+  if (dx !== 0 && dy !== 0) {
+    dx *= 0.7071;
+    dy *= 0.7071;
+  }
+
+  const speed = p.speed * dt;
+  const nextX = p.x + dx * speed;
+  const nextY = p.y + dy * speed;
+
+  // Compact collision box check around player's feet
+  if (!isSolid(nextX - 6, p.y) && !isSolid(nextX + 6, p.y)) p.x = nextX;
+  if (!isSolid(p.x, nextY - 4) && !isSolid(p.x, nextY + 4)) p.y = nextY;
+
+  // Attack timer
+  if (p.isAttacking) {
+    p.attackTimer -= dt;
+    if (p.attackTimer <= 0) p.isAttacking = false;
+  }
+
+  // Camera smooth following
+  const targetCamX = p.x - V_WIDTH / 2;
+  const targetCamY = p.y - V_HEIGHT / 2;
+  const maxCamX = WORLD_COLS * TILE_SIZE - V_WIDTH;
+  const maxCamY = WORLD_ROWS * TILE_SIZE - V_HEIGHT;
+  state.camX = Math.max(0, Math.min(maxCamX, targetCamX));
+  state.camY = Math.max(0, Math.min(maxCamY, targetCamY));
+
+  // Determine subzone for HUD
+  const c = Math.floor(p.x / TILE_SIZE);
+  let curZone = 'forest_clearing';
+  if (c >= 25 && c <= 38) curZone = 'Koyna River Crossing';
+  else if (c >= 39 && c <= 58 && p.y < 350) curZone = 'Bhavani Nagar Village';
+  else if (c >= 39 && c <= 58 && p.y >= 350) curZone = 'Hostile Raider Encampment';
+  else if (c >= 59) curZone = 'Kot Fortress Citadel';
+  else curZone = 'Sacred Sahyadri Teak Forest';
+
+  if (state.worldState.currentZone !== curZone) {
+    state.worldState.currentZone = curZone;
+    showZoneBanner(curZone);
+  }
+
+  // Check interaction pill prompt
+  let hasNearby = false;
+  for (const ent of state.entities) {
+    if (Math.hypot(p.x - ent.x, p.y - ent.y) < 38) {
+      hasNearby = true;
+      break;
+    }
+  }
+  document.getElementById('interaction-pill').style.display = hasNearby ? 'block' : 'none';
+}
+
+// =============================================================================
+// RENDERING PIPELINE (OPTION B PIXEL STANDARDS)
+// =============================================================================
+function render() {
+  ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
+
+  const startCol = Math.floor(state.camX / TILE_SIZE);
+  const endCol = Math.min(WORLD_COLS - 1, Math.floor((state.camX + V_WIDTH) / TILE_SIZE) + 1);
+  const startRow = Math.floor(state.camY / TILE_SIZE);
+  const endRow = Math.min(WORLD_ROWS - 1, Math.floor((state.camY + V_HEIGHT) / TILE_SIZE) + 1);
+
+  // 1. Base Terrain Ground Tiles
+  for (let r = startRow; r <= endRow; r++) {
+    for (let c = startCol; c <= endCol; c++) {
+      const tile = groundTiles[r][c];
+      const sx = Math.floor(c * TILE_SIZE - state.camX);
+      const sy = Math.floor(r * TILE_SIZE - state.camY);
+
+      if (tile.type === 'grass') {
+        const img = images['grass_tiles'];
+        if (img && img.complete) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
+        else { ctx.fillStyle = '#3a632a'; ctx.fillRect(sx, sy, 16, 16); }
+      } else if (tile.type === 'dirt') {
+        const img = images['dirt_tiles'];
+        if (img && img.complete) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
+        else { ctx.fillStyle = '#795538'; ctx.fillRect(sx, sy, 16, 16); }
+      } else if (tile.type === 'stone') {
+        const img = images['stone_tiles'];
+        if (img && img.complete) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
+        else { ctx.fillStyle = '#5e656e'; ctx.fillRect(sx, sy, 16, 16); }
+      } else if (tile.type === 'water') {
+        const img = images['water_tiles'];
+        if (img && img.complete) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
+        else { ctx.fillStyle = '#1f487e'; ctx.fillRect(sx, sy, 16, 16); }
+      } else if (tile.type === 'bridge') {
+        ctx.fillStyle = '#8a5b32'; ctx.fillRect(sx, sy, 16, 16);
+        ctx.fillStyle = '#422817'; ctx.fillRect(sx, sy + 14, 16, 2);
+      } else if (tile.type === 'cliff' || tile.type === 'fort_wall') {
+        ctx.fillStyle = '#27272a'; ctx.fillRect(sx, sy, 16, 16);
+        ctx.fillStyle = '#475569'; ctx.fillRect(sx, sy, 16, 3);
+      } else if (tile.type === 'gate') {
+        ctx.fillStyle = state.worldState.gateUnlocked ? '#8a5b32' : '#3b2516';
+        ctx.fillRect(sx, sy, 16, 16);
+      }
+    }
+  }
+
+  // 2. Y-Sorted Entities & Objects
+  const renderList = [];
+
+  // Harvest Nodes
+  state.harvestNodes.forEach(node => {
+    if (node.hp > 0) renderList.push({ type: 'node', obj: node, y: node.y });
+  });
+
+  // Entities & NPCs
+  state.entities.forEach(ent => {
+    if (ent.type !== 'enemy' || ent.hp > 0) renderList.push({ type: 'entity', obj: ent, y: ent.y });
+  });
+
+  // Player
+  renderList.push({ type: 'player', obj: state.player, y: state.player.y });
+
+  // Sort ascending by Y-depth
+  renderList.sort((a, b) => a.y - b.y);
+
+  // Render sorted list
+  renderList.forEach(item => {
+    const o = item.obj;
+    const sx = Math.floor(o.x - state.camX);
+    const sy = Math.floor(o.y - state.camY);
+
+    if (item.type === 'player') {
+      renderPlayer(sx, sy);
+    } else if (item.type === 'node') {
+      renderHarvestNode(o, sx, sy);
+    } else if (item.type === 'entity') {
+      renderWorldEntity(o, sx, sy);
+    }
+  });
+}
+
+function renderPlayer(sx, sy) {
+  const p = state.player;
+  // Soft Ground Shadow
+  ctx.fillStyle = 'rgba(15, 12, 10, 0.45)';
+  ctx.beginPath();
+  ctx.ellipse(sx, sy + 18, 12, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  let sheetKey = p.isAttacking ? 'shivaji_attack' : (Math.abs(p.vx) > 0 || Math.abs(p.vy) > 0 || keys['w'] || keys['s'] || keys['a'] || keys['d'] ? 'shivaji_walk' : 'shivaji_idle');
+  const sheet = images[sheetKey];
+  const fw = p.isAttacking ? 64 : 48;
+  const fh = 64;
+  const col = p.isAttacking ? Math.floor((1 - (p.attackTimer / 0.28)) * 6) % 6 : Math.floor(performance.now() / 150) % (sheetKey === 'shivaji_walk' ? 8 : 4);
+  const row = p.dir;
+
+  if (sheet && sheet.complete) {
+    ctx.drawImage(sheet, col * fw, row * fh, fw, fh, sx - fw / 2, sy - 40, fw, fh);
+  } else {
+    ctx.fillStyle = '#e66012'; ctx.fillRect(sx - 8, sy - 24, 16, 24);
+  }
+}
+
+function renderHarvestNode(node, sx, sy) {
+  if (node.type === 'wood_sagwan') {
+    const img = images['sagwan_trees'];
+    if (img && img.complete) ctx.drawImage(img, 0, 0, 48, 64, sx - 24, sy - 52, 48, 64);
+    else { ctx.fillStyle = '#422817'; ctx.fillRect(sx - 6, sy - 20, 12, 20); ctx.fillStyle = '#65a30d'; ctx.beginPath(); ctx.arc(sx, sy - 28, 18, 0, Math.PI*2); ctx.fill(); }
+  } else {
+    ctx.fillStyle = '#5e656e'; ctx.beginPath(); ctx.arc(sx, sy, 10, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#94a3b8'; ctx.fillRect(sx - 3, sy - 3, 6, 6);
+  }
+}
+
+function renderWorldEntity(ent, sx, sy) {
+  if (ent.type === 'enemy') {
+    // Enemy shadow
+    ctx.fillStyle = 'rgba(15, 12, 10, 0.45)';
+    ctx.beginPath(); ctx.ellipse(sx, sy + 14, 10, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+
+    const sheetKey = `${ent.model}_idle`;
+    const sheet = images[sheetKey];
+    const fw = ent.model === 'shield_guard' ? 44 : 40;
+    const fh = ent.model === 'shield_guard' ? 58 : 56;
+    const col = Math.floor(performance.now() / 200) % 4;
+    const row = ent.dir || 0;
+
+    if (sheet && sheet.complete) {
+      ctx.drawImage(sheet, col * fw, row * fh, fw, fh, sx - fw / 2, sy - 36, fw, fh);
+    } else {
+      ctx.fillStyle = '#205c34'; ctx.fillRect(sx - 6, sy - 20, 12, 20);
+    }
+
+    // Health bar above enemy
+    const pct = Math.max(0, ent.hp / ent.maxHp);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(sx - 12, sy - 42, 24, 3);
+    ctx.fillStyle = '#ef4444'; ctx.fillRect(sx - 12, sy - 42, Math.floor(24 * pct), 3);
+  } else if (ent.type === 'station') {
+    ctx.fillStyle = '#71717a'; ctx.fillRect(sx - 8, sy - 4, 16, 8);
+    ctx.fillStyle = '#ca8a04'; ctx.fillRect(sx - 4, sy - 8, 8, 4);
+  } else if (ent.type === 'npc') {
+    ctx.fillStyle = '#f59e0b'; ctx.fillRect(sx - 6, sy - 20, 12, 20);
+    ctx.fillStyle = '#fef3c7'; ctx.fillRect(sx - 4, sy - 28, 8, 8);
+  } else if (ent.type === 'gate_barrier') {
+    ctx.fillStyle = state.worldState.gateUnlocked ? '#8a5b32' : '#3b2516';
+    ctx.fillRect(sx - 16, sy - 24, 32, 24);
+  } else if (ent.type === 'flag_point') {
+    ctx.fillStyle = '#422817'; ctx.fillRect(sx - 2, sy - 36, 4, 36);
+    if (state.worldState.flagHoisted) {
+      ctx.fillStyle = '#e66012'; ctx.fillRect(sx + 2, sy - 36, 18, 12);
+    }
+  }
+}
+
+// =============================================================================
+// SAVE & LOAD SYSTEM (COMPATIBLE WITH CAMPAIGN PROGRESSION)
+// =============================================================================
+function saveGame() {
+  try {
+    const data = {
+      player: {
+        hp: state.player.hp,
+        maxHp: state.player.maxHp,
+        xp: state.player.xp,
+        maxXp: state.player.maxXp,
+        level: state.player.level,
+        equipped: state.player.equipped,
+        x: state.player.x,
+        y: state.player.y
+      },
+      inventory: state.inventory,
+      worldState: state.worldState,
+      activeMissions: state.activeMissions
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Save failed', e);
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (data.player) Object.assign(state.player, data.player);
+    if (data.inventory) Object.assign(state.inventory, data.inventory);
+    if (data.worldState) Object.assign(state.worldState, data.worldState);
+    if (data.activeMissions) state.activeMissions = data.activeMissions;
+    return true;
+  } catch (e) {
+    console.warn('Load failed', e);
+    return false;
+  }
+}
+
+// =============================================================================
+// MASTER GAME LOOP & RESIZE HANDLER
+// =============================================================================
+let lastTime = performance.now();
+
+function gameLoop(time) {
+  const dt = Math.min(0.05, (time - lastTime) / 1000);
+  lastTime = time;
+
+  update(dt);
+  render();
+
+  requestAnimationFrame(gameLoop);
+}
+
+function adjustCanvasScale() {
+  const availableH = window.innerHeight - 20;
+  const availableW = window.innerWidth - 20;
+  const scale = Math.max(1, Math.min(Math.floor(availableW / V_WIDTH), Math.floor(availableH / V_HEIGHT)));
+  canvas.style.width = `${V_WIDTH * scale}px`;
+  canvas.style.height = `${V_HEIGHT * scale}px`;
+}
+window.addEventListener('resize', adjustCanvasScale);
+
+// Initialization
+buildConnectedSahyadriWorld();
+loadGame();
+recalculatePlayerStats();
+adjustCanvasScale();
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>

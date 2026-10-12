@@ -1,0 +1,299 @@
+{
+  "system": "Chronicles of Swarajya: Universal Item Registry",
+  "version": "1.0.0",
+  "items": {
+    "wood_sagwan": {
+      "id": "wood_sagwan",
+      "name": "Sagwan Teak Wood",
+      "category": "material",
+      "slot": null,
+      "tier": 1,
+      "description": "Dense, water-resistant teak timber harvested from Sahyadri groves. Essential for tool handles, scabbards, and fortified gate construction.",
+      "icon": "ChroniclesOfSwarajya_Art/08_Trees/stumps_and_fallen_trees.png",
+      "stackable": true,
+      "maxStack": 99,
+      "sellValue": 2,
+      "buyValue": 5
+    },
+    "ore_iron": {
+      "id": "ore_iron",
+      "name": "Sahyadri Hematite Iron Ore",
+      "category": "material",
+      "slot": null,
+      "tier": 1,
+      "description": "Rich ironstone extracted from Deccan basalt outcrops. Refined by blacksmiths into deadly talwars, spearheads, and armour plates.",
+      "icon": "ChroniclesOfSwarajya_Art/09_RocksAndMountains/iron_ore_nodes.png",
+      "stackable": true,
+      "maxStack": 99,
+      "sellValue": 4,
+      "buyValue": 10
+    },
+    "leather_hide": {
+      "id": "leather_hide",
+      "name": "Tanned Buffalo Hide",
+      "category": "material",
+      "slot": null,
+      "tier": 1,
+      "description": "Thick, oil-cured leather used for grip bindings, kamarbandh straps, brigandine foundations, and dhal shield facings.",
+      "icon": "ChroniclesOfSwarajya_Art/11_VillageAndCamp/camp_assets.png",
+      "stackable": true,
+      "maxStack": 99,
+      "sellValue": 3,
+      "buyValue": 8
+    },
+    "gold_huns": {
+      "id": "gold_huns",
+      "name": "Swarajya Gold Huns",
+      "category": "currency",
+      "slot": null,
+      "tier": 1,
+      "description": "Official gold currency of the realm. Accepted by village smiths, merchants, and armourers across Maharashtra.",
+      "icon": "ChroniclesOfSwarajya_Art/09_RocksAndMountains/iron_ore_nodes.png",
+      "stackable": true,
+      "maxStack": 99999,
+      "sellValue": 1,
+      "buyValue": 1
+    },
+    "talwar_basic": {
+      "id": "talwar_basic",
+      "name": "Forged Steel Talwar",
+      "category": "weapon",
+      "slot": "weapon",
+      "tier": 1,
+      "weaponClass": "curved_sword",
+      "description": "Hand-forged curved steel talwar with a brass disc pommel. Well-balanced for swift slashes against raiders and sentries.",
+      "icon": "ChroniclesOfSwarajya_Art/06_Weapons_OptionB/talwar_basic.png",
+      "stats": {
+        "atk": 18,
+        "speed": 1.0,
+        "reach": 28,
+        "critChance": 0.05
+      },
+      "stackable": false,
+      "sellValue": 25,
+      "buyValue": 60
+    },
+    "talwar_upgraded": {
+      "id": "talwar_upgraded",
+      "name": "Pattisa Reinforced Talwar",
+      "category": "weapon",
+      "slot": "weapon",
+      "tier": 2,
+      "weaponClass": "curved_sword",
+      "description": "Master-forged high-carbon steel talwar with double fullers and spiked basket hilt. Cleaves through enemy mail with ease.",
+      "icon": "ChroniclesOfSwarajya_Art/06_Weapons_OptionB/talwar_upgraded.png",
+      "stats": {
+        "atk": 32,
+        "speed": 1.1,
+        "reach": 32,
+        "critChance": 0.12
+      },
+      "stackable": false,
+      "sellValue": 75,
+      "buyValue": 180
+    },
+    "heavy_curved_sword": {
+      "id": "heavy_curved_sword",
+      "name": "Khanda Heavy Broadsword",
+      "category": "weapon",
+      "slot": "weapon",
+      "tier": 2,
+      "weaponClass": "heavy_sword",
+      "description": "Broad double-edged blade reinforced with a spine plate. Delivers crushing downward cleaves capable of staggering shielded foes.",
+      "icon": "ChroniclesOfSwarajya_Art/06_Weapons_OptionB/heavy_curved_sword.png",
+      "stats": {
+        "atk": 42,
+        "speed": 0.85,
+        "reach": 36,
+        "staggerPower": 25
+      },
+      "stackable": false,
+      "sellValue": 90,
+      "buyValue": 220
+    },
+    "spear_bamboo": {
+      "id": "spear_bamboo",
+      "name": "Maratha Long Bhala (Spear)",
+      "category": "weapon",
+      "slot": "weapon",
+      "tier": 1,
+      "weaponClass": "polearm",
+      "description": "A 10-foot bamboo shaft tipped with a leaf-shaped steel point. Keeps fierce charging enemies and mounted scouts at distance.",
+      "icon": "ChroniclesOfSwarajya_Art/06_Weapons_OptionB/spear.png",
+      "stats": {
+        "atk": 22,
+        "speed": 1.05,
+        "reach": 44,
+        "critChance": 0.08
+      },
+      "stackable": false,
+      "sellValue": 35,
+      "buyValue": 80
+    },
+    "bow_composite": {
+      "id": "bow_composite",
+      "name": "Sahyadri Teak Composite Bow",
+      "category": "weapon",
+      "slot": "weapon",
+      "tier": 1,
+      "weaponClass": "bow",
+      "description": "Reinforced recurve bow made of horn, teak, and sinew. Fires armour-piercing arrows with great accuracy.",
+      "icon": "ChroniclesOfSwarajya_Art/06_Weapons_OptionB/bow_and_arrow.png",
+      "stats": {
+        "atk": 16,
+        "speed": 0.95,
+        "range": 160,
+        "critChance": 0.15
+      },
+      "stackable": false,
+      "sellValue": 40,
+      "buyValue": 95
+    },
+    "dhal_shield_basic": {
+      "id": "dhal_shield_basic",
+      "name": "Maratha Dhal Buckler",
+      "category": "shield",
+      "slot": "shield",
+      "tier": 1,
+      "description": "Convex buffalo-hide shield studded with four polished brass bosses. Absorbs incoming melee blows and projectile fire.",
+      "icon": "ChroniclesOfSwarajya_Art/06_Weapons_OptionB/maratha_dhal_shield.png",
+      "stats": {
+        "def": 8,
+        "blockChance": 0.35,
+        "staggerResist": 15
+      },
+      "stackable": false,
+      "sellValue": 30,
+      "buyValue": 70
+    },
+    "dhal_shield_reinforced": {
+      "id": "dhal_shield_reinforced",
+      "name": "Iron-Banded Dhal Greatshield",
+      "category": "shield",
+      "slot": "shield",
+      "tier": 2,
+      "description": "Heavy rhino-hide dhal banded in damascened steel plates. Completely deflects ordinary enemy arrows and reduces heavy boss impact.",
+      "icon": "ChroniclesOfSwarajya_Art/06_Weapons_OptionB/maratha_dhal_shield.png",
+      "stats": {
+        "def": 18,
+        "blockChance": 0.55,
+        "staggerResist": 30
+      },
+      "stackable": false,
+      "sellValue": 85,
+      "buyValue": 200
+    },
+    "angarkha_traditional": {
+      "id": "angarkha_traditional",
+      "name": "Traditional Cotton Angarkha",
+      "category": "armour",
+      "slot": "body",
+      "tier": 1,
+      "description": "Pleated off-white tunic with saffron trim. Offers maximum mobility and heat dissipation through the rugged Sahyadri trails.",
+      "icon": "ChroniclesOfSwarajya_Art/00_ArtStyle/option_b_palette.png",
+      "stats": {
+        "def": 2,
+        "speedBonus": 4
+      },
+      "stackable": false,
+      "sellValue": 10,
+      "buyValue": 25
+    },
+    "armour_leather_brigandine": {
+      "id": "armour_leather_brigandine",
+      "name": "Riveted Leather Brigandine",
+      "category": "armour",
+      "slot": "body",
+      "tier": 1,
+      "description": "Hardened buffalo-hide vest fitted with overlapping internal iron scales. Substantially reduces slash damage.",
+      "icon": "ChroniclesOfSwarajya_Art/00_ArtStyle/option_b_palette.png",
+      "stats": {
+        "def": 10,
+        "maxHp": 20,
+        "staggerResist": 10
+      },
+      "stackable": false,
+      "sellValue": 45,
+      "buyValue": 110
+    },
+    "armour_chainmail_zirah": {
+      "id": "armour_chainmail_zirah",
+      "name": "Maratha Zirah Chainmail Hauberk",
+      "category": "armour",
+      "slot": "body",
+      "tier": 2,
+      "description": "Interlinked riveted iron rings layered over quilted cotton gambeson. Protects vital organs against thrusts, arrows, and sabres.",
+      "icon": "ChroniclesOfSwarajya_Art/00_ArtStyle/option_b_palette.png",
+      "stats": {
+        "def": 22,
+        "maxHp": 40,
+        "staggerResist": 25
+      },
+      "stackable": false,
+      "sellValue": 120,
+      "buyValue": 280
+    },
+    "pheta_royal": {
+      "id": "pheta_royal",
+      "name": "Crimson & Saffron Pheta",
+      "category": "headgear",
+      "slot": "head",
+      "tier": 1,
+      "description": "Chhatrapati Shivaji Maharaj's iconic royal turban pinned with a jeweled Sirpech brooch and white plume. Symbol of Hindavi Swarajya.",
+      "icon": "ChroniclesOfSwarajya_Art/00_ArtStyle/option_b_palette.png",
+      "stats": {
+        "def": 4,
+        "leadership": 10,
+        "astraDamageBonus": 0.15
+      },
+      "stackable": false,
+      "sellValue": 50,
+      "buyValue": 150
+    },
+    "mojari_leather": {
+      "id": "mojari_leather",
+      "name": "Pointed Leather Mojari Boots",
+      "category": "footwear",
+      "slot": "feet",
+      "tier": 1,
+      "description": "Traditional curved-toe footwear built from thick cured leather with reinforced soles for gripping wet basalt rocks.",
+      "icon": "ChroniclesOfSwarajya_Art/00_ArtStyle/option_b_palette.png",
+      "stats": {
+        "def": 2,
+        "speedBonus": 8,
+        "dodgeWindow": 0.04
+      },
+      "stackable": false,
+      "sellValue": 20,
+      "buyValue": 45
+    },
+    "salve_healing": {
+      "id": "salve_healing",
+      "name": "Sahyadri Herbal Healing Salve",
+      "category": "consumable",
+      "slot": null,
+      "tier": 1,
+      "description": "Potent medicinal paste prepared by village elders from crushed neem leaves and wild mountain honey. Restores 50 HP immediately.",
+      "icon": "ChroniclesOfSwarajya_Art/07_TerrainTiles/grass_tiles.png",
+      "effect": {
+        "healHp": 50
+      },
+      "stackable": true,
+      "maxStack": 10,
+      "sellValue": 5,
+      "buyValue": 15
+    },
+    "key_kot_fort": {
+      "id": "key_kot_fort",
+      "name": "Kot Fort Gateway Key",
+      "category": "quest_item",
+      "slot": null,
+      "tier": 1,
+      "description": "Heavy wrought-iron key recovered from the enemy outpost commander. Unlocks the monumental ironwood gate of Kot Fort.",
+      "icon": "ChroniclesOfSwarajya_Art/10_FortArchitecture/fort_gates.png",
+      "stackable": false,
+      "sellValue": 0,
+      "buyValue": 0
+    }
+  }
+}

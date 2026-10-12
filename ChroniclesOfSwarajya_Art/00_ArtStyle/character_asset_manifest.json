@@ -481,5 +481,30 @@
       "ChroniclesOfSwarajya_Art/07_Previews_OptionB/javali_mountain_pass_overlook.png",
       "ChroniclesOfSwarajya_Art/07_Previews_OptionB/pratapgad_fortified_bastion_gate.png"
     ]
+  },
+  "gateD_release": {
+    "version": "1.0.0",
+    "playableBuild": "open_world_game.html",
+    "connectedRegion": "Sahyadri Gateway Valley (80x40 tiles, 1280x640px world space)",
+    "viewport": "480x270 16:9 widescreen nearest-neighbor",
+    "registries": [
+      "data/items.json",
+      "data/crafting_recipes.json",
+      "data/world_regions.json",
+      "data/missions.json",
+      "data/data_registries.js"
+    ],
+    "subzones": [
+      "Sacred Awakening Forest",
+      "Koyna Stream & Timber Footbridge",
+      "Bhavani Nagar Settlement",
+      "Deshmukh Raider Encampment",
+      "Kot Fort Monumental Approach & Citadel"
+    ],
+    "systems": [
+      "Atomic Universal Crafting (Field Anvil & Village Blacksmith)",
+      "Independent Character XP Progression",
+      "Physical World State Response & Save Migration"
+    ]
   }
 }

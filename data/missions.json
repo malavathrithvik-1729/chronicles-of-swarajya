@@ -1,0 +1,87 @@
+{
+  "system": "Chronicles of Swarajya: Mission & World State Registry",
+  "version": "1.0.0",
+  "missions": [
+    {
+      "id": "quest_1_awakening_and_forge",
+      "title": "Act I: The Divine Spark & Forest Forging",
+      "location": "forest_clearing",
+      "giver": "Divine Memory of Goddess Bhavani",
+      "prerequisites": [],
+      "objectives": [
+        { "id": "gather_materials", "desc": "Gather 4 Sagwan Teak Wood & 3 Ironstone Ore", "current": 0, "target": 7 },
+        { "id": "craft_talwar", "desc": "Forge the Steel Talwar via the Field Crafting Anvil [C]", "completed": false }
+      ],
+      "rewards": {
+        "xp": 100,
+        "gold": 15,
+        "unlockedRecipe": "craft_dhal_shield_basic"
+      },
+      "worldStateChanges": {
+        "forestCleared": true
+      }
+    },
+    {
+      "id": "quest_2_cross_river_to_village",
+      "title": "Act II: The Journey to Bhavani Nagar",
+      "location": "river_crossing",
+      "giver": "Mavala Scout",
+      "prerequisites": ["quest_1_awakening_and_forge"],
+      "objectives": [
+        { "id": "cross_bridge", "desc": "Cross the Koyna Stream Timber Footbridge eastward", "completed": false },
+        { "id": "reach_village", "desc": "Discover and enter Bhavani Nagar village", "completed": false }
+      ],
+      "rewards": {
+        "xp": 150,
+        "gold": 20
+      },
+      "worldStateChanges": {
+        "villageDiscovered": true
+      }
+    },
+    {
+      "id": "quest_3_liberate_village",
+      "title": "Act III: Liberation of Bhavani Nagar",
+      "location": "raider_camp",
+      "giver": "Village Elder",
+      "prerequisites": ["quest_2_cross_river_to_village"],
+      "objectives": [
+        { "id": "clear_raider_patrols", "desc": "Defeat the 4 enemy sentries assaulting the southern road", "current": 0, "target": 4 },
+        { "id": "defeat_raider_captain", "desc": "Defeat the Raider Subedar Captain and secure the Camp", "completed": false }
+      ],
+      "rewards": {
+        "xp": 350,
+        "gold": 50,
+        "item": "key_kot_fort"
+      },
+      "worldStateChanges": {
+        "villageLiberated": true,
+        "blacksmithUnlocked": true,
+        "armourerUnlocked": true,
+        "raiderCampSecured": true
+      }
+    },
+    {
+      "id": "quest_4_storm_kot_fort",
+      "title": "Act IV: Storming Kot Fort",
+      "location": "kot_fort_approach",
+      "giver": "Village Blacksmith & Mavala Allies",
+      "prerequisites": ["quest_3_liberate_village"],
+      "objectives": [
+        { "id": "unlock_citadel_gate", "desc": "Use the recovered Fort Key to breach the Dilli Darwaja gate", "completed": false },
+        { "id": "defeat_citadel_garrison", "desc": "Overcome the elite shield guards defending the bastion", "current": 0, "target": 3 },
+        { "id": "hoist_bhagwa_zenda", "desc": "Hoist the Saffron Bhagwa Zenda banner over the highest Buruj", "completed": false }
+      ],
+      "rewards": {
+        "xp": 600,
+        "gold": 100,
+        "title": "Chhatrapati of Kot Fort"
+      },
+      "worldStateChanges": {
+        "kotFortLiberated": true,
+        "routesSecured": true,
+        "strongholdEstablished": true
+      }
+    }
+  ]
+}

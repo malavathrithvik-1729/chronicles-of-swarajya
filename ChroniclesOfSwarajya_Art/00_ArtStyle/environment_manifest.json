@@ -302,5 +302,19 @@
       "resolution": "480x270",
       "aspectRatio": "16:9"
     }
-  ]
+  ],
+  "gateD_openWorld": {
+    "mapWidthCols": 80,
+    "mapHeightRows": 40,
+    "tileSize": 16,
+    "worldDimensions": "1280x640",
+    "playableSlice": "open_world_game.html",
+    "zones": [
+      "forest_clearing",
+      "river_crossing",
+      "village_bhavani_nagar",
+      "raider_camp",
+      "kot_fort_approach"
+    ]
+  }
 }

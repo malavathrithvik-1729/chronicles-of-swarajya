@@ -1,0 +1,55 @@
+{
+  "system": "Chronicles of Swarajya: World Map & Regions Registry",
+  "version": "1.0.0",
+  "regions": {
+    "sahyadri_gateway_valley": {
+      "id": "sahyadri_gateway_valley",
+      "name": "Sahyadri Gateway Valley (Connected Open World)",
+      "biome": "Monsoon Teak Forest, River Crossing, Hill Pass & Kot Fortress",
+      "worldWidth": 80,
+      "worldHeight": 40,
+      "tileSize": 16,
+      "viewportTarget": {
+        "width": 480,
+        "height": 270
+      },
+      "subZones": [
+        {
+          "id": "forest_clearing",
+          "name": "Sacred Awakening Forest",
+          "bounds": { "x1": 0, "y1": 0, "x2": 24, "y2": 39 },
+          "description": "Lush teak groves where Shivaji awakens and gathers his initial timber and ironstone ore.",
+          "musicTrack": "forest_ambient"
+        },
+        {
+          "id": "river_crossing",
+          "name": "Koyna Stream & Timber Footbridge",
+          "bounds": { "x1": 25, "y1": 0, "x2": 38, "y2": 39 },
+          "description": "Flowing river separating the deep woods from the settled village and mountain paths.",
+          "musicTrack": "river_ambient"
+        },
+        {
+          "id": "village_bhavani_nagar",
+          "name": "Bhavani Nagar Settlement",
+          "bounds": { "x1": 39, "y1": 0, "x2": 56, "y2": 22 },
+          "description": "Rustic village with thatched huts, an ancient central stone well, blacksmith forge, and elder's home.",
+          "musicTrack": "village_theme"
+        },
+        {
+          "id": "raider_camp",
+          "name": "Deshmukh Raider Encampment",
+          "bounds": { "x1": 40, "y1": 23, "x2": 58, "y2": 39 },
+          "description": "Hostile forward encampment with military pavilion tents, supply caches, and enemy sentries threatening the valley.",
+          "musicTrack": "tension_combat"
+        },
+        {
+          "id": "kot_fort_approach",
+          "name": "Kot Fort Monumental Approach & Citadel",
+          "bounds": { "x1": 59, "y1": 0, "x2": 79, "y2": 39 },
+          "description": "Steep stone staircase, twin monumental bastions, iron-spiked timber gate, and courtyard bastion.",
+          "musicTrack": "fortress_march"
+        }
+      ]
+    }
+  }
+}

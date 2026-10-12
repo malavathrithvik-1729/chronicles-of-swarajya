@@ -1,0 +1,140 @@
+{
+  "system": "Chronicles of Swarajya: Universal Crafting & Upgrade Registry",
+  "version": "1.0.0",
+  "recipes": [
+    {
+      "id": "craft_talwar_basic",
+      "outputItem": "talwar_basic",
+      "outputQty": 1,
+      "station": "field_or_anvil",
+      "unlockedByDefault": true,
+      "costs": {
+        "wood_sagwan": 4,
+        "ore_iron": 3,
+        "gold_huns": 0
+      },
+      "description": "Forge the first steel talwar using gathered teak wood and hematite ore from the forest."
+    },
+    {
+      "id": "craft_dhal_shield_basic",
+      "outputItem": "dhal_shield_basic",
+      "outputQty": 1,
+      "station": "field_or_anvil",
+      "unlockedByDefault": true,
+      "costs": {
+        "wood_sagwan": 3,
+        "leather_hide": 2,
+        "ore_iron": 1,
+        "gold_huns": 0
+      },
+      "description": "Construct a light Maratha dhal buckler reinforced with brass and iron studs."
+    },
+    {
+      "id": "craft_leather_brigandine",
+      "outputItem": "armour_leather_brigandine",
+      "outputQty": 1,
+      "station": "field_or_anvil",
+      "unlockedByDefault": true,
+      "costs": {
+        "leather_hide": 4,
+        "ore_iron": 2,
+        "gold_huns": 5
+      },
+      "description": "Stitch overlapping iron plates inside a tough leather vest (+10 DEF, +20 Max HP)."
+    },
+    {
+      "id": "craft_spear_bamboo",
+      "outputItem": "spear_bamboo",
+      "outputQty": 1,
+      "station": "field_or_anvil",
+      "unlockedByDefault": true,
+      "costs": {
+        "wood_sagwan": 4,
+        "ore_iron": 2,
+        "gold_huns": 0
+      },
+      "description": "Affix a sharpened steel spearhead to a long resilient timber shaft."
+    },
+    {
+      "id": "craft_bow_composite",
+      "outputItem": "bow_composite",
+      "outputQty": 1,
+      "station": "field_or_anvil",
+      "unlockedByDefault": true,
+      "costs": {
+        "wood_sagwan": 5,
+        "leather_hide": 3,
+        "gold_huns": 5
+      },
+      "description": "Fashion a composite recurve hunting bow strung with cured sinew."
+    },
+    {
+      "id": "craft_salve_healing",
+      "outputItem": "salve_healing",
+      "outputQty": 2,
+      "station": "field_or_anvil",
+      "unlockedByDefault": true,
+      "costs": {
+        "wood_sagwan": 1,
+        "gold_huns": 2
+      },
+      "description": "Prepare soothing herbal compresses using mountain herbs and natural resins."
+    },
+    {
+      "id": "upgrade_talwar_pattisa",
+      "outputItem": "talwar_upgraded",
+      "outputQty": 1,
+      "station": "village_blacksmith",
+      "unlockedByDefault": false,
+      "unlockCondition": "village_liberated",
+      "costs": {
+        "talwar_basic": 1,
+        "ore_iron": 6,
+        "gold_huns": 25
+      },
+      "description": "Refine the basic talwar at the village forge into a lethal double-fullered Pattisa (+32 ATK)."
+    },
+    {
+      "id": "craft_khanda_heavy",
+      "outputItem": "heavy_curved_sword",
+      "outputQty": 1,
+      "station": "village_blacksmith",
+      "unlockedByDefault": false,
+      "unlockCondition": "village_liberated",
+      "costs": {
+        "ore_iron": 10,
+        "wood_sagwan": 4,
+        "gold_huns": 40
+      },
+      "description": "Forge a massive Khanda broadsword capable of shattering enemy guard stances (+42 ATK)."
+    },
+    {
+      "id": "upgrade_dhal_iron_banded",
+      "outputItem": "dhal_shield_reinforced",
+      "outputQty": 1,
+      "station": "village_blacksmith",
+      "unlockedByDefault": false,
+      "unlockCondition": "village_liberated",
+      "costs": {
+        "dhal_shield_basic": 1,
+        "ore_iron": 5,
+        "gold_huns": 20
+      },
+      "description": "Bolt damascened iron bands and heavy rim reinforcement onto the dhal shield (+18 DEF)."
+    },
+    {
+      "id": "craft_chainmail_hauberk",
+      "outputItem": "armour_chainmail_zirah",
+      "outputQty": 1,
+      "station": "village_armourer",
+      "unlockedByDefault": false,
+      "unlockCondition": "village_liberated",
+      "costs": {
+        "armour_leather_brigandine": 1,
+        "ore_iron": 8,
+        "gold_huns": 50
+      },
+      "description": "Weave interlocking steel rings into a resilient Zirah chainmail hauberk (+22 DEF, +40 Max HP)."
+    }
+  ]
+}
