@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Chronicles of Swarajya: The Divine Blade — Open-World Edition (Gate D)</title>
+<title>Chronicles of Swarajya: The Divine Blade — Open-World Action RPG</title>
 <style>
   :root {
     --bg-dark: #080705;
@@ -19,6 +19,7 @@
     --text-muted: #9ca3af;
     --hp-green: #16a34a;
     --xp-blue: #0284c7;
+    --mana-gold: #eab308;
   }
   * {
     box-sizing: border-box;
@@ -72,7 +73,7 @@
     z-index: 10;
   }
   .hud-badge {
-    background: rgba(20, 14, 11, 0.85);
+    background: rgba(20, 14, 11, 0.9);
     border: 1px solid var(--border-gold);
     padding: 4px 8px;
     border-radius: 4px;
@@ -80,9 +81,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.8);
   }
   .bar-container {
-    width: 80px;
+    width: 75px;
     height: 8px;
     background: #2a1b12;
     border: 1px solid #5a3820;
@@ -91,16 +93,16 @@
   }
   .bar-fill {
     height: 100%;
-    transition: width 0.15s ease;
+    transition: width 0.1s linear;
   }
 
-  /* Region / Subzone Banner */
+  /* Subzone Banner */
   #zone-banner {
     position: absolute;
     top: 48px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(20, 14, 11, 0.9);
+    background: rgba(20, 14, 11, 0.92);
     border: 1px solid var(--saffron);
     padding: 6px 16px;
     border-radius: 20px;
@@ -112,14 +114,14 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.4s ease;
     z-index: 10;
   }
   #zone-banner.visible {
     opacity: 1;
   }
 
-  /* Bottom Controls & Interaction Pill */
+  /* Interaction Pill */
   #interaction-pill {
     position: absolute;
     bottom: 12px;
@@ -141,11 +143,11 @@
     100% { transform: translateX(-50%) scale(1.06); }
   }
 
-  /* Modals: Crafting, Inventory, Dialogue, Village Smith */
+  /* Modals: Title, Astra Selection, Crafting, Dialogue, Defeat */
   .modal-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.85);
     display: none;
     justify-content: center;
     align-items: center;
@@ -155,8 +157,6 @@
     display: flex;
   }
   .modal-panel {
-    width: 440px;
-    max-height: 250px;
     background: var(--panel-bg);
     border: 2px solid var(--border-gold);
     border-radius: 6px;
@@ -188,13 +188,90 @@
   }
   .modal-close:hover { color: #fff; }
   .modal-body {
-    padding: 10px;
+    padding: 12px;
     overflow-y: auto;
     font-size: 11px;
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
+
+  /* Title Screen Modal */
+  #title-modal .modal-panel {
+    width: 420px;
+    text-align: center;
+    padding: 16px;
+    gap: 12px;
+  }
+  .title-h1 {
+    font-size: 18px;
+    color: var(--saffron-hi);
+    font-weight: bold;
+    letter-spacing: 2px;
+  }
+  .title-h2 {
+    font-size: 11px;
+    color: var(--gold-hi);
+    letter-spacing: 1px;
+  }
+  .btn-title {
+    background: #27170f;
+    border: 1px solid var(--border-gold);
+    color: var(--text-cream);
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 12px;
+    transition: all 0.15s ease;
+  }
+  .btn-title:hover {
+    background: var(--saffron);
+    color: #fff;
+    border-color: #fef08a;
+  }
+  .btn-title:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #4a3424;
+  }
+
+  /* Astra Selection Modal */
+  #astra-modal .modal-panel {
+    width: 450px;
+    padding: 14px;
+  }
+  .astra-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .astra-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-dark);
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .astra-card:hover {
+    border-color: var(--saffron-hi);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230, 96, 18, 0.4);
+  }
+  .astra-card.selected {
+    border-color: var(--gold-hi);
+    background: #331f14;
+    box-shadow: 0 0 15px rgba(254, 240, 138, 0.5);
+  }
+
+  /* Crafting Cards */
   .recipe-card {
     background: var(--card-bg);
     border: 1px solid var(--border-dark);
@@ -204,14 +281,12 @@
     justify-content: space-between;
     align-items: center;
   }
-  .recipe-card:hover {
-    border-color: var(--border-gold);
-  }
+  .recipe-card:hover { border-color: var(--border-gold); }
   .btn-craft {
     background: var(--saffron);
     color: #fff;
     border: 1px solid var(--border-gold);
-    padding: 4px 10px;
+    padding: 5px 12px;
     font-size: 10px;
     font-weight: bold;
     border-radius: 3px;
@@ -225,7 +300,7 @@
     border-color: #4a3a30;
   }
 
-  /* Dialogue Box with Illustrated Portrait */
+  /* Dialogue Box with Portrait */
   #dialogue-modal {
     position: absolute;
     bottom: 12px;
@@ -274,6 +349,14 @@
     color: var(--saffron);
     font-weight: bold;
   }
+
+  /* Defeat Modal */
+  #defeat-modal .modal-panel {
+    width: 320px;
+    text-align: center;
+    padding: 16px;
+    gap: 12px;
+  }
 </style>
 </head>
 <body>
@@ -285,7 +368,7 @@
     <!-- Top HUD -->
     <div id="top-hud">
       <div class="hud-badge">
-        <span style="color:var(--saffron-hi); font-weight:bold;">CHHATRAPATI SHIVAJI</span>
+        <span style="color:var(--saffron-hi); font-weight:bold;">SHIVAJI</span>
         <span id="hud-level">LVL 1</span>
         <div style="display:flex; align-items:center; gap:4px;">
           <span>HP</span>
@@ -294,6 +377,10 @@
         <div style="display:flex; align-items:center; gap:4px;">
           <span>XP</span>
           <div class="bar-container"><div id="bar-xp" class="bar-fill" style="background:var(--xp-blue); width:0%;"></div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <span id="hud-astra-name">ASTRA</span>
+          <div class="bar-container"><div id="bar-astra" class="bar-fill" style="background:var(--mana-gold); width:100%;"></div></div>
         </div>
       </div>
 
@@ -311,9 +398,54 @@
     <!-- Interaction Pill -->
     <div id="interaction-pill">[E] Interact</div>
 
-    <!-- Universal Crafting Modal -->
-    <div id="crafting-modal" class="modal-overlay">
+    <!-- 1. Title Screen Modal -->
+    <div id="title-modal" class="modal-overlay active">
       <div class="modal-panel">
+        <div class="title-h1">CHRONICLES OF SWARAJYA</div>
+        <div class="title-h2">THE DIVINE BLADE — OPEN-WORLD RPG</div>
+        <div style="font-size:11px; color:var(--text-muted); line-height:1.4;">
+          Explore the rugged Sahyadri mountains, forge weapons and armour, liberate village settlements, and establish Hindavi Swarajya under Chhatrapati Shivaji Maharaj.
+        </div>
+        <button class="btn-title" id="btn-continue-game" disabled onclick="continueSavedAdventure()">CONTINUE ADVENTURE</button>
+        <button class="btn-title" style="background:#b45309;" onclick="startNewAdventureFlow()">NEW ADVENTURE</button>
+      </div>
+    </div>
+
+    <!-- 2. Astra Selection Modal -->
+    <div id="astra-modal" class="modal-overlay">
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div class="modal-title">THE SACRED VOW — CHOOSE YOUR STARTING ASTRA</div>
+        </div>
+        <div class="modal-body">
+          <div style="color:var(--text-cream); font-size:11px; text-align:center;">
+            Before the sanctum of Goddess Bhavani, declare your sacred vow for Hindavi Swarajya. Choose your divine blessing:
+          </div>
+          <div class="astra-grid">
+            <div class="astra-card" id="card-agni" onclick="selectAstra('agni')">
+              <div style="font-size:22px;">🔥</div>
+              <div style="font-weight:bold; color:#ef4444; margin:4px 0;">AGNI</div>
+              <div style="font-size:10px; color:var(--text-muted);">Radial fire burst damaging nearby enemies. Offensive powerhouse.</div>
+            </div>
+            <div class="astra-card" id="card-varuna" onclick="selectAstra('varuna')">
+              <div style="font-size:22px;">💧</div>
+              <div style="font-weight:bold; color:#38bdf8; margin:4px 0;">VARUNA</div>
+              <div style="font-size:10px; color:var(--text-muted);">Restorative waters healing 40 HP & granting aegis shield. Defensive survival.</div>
+            </div>
+            <div class="astra-card" id="card-bhoomi" onclick="selectAstra('bhoomi')">
+              <div style="font-size:22px;">🌍</div>
+              <div style="font-weight:bold; color:#facc15; margin:4px 0;">BHOOMI</div>
+              <div style="font-size:10px; color:var(--text-muted);">Seismic tremor shockwave staggering & knocking back foes. Crowd control.</div>
+            </div>
+          </div>
+          <button class="btn-title" id="btn-confirm-astra" style="margin-top:10px; background:var(--saffron);" disabled onclick="confirmAstraSelection()">CONFIRM SACRED VOW</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Universal Crafting Modal -->
+    <div id="crafting-modal" class="modal-overlay">
+      <div class="modal-panel" style="width:440px; max-height:250px;">
         <div class="modal-header">
           <div class="modal-title" id="crafting-title">Field Smithing Anvil</div>
           <button class="modal-close" onclick="closeCraftingModal()">✕</button>
@@ -324,13 +456,22 @@
       </div>
     </div>
 
-    <!-- Dialogue Box with Portrait -->
+    <!-- 4. Dialogue Box with Portrait -->
     <div id="dialogue-modal">
       <img id="dialogue-portrait" src="ChroniclesOfSwarajya_Art/05_Portraits_OptionB/bhavani_portrait.png" alt="Portrait">
       <div id="dialogue-content">
         <div id="dialogue-speaker">Goddess Bhavani</div>
         <div id="dialogue-text">"Rise, Shivba! The rugged Sahyadri calls for its protector. Forge your steel talwar and bring Swarajya to the land."</div>
         <div id="dialogue-prompt">Press [SPACE] or [E] to continue</div>
+      </div>
+    </div>
+
+    <!-- 5. Defeat Modal -->
+    <div id="defeat-modal" class="modal-overlay">
+      <div class="modal-panel">
+        <div style="font-size:16px; color:#ef4444; font-weight:bold;">SHIVAJI HAS FALLEN</div>
+        <div style="font-size:11px; color:var(--text-muted);">The dream of Swarajya never perishes. Regroup at the Sacred Forest Clearing with renewed resolve.</div>
+        <button class="btn-title" style="background:var(--saffron);" onclick="respawnPlayer()">RESPAWN AT CLEARING</button>
       </div>
     </div>
   </div>
@@ -341,7 +482,7 @@
 
 <script>
 // =============================================================================
-// OPEN-WORLD GAME ENGINE (GATE D IMPLEMENTATION)
+// OPEN-WORLD GAME ENGINE (GATE E: FULL COMBAT, ASTRA & REFINED EXPERIENCE)
 // Viewport: 480 x 270 (16:9 widescreen) | Connected World: 80 x 40 tiles (16px)
 // =============================================================================
 
@@ -387,6 +528,13 @@ class OpenWorldAudio {
       gain.gain.setValueAtTime(0.25, now);
       gain.gain.linearRampToValueAtTime(0, now + 0.08);
       osc.start(now); osc.stop(now + 0.08);
+    } else if (type === 'enemy_hit') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(110, now);
+      osc.frequency.linearRampToValueAtTime(45, now + 0.14);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.14);
+      osc.start(now); osc.stop(now + 0.14);
     } else if (type === 'craft') {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(600, now);
@@ -405,6 +553,27 @@ class OpenWorldAudio {
         g.gain.linearRampToValueAtTime(0, now + idx * 0.1 + 0.25);
         o.start(now + idx * 0.1); o.stop(now + idx * 0.1 + 0.25);
       });
+    } else if (type === 'agni') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(250, now);
+      osc.frequency.exponentialRampToValueAtTime(60, now + 0.35);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.35);
+      osc.start(now); osc.stop(now + 0.35);
+    } else if (type === 'varuna') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.4);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.4);
+      osc.start(now); osc.stop(now + 0.4);
+    } else if (type === 'bhoomi') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(80, now);
+      osc.frequency.linearRampToValueAtTime(30, now + 0.4);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.4);
+      osc.start(now); osc.stop(now + 0.4);
     }
   }
 }
@@ -416,13 +585,25 @@ const ASSETS = {
   shivaji_idle: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png',
   shivaji_walk: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_walk.png',
   shivaji_attack: 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_attack.png',
-  // Refined Option B Enemies
+  // All 6 Refined Option B Enemies
   swordsman_idle: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_idle.png',
   swordsman_walk: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_walk.png',
   swordsman_attack: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_attack.png',
   shield_guard_idle: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_idle.png',
   shield_guard_walk: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_walk.png',
   shield_guard_attack: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_attack.png',
+  archer_idle: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/archer/archer_idle.png',
+  archer_walk: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/archer/archer_walk.png',
+  archer_attack: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/archer/archer_attack.png',
+  charging_soldier_idle: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/charging_soldier/charging_soldier_idle.png',
+  charging_soldier_walk: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/charging_soldier/charging_soldier_walk.png',
+  charging_soldier_attack: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/charging_soldier/charging_soldier_attack.png',
+  elite_halberdier_idle: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/elite_halberdier/elite_halberdier_idle.png',
+  elite_halberdier_walk: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/elite_halberdier/elite_halberdier_walk.png',
+  elite_halberdier_attack: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/elite_halberdier/elite_halberdier_attack.png',
+  spear_soldier_idle: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/spear_soldier/spear_soldier_idle.png',
+  spear_soldier_walk: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/spear_soldier/spear_soldier_walk.png',
+  spear_soldier_attack: 'ChroniclesOfSwarajya_Art/02_Enemies_OptionB/spear_soldier/spear_soldier_attack.png',
   // Environment Tiles & Nature
   grass_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/grass_tiles.png',
   dirt_tiles: 'ChroniclesOfSwarajya_Art/07_TerrainTiles/dirt_path_tiles.png',
@@ -460,6 +641,9 @@ for (const [k, src] of Object.entries(ASSETS)) {
 // =============================================================================
 const SAVE_KEY = 'swarajya_open_world_save_v1';
 
+let pendingAstraSelection = null;
+let gameRunning = false;
+
 const state = {
   // Player
   player: {
@@ -478,6 +662,15 @@ const state = {
     def: 2,
     isAttacking: false,
     attackTimer: 0,
+    invulnerableTimer: 0,
+    isDodging: false,
+    dodgeTimer: 0,
+    dodgeCooldown: 0,
+    // Divine Astra
+    selectedAstra: null, // 'agni', 'varuna', 'bhoomi'
+    astraCooldown: 0,
+    astraMaxCooldown: 7.0,
+    aegisShieldTimer: 0,
     equipped: {
       weapon: null,
       shield: null,
@@ -487,7 +680,7 @@ const state = {
     }
   },
 
-  // Inventory (Items registry IDs and stack quantities)
+  // Inventory
   inventory: {
     wood_sagwan: 0,
     ore_iron: 0,
@@ -517,7 +710,7 @@ const state = {
     }
   ],
 
-  // Camera Position (Upper-left world coords)
+  // Camera Position
   camX: 0,
   camY: 0,
 
@@ -552,11 +745,9 @@ function buildConnectedSahyadriWorld() {
       // 2. Koyna River Channel (Cols 28..31, crossing at r 18..22)
       if (c >= 28 && c <= 31) {
         if (r >= 18 && r <= 22) {
-          // Timber Bridge Walkway
           tileRow.push({ type: 'bridge', idx: 0 });
           colRow.push(0);
         } else {
-          // Deep impassable water
           tileRow.push({ type: 'water', idx: (c + r) % 4 });
           colRow.push(2);
         }
@@ -566,15 +757,12 @@ function buildConnectedSahyadriWorld() {
       // 3. Fort Enclosure & Stone Courtyard (Cols 60..78)
       if (c >= 60) {
         if (c === 60 && (r < 18 || r > 22)) {
-          // Fort Outer Bastion Wall
           tileRow.push({ type: 'fort_wall', idx: 0 });
           colRow.push(1);
         } else if (c === 60 && r >= 18 && r <= 22) {
-          // Fort Gate Entrance
           tileRow.push({ type: 'gate', idx: 0 });
           colRow.push(state.worldState.gateUnlocked ? 0 : 1);
         } else {
-          // Courtyard Dressed Flagstones
           tileRow.push({ type: 'stone', idx: (c % 4) });
           colRow.push(0);
         }
@@ -584,7 +772,6 @@ function buildConnectedSahyadriWorld() {
       // 4. Village of Bhavani Nagar (Cols 40..54, Rows 5..20)
       if (c >= 40 && c <= 54 && r >= 5 && r <= 20) {
         if ((c === 47 && r === 12)) {
-          // Central Stone Well
           tileRow.push({ type: 'village_well', idx: 0 });
           colRow.push(1);
         } else if (r % 4 === 0 || c % 5 === 0) {
@@ -612,9 +799,8 @@ function buildConnectedSahyadriWorld() {
     collisionMap.push(colRow);
   }
 
-  // Populate Interactive Harvest Nodes (Teak Trees & Iron Ore)
+  // Populate Interactive Harvest Nodes
   state.harvestNodes = [
-    // Forest Clearing Nodes
     { id: 'tree_1', type: 'wood_sagwan', x: 80, y: 180, hp: 3, name: 'Sagwan Teak Tree' },
     { id: 'tree_2', type: 'wood_sagwan', x: 160, y: 220, hp: 3, name: 'Sagwan Teak Tree' },
     { id: 'tree_3', type: 'wood_sagwan', x: 110, y: 340, hp: 3, name: 'Sagwan Teak Tree' },
@@ -622,12 +808,11 @@ function buildConnectedSahyadriWorld() {
     { id: 'ore_1', type: 'ore_iron', x: 140, y: 110, hp: 3, name: 'Hematite Ore Vein' },
     { id: 'ore_2', type: 'ore_iron', x: 260, y: 380, hp: 3, name: 'Hematite Ore Vein' },
     { id: 'ore_3', type: 'ore_iron', x: 70, y: 260, hp: 3, name: 'Hematite Ore Vein' },
-    // Near River & Village
     { id: 'tree_5', type: 'wood_sagwan', x: 370, y: 140, hp: 3, name: 'Sagwan Teak Tree' },
     { id: 'ore_4', type: 'ore_iron', x: 420, y: 360, hp: 3, name: 'Hematite Ore Vein' },
   ];
 
-  // Populate World Interactive Stations & NPCs
+  // Populate World Interactive Stations, NPCs & Varied Tactical Enemies
   state.entities = [
     // Field Anvil in Forest
     { id: 'station_field_anvil', type: 'station', name: 'Field Smithing Anvil', x: 200, y: 300, stationType: 'field_or_anvil' },
@@ -640,16 +825,50 @@ function buildConnectedSahyadriWorld() {
     // High Saffron Bastion Flag
     { id: 'bhagwa_zenda_obj', type: 'flag_point', name: 'Bastion Bhagwa Zenda Staff', x: 1160, y: 220 },
 
-    // Hostile Enemies (Using Refined Option B Models)
-    // 1. Forest Outpost Raider
-    { id: 'enemy_1', type: 'enemy', model: 'swordsman', name: 'Deccan Scout', x: 320, y: 310, hp: 45, maxHp: 45, atk: 8, state: 'patrol', dir: 3 },
-    // 2. Raider Camp Sentries
-    { id: 'enemy_2', type: 'enemy', model: 'swordsman', name: 'Deccan Swordsman', x: 700, y: 440, hp: 55, maxHp: 55, atk: 10, state: 'patrol', dir: 1 },
-    { id: 'enemy_3', type: 'enemy', model: 'shield_guard', name: 'Camp Shield Guard', x: 760, y: 460, hp: 80, maxHp: 80, atk: 12, state: 'patrol', dir: 3 },
-    // 3. Fort Gateway Elite Guards
-    { id: 'enemy_4', type: 'enemy', model: 'shield_guard', name: 'Citadel Gatekeeper Guard', x: 920, y: 300, hp: 90, maxHp: 90, atk: 14, state: 'patrol', dir: 3 },
-    { id: 'enemy_5', type: 'enemy', model: 'swordsman', name: 'Fort Bastion Swordsman', x: 1050, y: 280, hp: 65, maxHp: 65, atk: 12, state: 'patrol', dir: 0 }
+    // Tactical Enemy Encounters (All Option B Roster Roles)
+    // 1. Forest Outpost Raider (Fast Swordsman)
+    createEnemy('enemy_1', 'swordsman', 'Deccan Scout', 320, 310, { hp: 45, atk: 12, detectRadius: 110, attackRange: 28 }),
+    // 2. Raider Camp Vanguard (Charging Soldier & Ranged Archer)
+    createEnemy('enemy_2', 'charging_soldier', 'Raider Berserker', 680, 430, { hp: 65, atk: 18, detectRadius: 130, attackRange: 34, chargeSpeed: 110 }),
+    createEnemy('enemy_3', 'archer', 'Camp Sniper', 790, 420, { hp: 38, atk: 14, detectRadius: 150, attackRange: 130, isRanged: true }),
+    createEnemy('enemy_4', 'shield_guard', 'Camp Shield Guard', 740, 460, { hp: 85, def: 6, atk: 15, detectRadius: 100, attackRange: 26, isShielded: true }),
+    // 3. Fort Gateway Elite Defenders
+    createEnemy('enemy_5', 'elite_halberdier', 'Citadel Halberdier', 930, 290, { hp: 95, atk: 20, detectRadius: 110, attackRange: 42 }),
+    createEnemy('enemy_6', 'shield_guard', 'Citadel Iron Guard', 930, 350, { hp: 90, def: 8, atk: 16, detectRadius: 100, attackRange: 26, isShielded: true }),
+    // 4. Citadel Courtyard Sentry
+    createEnemy('enemy_7', 'spear_soldier', 'Courtyard Spearman', 1080, 280, { hp: 60, atk: 15, detectRadius: 120, attackRange: 40 })
   ];
+}
+
+function createEnemy(id, model, name, x, y, opts = {}) {
+  return {
+    id,
+    type: 'enemy',
+    model,
+    name,
+    x,
+    y,
+    spawnX: x,
+    spawnY: y,
+    dir: 0,
+    hp: opts.hp || 50,
+    maxHp: opts.hp || 50,
+    atk: opts.atk || 12,
+    def: opts.def || 2,
+    detectRadius: opts.detectRadius || 110,
+    attackRange: opts.attackRange || 28,
+    speed: opts.speed || 48,
+    chargeSpeed: opts.chargeSpeed || 100,
+    isRanged: !!opts.isRanged,
+    isShielded: !!opts.isShielded,
+    // State Machine
+    state: 'patrol', // patrol, chase, windup, attack, recover, stagger, defeated
+    stateTimer: 0,
+    patrolTimer: 2.0,
+    patrolDir: 1,
+    attackHitApplied: false,
+    staggerTimer: 0
+  };
 }
 
 // =============================================================================
@@ -661,20 +880,16 @@ function recalculatePlayerStats() {
   let baseDef = 2;
   let hpBonus = 0;
 
-  // Evaluate Weapon
   if (p.equipped.weapon && ITEM_DATABASE[p.equipped.weapon]) {
     baseAtk += ITEM_DATABASE[p.equipped.weapon].stats.atk || 0;
   }
-  // Evaluate Shield
   if (p.equipped.shield && ITEM_DATABASE[p.equipped.shield]) {
     baseDef += ITEM_DATABASE[p.equipped.shield].stats.def || 0;
   }
-  // Evaluate Body Armour
   if (p.equipped.body && ITEM_DATABASE[p.equipped.body]) {
     baseDef += ITEM_DATABASE[p.equipped.body].stats.def || 0;
     hpBonus += ITEM_DATABASE[p.equipped.body].stats.maxHp || 0;
   }
-  // Evaluate Headgear & Footwear
   if (p.equipped.head && ITEM_DATABASE[p.equipped.head]) {
     baseDef += ITEM_DATABASE[p.equipped.head].stats.def || 0;
   }
@@ -687,7 +902,6 @@ function recalculatePlayerStats() {
   p.maxHp = 100 + hpBonus;
   p.hp = Math.min(p.hp, p.maxHp);
 
-  // Update HUD
   document.getElementById('hud-weapon').innerText = p.equipped.weapon ? `⚔️ ${ITEM_DATABASE[p.equipped.weapon].name.toUpperCase()}` : '⚔️ FISTS';
   updateHUD();
 }
@@ -710,7 +924,6 @@ function openCraftingModal(stationType) {
     const item = ITEM_DATABASE[rec.outputItem];
     if (!item) return;
 
-    // Check cost requirements
     let canAfford = true;
     let costStr = [];
     for (const [resKey, reqQty] of Object.entries(rec.costs)) {
@@ -746,6 +959,13 @@ function executeCraft(recipeId) {
   const rec = CRAFTING_RECIPES.find(r => r.id === recipeId);
   if (!rec) return;
 
+  // Validate all costs prior to atomic deduction
+  for (const [resKey, reqQty] of Object.entries(rec.costs)) {
+    if (reqQty <= 0) continue;
+    const curQty = state.inventory[resKey] || (state.player.equipped.weapon === resKey ? 1 : (state.player.equipped.shield === resKey ? 1 : 0));
+    if (curQty < reqQty) return; // Insufficient materials, abort
+  }
+
   // Deduct materials atomically
   for (const [resKey, reqQty] of Object.entries(rec.costs)) {
     if (reqQty <= 0) continue;
@@ -758,7 +978,6 @@ function executeCraft(recipeId) {
     }
   }
 
-  // Grant crafted item
   const item = ITEM_DATABASE[rec.outputItem];
   if (item.category === 'weapon') {
     state.player.equipped.weapon = item.id;
@@ -775,8 +994,69 @@ function executeCraft(recipeId) {
   checkMissionProgression();
   saveGame();
 
-  // Refresh UI
   openCraftingModal(rec.station);
+}
+
+// =============================================================================
+// DIVINE ASTRA SELECTION & COMBAT INVOCATION
+// =============================================================================
+function selectAstra(type) {
+  pendingAstraSelection = type;
+  document.querySelectorAll('.astra-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById(`card-${type}`);
+  if (card) card.classList.add('selected');
+  document.getElementById('btn-confirm-astra').disabled = false;
+  audio.init();
+  audio.play(type);
+}
+
+function confirmAstraSelection() {
+  if (!pendingAstraSelection) return;
+  state.player.selectedAstra = pendingAstraSelection;
+  document.getElementById('astra-modal').classList.remove('active');
+  document.getElementById('title-modal').classList.remove('active');
+  gameRunning = true;
+  audio.play('fanfare');
+  saveGame();
+  showZoneBanner(`DIVINE VOW SEALED: ${pendingAstraSelection.toUpperCase()} ASTRA EQUIPPED!`);
+  updateHUD();
+}
+
+function castAstra() {
+  const p = state.player;
+  if (!p.selectedAstra || p.astraCooldown > 0) return;
+
+  p.astraCooldown = p.astraMaxCooldown;
+  audio.play(p.selectedAstra);
+
+  if (p.selectedAstra === 'agni') {
+    // Agni: Radial sacred flame damaging all enemies in 80px radius
+    showZoneBanner('🔥 AGNI ASTRA UNLEASHED: SACRED FLAME WAVE');
+    state.particles.push({ type: 'wave_agni', x: p.x, y: p.y, r: 10, maxR: 70, life: 0.4 });
+    state.entities.forEach(en => {
+      if (en.type === 'enemy' && en.hp > 0 && Math.hypot(p.x - en.x, p.y - en.y) < 70) {
+        damageEnemy(en, 35 + p.level * 4);
+      }
+    });
+  } else if (p.selectedAstra === 'varuna') {
+    // Varuna: Restorative waters healing 40 HP & 4-second protective aegis
+    p.hp = Math.min(p.maxHp, p.hp + 40);
+    p.aegisShieldTimer = 4.0;
+    showZoneBanner('💧 VARUNA ASTRA INVOKED: HEALED 40 HP & AEGIS SHIELD');
+    state.particles.push({ type: 'wave_varuna', x: p.x, y: p.y, r: 8, maxR: 45, life: 0.5 });
+  } else if (p.selectedAstra === 'bhoomi') {
+    // Bhoomi: Seismic tremor staggering all enemies in 90px radius
+    showZoneBanner('🌍 BHOOMI ASTRA INVOKED: SEISMIC STUN SHOCKWAVE');
+    state.particles.push({ type: 'wave_bhoomi', x: p.x, y: p.y, r: 12, maxR: 85, life: 0.45 });
+    state.entities.forEach(en => {
+      if (en.type === 'enemy' && en.hp > 0 && Math.hypot(p.x - en.x, p.y - en.y) < 85) {
+        en.state = 'stagger';
+        en.staggerTimer = 1.8;
+        damageEnemy(en, 20 + p.level * 3);
+      }
+    });
+  }
+  updateHUD();
 }
 
 // =============================================================================
@@ -821,6 +1101,12 @@ function updateHUD() {
   document.getElementById('hud-level').innerText = `LVL ${p.level}`;
   document.getElementById('bar-hp').style.width = `${Math.max(0, (p.hp / p.maxHp) * 100)}%`;
   document.getElementById('bar-xp').style.width = `${Math.min(100, (p.xp / p.maxXp) * 100)}%`;
+  
+  // Astra HUD Bar
+  const astraRatio = p.selectedAstra ? (p.astraCooldown <= 0 ? 1 : 1 - (p.astraCooldown / p.astraMaxCooldown)) : 0;
+  document.getElementById('bar-astra').style.width = `${Math.floor(astraRatio * 100)}%`;
+  document.getElementById('hud-astra-name').innerText = p.selectedAstra ? p.selectedAstra.toUpperCase() : 'ASTRA';
+
   document.getElementById('inv-wood').innerText = state.inventory.wood_sagwan || 0;
   document.getElementById('inv-ore').innerText = state.inventory.ore_iron || 0;
   document.getElementById('inv-gold').innerText = state.inventory.gold_huns || 0;
@@ -834,7 +1120,7 @@ function showZoneBanner(text) {
 }
 
 // =============================================================================
-// INPUT & CONTROLS
+// INPUT & COMBAT CONTROLS
 // =============================================================================
 const keys = {};
 window.addEventListener('keydown', (e) => {
@@ -850,10 +1136,25 @@ window.addEventListener('keydown', (e) => {
   if (e.key === ' ') {
     performAttack();
   }
+  if (e.key === 'Shift') {
+    castAstra();
+  }
+  if (e.key === 'q' || e.key === 'Q') {
+    performDodge();
+  }
 });
 window.addEventListener('keyup', (e) => {
   keys[e.key.toLowerCase()] = false;
 });
+
+function performDodge() {
+  const p = state.player;
+  if (p.isDodging || p.dodgeCooldown > 0) return;
+  p.isDodging = true;
+  p.dodgeTimer = 0.28;
+  p.dodgeCooldown = 0.75;
+  p.invulnerableTimer = 0.32; // Invulnerable during dodge roll
+}
 
 function performAttack() {
   const p = state.player;
@@ -862,7 +1163,6 @@ function performAttack() {
   p.attackTimer = 0.28;
   audio.play('slash');
 
-  // Melee Hitbox detection
   const reach = p.equipped.weapon ? (ITEM_DATABASE[p.equipped.weapon].stats.reach || 30) : 20;
   let hitX = p.x;
   let hitY = p.y;
@@ -889,23 +1189,43 @@ function performAttack() {
   state.entities.forEach(en => {
     if (en.type !== 'enemy' || en.hp <= 0) return;
     const dist = Math.hypot(hitX - en.x, hitY - en.y);
-    if (dist < 32) {
-      const dmg = Math.max(1, p.atk - (en.def || 2));
-      en.hp -= dmg;
-      audio.play('hit');
-      if (en.hp <= 0) {
-        gainXP(45);
-        state.inventory.gold_huns = (state.inventory.gold_huns || 0) + 8;
-        showZoneBanner(`DEFEATED: ${en.name} (+45 XP, +8 HUNS)`);
-        checkVillageStatus();
+    if (dist < 34) {
+      let incomingDmg = p.atk;
+      // Shield Guard frontal block mechanic
+      if (en.isShielded && en.state !== 'stagger') {
+        const angleToPlayer = Math.atan2(p.y - en.y, p.x - en.x);
+        let facingAngle = en.dir === 0 ? Math.PI/2 : (en.dir === 1 ? -Math.PI/2 : (en.dir === 2 ? 0 : Math.PI));
+        if (Math.abs(angleToPlayer - facingAngle) < 1.0) {
+          incomingDmg = Math.max(1, incomingDmg * 0.35); // 65% damage block from front
+          showZoneBanner(`${en.name} BLOCKED WITH DHAL SHIELD!`);
+        }
       }
+      damageEnemy(en, incomingDmg);
     }
   });
 }
 
+function damageEnemy(en, rawDmg) {
+  if (en.hp <= 0) return;
+  const dmg = Math.max(2, Math.floor(rawDmg - (en.def || 0)));
+  en.hp -= dmg;
+  en.state = 'stagger';
+  en.staggerTimer = 0.22;
+  audio.play('hit');
+
+  if (en.hp <= 0) {
+    en.hp = 0;
+    en.state = 'defeated';
+    gainXP(55);
+    state.inventory.gold_huns = (state.inventory.gold_huns || 0) + 10;
+    showZoneBanner(`DEFEATED: ${en.name} (+55 XP, +10 HUNS)`);
+    checkVillageStatus();
+  }
+}
+
 function checkVillageStatus() {
-  const aliveRaiders = state.entities.filter(e => e.type === 'enemy' && (e.id === 'enemy_2' || e.id === 'enemy_3') && e.hp > 0);
-  if (aliveRaiders.length === 0 && !state.worldState.villageLiberated) {
+  const aliveCampEnemies = state.entities.filter(e => e.type === 'enemy' && (e.id === 'enemy_2' || e.id === 'enemy_3' || e.id === 'enemy_4') && e.hp > 0);
+  if (aliveCampEnemies.length === 0 && !state.worldState.villageLiberated) {
     state.worldState.villageLiberated = true;
     state.worldState.blacksmithUnlocked = true;
     checkMissionProgression();
@@ -914,7 +1234,6 @@ function checkVillageStatus() {
 
 function handleInteraction() {
   const p = state.player;
-  // Check nearby interactive entities
   for (const ent of state.entities) {
     const dist = Math.hypot(p.x - ent.x, p.y - ent.y);
     if (dist < 38) {
@@ -961,7 +1280,7 @@ function showDialogue(speaker, portraitKey, text) {
 }
 
 // =============================================================================
-// PHYSICS & COLLISION
+// PHYSICS, ENEMY AI & COLLISION
 // =============================================================================
 function isSolid(worldX, worldY) {
   const c = Math.floor(worldX / TILE_SIZE);
@@ -971,32 +1290,63 @@ function isSolid(worldX, worldY) {
 }
 
 function update(dt) {
+  if (!gameRunning) return;
   const p = state.player;
 
-  // Movement input
-  let dx = 0, dy = 0;
-  if (keys['arrowup'] || keys['w']) { dy -= 1; p.dir = 1; }
-  if (keys['arrowdown'] || keys['s']) { dy += 1; p.dir = 0; }
-  if (keys['arrowleft'] || keys['a']) { dx -= 1; p.dir = 3; }
-  if (keys['arrowright'] || keys['d']) { dx += 1; p.dir = 2; }
-
-  if (dx !== 0 && dy !== 0) {
-    dx *= 0.7071;
-    dy *= 0.7071;
+  // Invulnerability & Cooldowns
+  if (p.invulnerableTimer > 0) p.invulnerableTimer -= dt;
+  if (p.dodgeCooldown > 0) p.dodgeCooldown -= dt;
+  if (p.astraCooldown > 0) {
+    p.astraCooldown -= dt;
+    updateHUD();
   }
+  if (p.aegisShieldTimer > 0) p.aegisShieldTimer -= dt;
 
-  const speed = p.speed * dt;
-  const nextX = p.x + dx * speed;
-  const nextY = p.y + dy * speed;
+  // Dodge handling
+  if (p.isDodging) {
+    p.dodgeTimer -= dt;
+    let dodgeSpeed = 135 * dt;
+    let dx = p.dir === 2 ? 1 : (p.dir === 3 ? -1 : 0);
+    let dy = p.dir === 0 ? 1 : (p.dir === 1 ? -1 : 0);
+    if (!isSolid(p.x + dx * dodgeSpeed, p.y)) p.x += dx * dodgeSpeed;
+    if (!isSolid(p.x, p.y + dy * dodgeSpeed)) p.y += dy * dodgeSpeed;
+    if (p.dodgeTimer <= 0) p.isDodging = false;
+  } else {
+    // Normal movement input
+    let dx = 0, dy = 0;
+    if (keys['arrowup'] || keys['w']) { dy -= 1; p.dir = 1; }
+    if (keys['arrowdown'] || keys['s']) { dy += 1; p.dir = 0; }
+    if (keys['arrowleft'] || keys['a']) { dx -= 1; p.dir = 3; }
+    if (keys['arrowright'] || keys['d']) { dx += 1; p.dir = 2; }
 
-  // Compact collision box check around player's feet
-  if (!isSolid(nextX - 6, p.y) && !isSolid(nextX + 6, p.y)) p.x = nextX;
-  if (!isSolid(p.x, nextY - 4) && !isSolid(p.x, nextY + 4)) p.y = nextY;
+    if (dx !== 0 && dy !== 0) {
+      dx *= 0.7071;
+      dy *= 0.7071;
+    }
+
+    const speed = p.speed * dt;
+    const nextX = p.x + dx * speed;
+    const nextY = p.y + dy * speed;
+
+    if (!isSolid(nextX - 6, p.y) && !isSolid(nextX + 6, p.y)) p.x = nextX;
+    if (!isSolid(p.x, nextY - 4) && !isSolid(p.x, nextY + 4)) p.y = nextY;
+  }
 
   // Attack timer
   if (p.isAttacking) {
     p.attackTimer -= dt;
     if (p.attackTimer <= 0) p.isAttacking = false;
+  }
+
+  // Update Enemy State Machines
+  updateEnemyAI(dt);
+
+  // Update Particles
+  for (let i = state.particles.length - 1; i >= 0; i--) {
+    const pt = state.particles[i];
+    pt.life -= dt;
+    pt.r += (pt.maxR - pt.r) * dt * 8;
+    if (pt.life <= 0) state.particles.splice(i, 1);
   }
 
   // Camera smooth following
@@ -1030,6 +1380,149 @@ function update(dt) {
     }
   }
   document.getElementById('interaction-pill').style.display = hasNearby ? 'block' : 'none';
+}
+
+function updateEnemyAI(dt) {
+  const p = state.player;
+
+  state.entities.forEach(en => {
+    if (en.type !== 'enemy' || en.hp <= 0) return;
+
+    // Viewport Culling: Skip AI if too far from camera
+    const distCam = Math.hypot(en.x - (state.camX + V_WIDTH/2), en.y - (state.camY + V_HEIGHT/2));
+    if (distCam > 380) return;
+
+    const distToPlayer = Math.hypot(p.x - en.x, p.y - en.y);
+
+    // Stagger state recovery
+    if (en.state === 'stagger') {
+      en.staggerTimer -= dt;
+      if (en.staggerTimer <= 0) en.state = 'chase';
+      return;
+    }
+
+    // Determine direction facing player
+    if (distToPlayer < en.detectRadius || en.state === 'chase' || en.state === 'attack') {
+      const angle = Math.atan2(p.y - en.y, p.x - en.x);
+      if (Math.abs(p.x - en.x) > Math.abs(p.y - en.y)) {
+        en.dir = p.x > en.x ? 2 : 3;
+      } else {
+        en.dir = p.y > en.y ? 0 : 1;
+      }
+    }
+
+    // STATE MACHINE
+    switch (en.state) {
+      case 'patrol':
+        en.patrolTimer -= dt;
+        if (en.patrolTimer <= 0) {
+          en.patrolDir *= -1;
+          en.patrolTimer = 2.5;
+        }
+        let pNextX = en.x + en.patrolDir * 15 * dt;
+        if (!isSolid(pNextX, en.y)) en.x = pNextX;
+        en.dir = en.patrolDir > 0 ? 2 : 3;
+
+        // Detection transition
+        if (distToPlayer <= en.detectRadius && p.hp > 0) {
+          en.state = 'chase';
+        }
+        break;
+
+      case 'chase':
+        if (distToPlayer > en.detectRadius * 1.5) {
+          en.state = 'patrol';
+          break;
+        }
+
+        // Within attack range: begin telegraph windup
+        if (distToPlayer <= en.attackRange) {
+          en.state = 'windup';
+          en.stateTimer = en.model === 'charging_soldier' ? 0.65 : 0.45;
+          en.attackHitApplied = false;
+          break;
+        }
+
+        // Move towards player respecting collisions
+        const moveSpeed = (en.model === 'charging_soldier' ? en.chargeSpeed : en.speed) * dt;
+        const moveAngle = Math.atan2(p.y - en.y, p.x - en.x);
+        const nextEnX = en.x + Math.cos(moveAngle) * moveSpeed;
+        const nextEnY = en.y + Math.sin(moveAngle) * moveSpeed;
+
+        if (!isSolid(nextEnX, en.y)) en.x = nextEnX;
+        if (!isSolid(en.x, nextEnY)) en.y = nextEnY;
+        break;
+
+      case 'windup':
+        en.stateTimer -= dt;
+        if (en.stateTimer <= 0) {
+          en.state = 'attack';
+          en.stateTimer = 0.35;
+          en.attackHitApplied = false;
+          audio.play('slash');
+        }
+        break;
+
+      case 'attack':
+        en.stateTimer -= dt;
+        // Apply single hit damage during active window
+        if (!en.attackHitApplied && en.stateTimer <= 0.2) {
+          en.attackHitApplied = true;
+          // Check if player is still in range
+          if (distToPlayer <= en.attackRange + 12 && p.hp > 0 && p.invulnerableTimer <= 0) {
+            applyDamageToPlayer(en.atk);
+          }
+        }
+        if (en.stateTimer <= 0) {
+          en.state = 'recover';
+          en.stateTimer = en.model === 'charging_soldier' ? 0.8 : 0.5;
+        }
+        break;
+
+      case 'recover':
+        en.stateTimer -= dt;
+        if (en.stateTimer <= 0) {
+          en.state = distToPlayer <= en.attackRange ? 'windup' : 'chase';
+          en.stateTimer = 0.45;
+          en.attackHitApplied = false;
+        }
+        break;
+    }
+  });
+}
+
+function applyDamageToPlayer(rawAtk) {
+  const p = state.player;
+  if (p.invulnerableTimer > 0) return;
+
+  // Aegis Shield absorbs damage
+  if (p.aegisShieldTimer > 0) {
+    audio.play('varuna');
+    showZoneBanner('VARUNA AEGIS SHIELD ABSORBED ATTACK!');
+    p.invulnerableTimer = 0.5;
+    return;
+  }
+
+  const netDmg = Math.max(3, Math.floor(rawAtk - p.def));
+  p.hp = Math.max(0, p.hp - netDmg);
+  p.invulnerableTimer = 0.65; // Safe invulnerability window
+  audio.play('enemy_hit');
+  updateHUD();
+
+  if (p.hp <= 0) {
+    document.getElementById('defeat-modal').classList.add('active');
+  }
+}
+
+function respawnPlayer() {
+  const p = state.player;
+  p.hp = p.maxHp;
+  p.x = 120;
+  p.y = 280;
+  p.invulnerableTimer = 1.5;
+  document.getElementById('defeat-modal').classList.remove('active');
+  updateHUD();
+  showZoneBanner('RESTORED AT SACRED FOREST CLEARING');
 }
 
 // =============================================================================
@@ -1082,23 +1575,18 @@ function render() {
   // 2. Y-Sorted Entities & Objects
   const renderList = [];
 
-  // Harvest Nodes
   state.harvestNodes.forEach(node => {
     if (node.hp > 0) renderList.push({ type: 'node', obj: node, y: node.y });
   });
 
-  // Entities & NPCs
   state.entities.forEach(ent => {
     if (ent.type !== 'enemy' || ent.hp > 0) renderList.push({ type: 'entity', obj: ent, y: ent.y });
   });
 
-  // Player
   renderList.push({ type: 'player', obj: state.player, y: state.player.y });
 
-  // Sort ascending by Y-depth
   renderList.sort((a, b) => a.y - b.y);
 
-  // Render sorted list
   renderList.forEach(item => {
     const o = item.obj;
     const sx = Math.floor(o.x - state.camX);
@@ -1112,11 +1600,23 @@ function render() {
       renderWorldEntity(o, sx, sy);
     }
   });
+
+  // 3. Render Particles & VFX
+  state.particles.forEach(pt => {
+    const sx = Math.floor(pt.x - state.camX);
+    const sy = Math.floor(pt.y - state.camY);
+    ctx.beginPath();
+    ctx.arc(sx, sy, pt.r, 0, Math.PI * 2);
+    if (pt.type === 'wave_agni') ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+    else if (pt.type === 'wave_varuna') ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+    else if (pt.type === 'wave_bhoomi') ctx.fillStyle = 'rgba(250, 204, 21, 0.4)';
+    ctx.fill();
+  });
 }
 
 function renderPlayer(sx, sy) {
   const p = state.player;
-  // Soft Ground Shadow
+  // Ground Shadow
   ctx.fillStyle = 'rgba(15, 12, 10, 0.45)';
   ctx.beginPath();
   ctx.ellipse(sx, sy + 18, 12, 4, 0, 0, Math.PI * 2);
@@ -1129,10 +1629,25 @@ function renderPlayer(sx, sy) {
   const col = p.isAttacking ? Math.floor((1 - (p.attackTimer / 0.28)) * 6) % 6 : Math.floor(performance.now() / 150) % (sheetKey === 'shivaji_walk' ? 8 : 4);
   const row = p.dir;
 
+  // Hurt flash if recently hit
+  if (p.invulnerableTimer > 0 && Math.floor(performance.now() / 80) % 2 === 0) {
+    ctx.globalAlpha = 0.5;
+  }
+
   if (sheet && sheet.complete) {
     ctx.drawImage(sheet, col * fw, row * fh, fw, fh, sx - fw / 2, sy - 40, fw, fh);
   } else {
     ctx.fillStyle = '#e66012'; ctx.fillRect(sx - 8, sy - 24, 16, 24);
+  }
+  ctx.globalAlpha = 1.0;
+
+  // Aegis Shield Visual Ring
+  if (p.aegisShieldTimer > 0) {
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(sx, sy - 14, 16, 22, 0, 0, Math.PI * 2);
+    ctx.stroke();
   }
 }
 
@@ -1149,16 +1664,33 @@ function renderHarvestNode(node, sx, sy) {
 
 function renderWorldEntity(ent, sx, sy) {
   if (ent.type === 'enemy') {
-    // Enemy shadow
     ctx.fillStyle = 'rgba(15, 12, 10, 0.45)';
     ctx.beginPath(); ctx.ellipse(sx, sy + 14, 10, 3.5, 0, 0, Math.PI * 2); ctx.fill();
 
-    const sheetKey = `${ent.model}_idle`;
-    const sheet = images[sheetKey];
-    const fw = ent.model === 'shield_guard' ? 44 : 40;
-    const fh = ent.model === 'shield_guard' ? 58 : 56;
-    const col = Math.floor(performance.now() / 200) % 4;
+    // Select correct state animation sheet
+    let animSuffix = 'idle';
+    if (ent.state === 'chase' || ent.state === 'patrol') animSuffix = 'walk';
+    else if (ent.state === 'attack' || ent.state === 'windup') animSuffix = 'attack';
+
+    const sheetKey = `${ent.model}_${animSuffix}`;
+    const sheet = images[sheetKey] || images[`${ent.model}_idle`];
+
+    // Grid Dimensions
+    let fw = 40, fh = 56;
+    if (ent.model === 'shield_guard') { fw = (animSuffix === 'attack' ? 60 : 44); fh = 58; }
+    else if (ent.model === 'charging_soldier') { fw = (animSuffix === 'attack' ? 60 : 44); fh = 58; }
+    else if (ent.model === 'elite_halberdier') { fw = (animSuffix === 'attack' ? 64 : 48); fh = 64; }
+    else if (animSuffix === 'attack') { fw = 56; fh = 56; }
+
+    const col = animSuffix === 'walk' ? Math.floor(performance.now() / 150) % 8 : (animSuffix === 'attack' ? Math.floor((1 - (ent.stateTimer / 0.35)) * 6) % 6 : Math.floor(performance.now() / 200) % 4);
     const row = ent.dir || 0;
+
+    // Telegraph alert exclamation mark
+    if (ent.state === 'windup') {
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText('!', sx - 3, sy - fh + 10);
+    }
 
     if (sheet && sheet.complete) {
       ctx.drawImage(sheet, col * fw, row * fh, fw, fh, sx - fw / 2, sy - 36, fw, fh);
@@ -1188,8 +1720,23 @@ function renderWorldEntity(ent, sx, sy) {
 }
 
 // =============================================================================
-// SAVE & LOAD SYSTEM (COMPATIBLE WITH CAMPAIGN PROGRESSION)
+// FLOW & SAVE PERSISTENCE
 // =============================================================================
+function startNewAdventureFlow() {
+  audio.init();
+  document.getElementById('title-modal').classList.remove('active');
+  document.getElementById('astra-modal').classList.add('active');
+}
+
+function continueSavedAdventure() {
+  audio.init();
+  if (loadGame()) {
+    document.getElementById('title-modal').classList.remove('active');
+    gameRunning = true;
+    showZoneBanner(`WELCOME BACK, SHIVBA! (${state.player.selectedAstra ? state.player.selectedAstra.toUpperCase() : 'NO'} ASTRA)`);
+  }
+}
+
 function saveGame() {
   try {
     const data = {
@@ -1199,6 +1746,7 @@ function saveGame() {
         xp: state.player.xp,
         maxXp: state.player.maxXp,
         level: state.player.level,
+        selectedAstra: state.player.selectedAstra,
         equipped: state.player.equipped,
         x: state.player.x,
         y: state.player.y
@@ -1222,11 +1770,17 @@ function loadGame() {
     if (data.inventory) Object.assign(state.inventory, data.inventory);
     if (data.worldState) Object.assign(state.worldState, data.worldState);
     if (data.activeMissions) state.activeMissions = data.activeMissions;
+    recalculatePlayerStats();
     return true;
   } catch (e) {
     console.warn('Load failed', e);
     return false;
   }
+}
+
+function checkSaveStatus() {
+  const hasSave = !!localStorage.getItem(SAVE_KEY);
+  document.getElementById('btn-continue-game').disabled = !hasSave;
 }
 
 // =============================================================================
@@ -1255,7 +1809,7 @@ window.addEventListener('resize', adjustCanvasScale);
 
 // Initialization
 buildConnectedSahyadriWorld();
-loadGame();
+checkSaveStatus();
 recalculatePlayerStats();
 adjustCanvasScale();
 requestAnimationFrame(gameLoop);
