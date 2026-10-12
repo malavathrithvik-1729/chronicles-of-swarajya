@@ -279,5 +279,28 @@
       "biome": "Raigad Climax",
       "dimensions": "160x160"
     }
+  ],
+  "optionBPreviews": [
+    {
+      "name": "sahyadri_forest_river_crossing",
+      "file": "07_Previews_OptionB/sahyadri_forest_river_crossing.png",
+      "biome": "Dense Sahyadri Teak Forest & River Crossing",
+      "resolution": "480x270",
+      "aspectRatio": "16:9"
+    },
+    {
+      "name": "javali_mountain_pass_overlook",
+      "file": "07_Previews_OptionB/javali_mountain_pass_overlook.png",
+      "biome": "Javali Mountain Pass & Basalt Escarpment Overlook",
+      "resolution": "480x270",
+      "aspectRatio": "16:9"
+    },
+    {
+      "name": "pratapgad_fortified_bastion_gate",
+      "file": "07_Previews_OptionB/pratapgad_fortified_bastion_gate.png",
+      "biome": "Pratapgad Fortified Approach & Monumental Bastion Gate",
+      "resolution": "480x270",
+      "aspectRatio": "16:9"
+    }
   ]
 }
