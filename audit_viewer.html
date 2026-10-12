@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chronicles of Swarajya — Gate A: Master Design Audit & Visual Direction Studio</title>
+<style>
+  :root {
+    --bg-dark: #0a0806;
+    --panel-bg: #140f0c;
+    --card-bg: #1c1510;
+    --card-hover: #261c15;
+    --saffron: #e66012;
+    --saffron-light: #f59e0b;
+    --maratha-red: #b91c1c;
+    --gold: #d97706;
+    --gold-light: #fde68a;
+    --border-gold: #b45309;
+    --border-dark: #451a03;
+    --text-cream: #fef3c7;
+    --text-muted: #9ca3af;
+    --accent-blue: #38bdf8;
+    --accent-green: #22c55e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg-dark);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-cream);
+    line-height: 1.6;
+    padding-bottom: 60px;
+  }
+  header {
+    background: radial-gradient(circle at top, #2d160c 0%, #140f0c 100%);
+    border-bottom: 2px solid var(--border-gold);
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  header h1 {
+    font-size: 20px;
+    color: var(--saffron-light);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-gate { background: var(--maratha-red); color: #fff; }
+  .badge-recommended { background: var(--accent-green); color: #000; }
+  .badge-replace { background: #ef4444; color: #fff; }
+  .badge-retain { background: #3b82f6; color: #fff; }
+  .badge-upgrade { background: #f59e0b; color: #000; }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 32px;
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-dark);
+    padding-bottom: 12px;
+  }
+  .tab-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-dark);
+    color: var(--text-cream);
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { background: var(--card-hover); border-color: var(--saffron); }
+  .tab-btn.active {
+    background: linear-gradient(90deg, #9a3412, #c2410c);
+    border-color: var(--gold-light);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(230, 96, 18, 0.4);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Concept Cards */
+  .directions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .direction-card {
+    background: var(--panel-bg);
+    border: 2px solid var(--border-dark);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.25s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .direction-card:hover {
+    border-color: var(--border-gold);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+  }
+  .direction-card.recommended {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+  }
+  .direction-card .preview-box {
+    width: 100%;
+    height: 230px;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+  }
+  .direction-card .preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+  .direction-card:hover .preview-box img {
+    transform: scale(1.03);
+  }
+  .direction-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .direction-header h3 {
+    font-size: 16px;
+    color: var(--gold-light);
+  }
+  .direction-body {
+    padding: 16px;
+    flex: 1;
+    font-size: 13px;
+    color: #e5e7eb;
+  }
+  .direction-body p { margin-bottom: 12px; }
+  .criteria-list {
+    list-style: none;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+  .criteria-list li {
+    padding: 4px 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed rgba(255,255,255,0.08);
+  }
+  .score-val { font-weight: bold; color: var(--gold-light); }
+
+  /* Resolution Interactive Comparison */
+  .res-tester {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-gold);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .res-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .canvas-stage-wrapper {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .stage-box {
+    background: #000;
+    border: 2px solid var(--border-dark);
+    border-radius: 6px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stage-box h4 {
+    font-size: 12px;
+    color: var(--saffron-light);
+    margin-bottom: 8px;
+  }
+  .stage-canvas {
+    image-rendering: pixelated;
+    background: #140f0c;
+    border: 1px solid #333;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Table styling */
+  .inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 12px;
+    background: var(--panel-bg);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .inventory-table th, .inventory-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-dark);
+  }
+  .inventory-table th {
+    background: #1e1510;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .inventory-table tr:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* Roster System */
+  .roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .roster-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-dark);
+    border-radius: 6px;
+    padding: 14px;
+  }
+  .roster-card h4 {
+    font-size: 14px;
+    color: var(--saffron-light);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .roster-meta {
+    font-size: 11px;
+    color: var(--gold-light);
+    margin-bottom: 8px;
+  }
+  .roster-desc {
+    font-size: 12px;
+    color: #d1d5db;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1><span class="badge badge-gate">GATE A</span> Chronicles of Swarajya: Design Audit & Art Studio</h1>
+    <div style="font-size: 12px; color: var(--gold-light); margin-top: 4px;">Master Reimagining — Open-World Action RPG Architecture & Visual Evaluation</div>
+  </div>
+  <div>
+    <span class="badge badge-recommended">Recommended Direction: 32-Bit High-Res Pixel Art + Illustrated Portraits</span>
+  </div>
+</header>
+
+<div class="container">
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('directions')">1. Visual Directions Evaluation (A, B, C)</button>
+    <button class="tab-btn" onclick="switchTab('resolution')">2. Canvas Resolution & Scaling Lab</button>
+    <button class="tab-btn" onclick="switchTab('inventory')">3. Complete 65-Asset Reuse Inventory</button>
+    <button class="tab-btn" onclick="switchTab('roster')">4. Shivaji & Roster Design System</button>
+    <button class="tab-btn" onclick="switchTab('world')">5. Continuous World & Progression</button>
+  </div>
+
+  <!-- TAB 1: VISUAL DIRECTIONS EVALUATION -->
+  <div id="tab-directions" class="tab-content active">
+    <div style="margin-bottom: 20px;">
+      <h2 style="font-size: 18px; color: var(--saffron-light); margin-bottom: 6px;">Comparative Evaluation of the 3 Visual Directions</h2>
+      <p style="font-size: 13px; color: #d1d5db;">Evaluated against: visual quality, character expressiveness, open-world readability, animation requirements, browser performance, asset production workload, engine compatibility, and offline desktop feasibility.</p>
+    </div>
+
+    <div class="directions-grid">
+      <!-- Option A -->
+      <div class="direction-card">
+        <div class="preview-box">
+          <img src="docs/art_direction_previews/direction_a_painted.jpg" alt="Option A: Hand-Painted 2D HD" onerror="this.src='ChroniclesOfSwarajya_Art/14_MapPreviews/forest_fort_entrance.png'">
+        </div>
+        <div class="direction-header">
+          <h3>Option A: Hand-Painted 2D HD</h3>
+          <span class="badge" style="background: #64748b; color: #fff;">Score: 51/80</span>
+        </div>
+        <div class="direction-body">
+          <p><strong>Style:</strong> Hand-crafted high-resolution painted digital art with layered raster environments (similar to <em>Hades</em> or <em>Hollow Knight</em>).</p>
+          <ul class="criteria-list">
+            <li><span>Visual Quality:</span> <span class="score-val">10 / 10</span></li>
+            <li><span>Character Expressiveness:</span> <span class="score-val">9 / 10</span></li>
+            <li><span>Open-World Readability:</span> <span class="score-val">7 / 10</span></li>
+            <li><span>Animation Feasibility:</span> <span class="score-val">5 / 10</span></li>
+            <li><span>Browser Performance:</span> <span class="score-val">6 / 10</span></li>
+            <li><span>Production Workload:</span> <span class="score-val">4 / 10 (Prohibitive)</span></li>
+            <li><span>Current Compatibility:</span> <span class="score-val">4 / 10</span></li>
+            <li><span>Offline Desktop Play:</span> <span class="score-val">6 / 10 (Massive assets)</span></li>
+          </ul>
+          <p style="margin-top: 12px; font-size: 12px; color: #9ca3af;"><em>Verdict:</em> Gorgeous presentation, but high animation overhead and immense memory weight make it impractical for a lightweight browser-based RPG.</p>
+        </div>
+      </div>
+
+      <!-- Option B (RECOMMENDED) -->
+      <div class="direction-card recommended">
+        <div class="preview-box">
+          <img src="docs/art_direction_previews/direction_b_pixel.jpg" alt="Option B: 32-Bit High-Res Pixel Art" onerror="this.src='ChroniclesOfSwarajya_Art/14_MapPreviews/raigad_arena.png'">
+        </div>
+        <div class="direction-header">
+          <h3>Option B: 32-Bit High-Res Pixel Art</h3>
+          <span class="badge badge-recommended">★ RECOMMENDED (74/80)</span>
+        </div>
+        <div class="direction-body">
+          <p><strong>Style:</strong> Detailed high-resolution 32-bit pixel art ($48\times 64\text{px}$ character cells, $32\times 32\text{px}$ tiles) inspired by masterworks like <em>Sea of Stars</em> and <em>Eastward</em>.</p>
+          <ul class="criteria-list">
+            <li><span>Visual Quality:</span> <span class="score-val">9 / 10</span></li>
+            <li><span>Character Expressiveness:</span> <span class="score-val">9 / 10</span></li>
+            <li><span>Open-World Readability:</span> <span class="score-val">10 / 10 (Pixel-perfect)</span></li>
+            <li><span>Animation Feasibility:</span> <span class="score-val">9 / 10 (Punchy 4-8f cycles)</span></li>
+            <li><span>Browser Performance:</span> <span class="score-val">10 / 10 (Instant 60 FPS)</span></li>
+            <li><span>Production Workload:</span> <span class="score-val">8 / 10 (Sustainable)</span></li>
+            <li><span>Current Compatibility:</span> <span class="score-val">9 / 10 (Elevates pipeline)</span></li>
+            <li><span>Offline Desktop Play:</span> <span class="score-val">10 / 10 (Ultra-compact &lt;15MB)</span></li>
+          </ul>
+          <p style="margin-top: 12px; font-size: 12px; color: var(--gold-light);"><em>Verdict:</em> The ideal choice. Delivers chiseled Sahyadri rock textures, crisp combat hitboxes, authentic regalia, and flawless browser performance.</p>
+        </div>
+      </div>
+
+      <!-- Option C -->
+      <div class="direction-card">
+        <div class="preview-box">
+          <img src="docs/art_direction_previews/direction_c_stylised.jpg" alt="Option C: Stylised Illustrated 2D" onerror="this.src='ChroniclesOfSwarajya_Art/14_MapPreviews/forest_clearing.png'">
+        </div>
+        <div class="direction-header">
+          <h3>Option C: Stylised Illustrated 2D</h3>
+          <span class="badge" style="background: #64748b; color: #fff;">Score: 61/80</span>
+        </div>
+        <div class="direction-body">
+          <p><strong>Style:</strong> Stylised cel-shaded 2D action RPG art with bold outlines and painted vector textures (similar to <em>Bastion</em> or <em>Cult of the Lamb</em>).</p>
+          <ul class="criteria-list">
+            <li><span>Visual Quality:</span> <span class="score-val">9 / 10</span></li>
+            <li><span>Character Expressiveness:</span> <span class="score-val">9 / 10</span></li>
+            <li><span>Open-World Readability:</span> <span class="score-val">8 / 10</span></li>
+            <li><span>Animation Feasibility:</span> <span class="score-val">7 / 10</span></li>
+            <li><span>Browser Performance:</span> <span class="score-val">8 / 10</span></li>
+            <li><span>Production Workload:</span> <span class="score-val">6 / 10</span></li>
+            <li><span>Current Compatibility:</span> <span class="score-val">6 / 10</span></li>
+            <li><span>Offline Desktop Play:</span> <span class="score-val">8 / 10</span></li>
+          </ul>
+          <p style="margin-top: 12px; font-size: 12px; color: #9ca3af;"><em>Verdict:</em> High visual appeal. We adopt its high-res character portrait style for story dialogue and cutscenes while keeping Option B for world gameplay!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: RESOLUTION & SCALING LAB -->
+  <div id="tab-resolution" class="tab-content">
+    <div class="res-tester">
+      <h3 style="font-size: 16px; color: var(--saffron-light); margin-bottom: 8px;">Interactive Viewport Resolution & Pixel Density Lab</h3>
+      <p style="font-size: 13px; color: #d1d5db; margin-bottom: 16px;">See how the existing 160×160 logical canvas compares to the proposed 480×270 (16:9) high-resolution virtual canvas. The new resolution provides 5× the world field of view and eliminates blurry scaling artifacts.</p>
+
+      <div class="canvas-stage-wrapper">
+        <div class="stage-box">
+          <h4>Old Arcade Screen: 160 × 160 px (Stretched ~8×)</h4>
+          <canvas id="canvas-old" class="stage-canvas" width="160" height="160" style="width: 320px; height: 320px;"></canvas>
+          <div style="font-size: 11px; color: #ef4444; margin-top: 6px;">Crude, narrow field of view, cramped combat</div>
+        </div>
+
+        <div class="stage-box">
+          <h4>Recommended 32-Bit Viewport: 480 × 270 px (16:9 Widescreen)</h4>
+          <canvas id="canvas-new" class="stage-canvas" width="480" height="270" style="width: 640px; height: 360px;"></canvas>
+          <div style="font-size: 11px; color: var(--accent-green); margin-top: 6px;">Crisp, expansive Sahyadri vistas, tactical weapon reach</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: COMPLETE 65-ASSET INVENTORY -->
+  <div id="tab-inventory" class="tab-content">
+    <h3 style="font-size: 16px; color: var(--saffron-light); margin-bottom: 8px;">Asset Reuse / Replacement Inventory (65 Files Audited)</h3>
+    <p style="font-size: 13px; color: #d1d5db; margin-bottom: 16px;">Full classification of existing assets across 14 directories. Approved art packs are safeguarded; no file is removed until replacements are verified.</p>
+
+    <table class="inventory-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Asset Filename</th>
+          <th>Native Dimensions</th>
+          <th>Current Status</th>
+          <th>Action & Architectural Migration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>01_Shivaji</strong></td>
+          <td><code>shivaji_idle.png</code></td>
+          <td>48 × 128 (24×32 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Redraw at 48×64px with authentic pheta, sirpech, and pleated angarkha (Gate B).</td>
+        </tr>
+        <tr>
+          <td><strong>01_Shivaji</strong></td>
+          <td><code>shivaji_walk.png</code></td>
+          <td>96 × 128 (24×32 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Redraw with fluid 8-frame walking cycle and natural cloth physics.</td>
+        </tr>
+        <tr>
+          <td><strong>01_Shivaji</strong></td>
+          <td><code>shivaji_attack.png</code></td>
+          <td>72 × 128 (24×32 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Implement 3-phase combat combo (slash, ascending cut, lunge) with readable windups.</td>
+        </tr>
+        <tr>
+          <td><strong>01_Shivaji</strong></td>
+          <td><code>shivaji_dodge.png</code></td>
+          <td>72 × 128 (24×32 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Replace roll with tactical sidestep evasion dash and invulnerability timing.</td>
+        </tr>
+        <tr>
+          <td><strong>02_Enemies</strong></td>
+          <td><code>swordsman.png</code></td>
+          <td>64 × 96 (16×24 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Replace generic green soldier with historically informed Adilshahi / Mughal infantry.</td>
+        </tr>
+        <tr>
+          <td><strong>02_Enemies</strong></td>
+          <td><code>shield_guard.png</code></td>
+          <td>72 × 96 (18×24 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Redesign with clear block stance and directional counter-play vulnerability.</td>
+        </tr>
+        <tr>
+          <td><strong>02_Enemies</strong></td>
+          <td><code>archer.png</code></td>
+          <td>64 × 96 (16×24 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Add distinct aiming telegraph and visible flight physics for arrows.</td>
+        </tr>
+        <tr>
+          <td><strong>02_Enemies</strong></td>
+          <td><code>charging_soldier.png</code></td>
+          <td>80 × 96 (20×24 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Remove unhistorical horned helmet; replace with plate-and-brigandine shock troop.</td>
+        </tr>
+        <tr>
+          <td><strong>02_Enemies</strong></td>
+          <td><code>elite_guard.png</code></td>
+          <td>88 × 112 (22×28 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Tall 56px halberdier with wide circular sweeps and defensive poise.</td>
+        </tr>
+        <tr>
+          <td><strong>03_Bosses</strong></td>
+          <td><code>afzal_khan.png</code></td>
+          <td>108 × 176 (36×44 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Massive 64×80px bespoke sprite with multi-phase crushing cleaves and grapple tells.</td>
+        </tr>
+        <tr>
+          <td><strong>03_Bosses</strong></td>
+          <td><code>shaista_khan.png</code></td>
+          <td>84 × 144 (28×36 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Agile night-stealth encounter with rapid evasion across Lal Mahal chambers.</td>
+        </tr>
+        <tr>
+          <td><strong>03_Bosses</strong></td>
+          <td><code>aurangzeb.png</code></td>
+          <td>108 × 176 (36×44 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Imperial final encounter with gold damascened armor and divine warding summons.</td>
+        </tr>
+        <tr>
+          <td><strong>04_Astras</strong></td>
+          <td><code>agni/varuna/bhoomi_effects.png</code></td>
+          <td>128 × 64 (32×32 cells)</td>
+          <td><span class="badge badge-upgrade">UPGRADE</span></td>
+          <td>Retain excellent core color swatches; upgrade into layered particle burst animations.</td>
+        </tr>
+        <tr>
+          <td><strong>05_Weapons</strong></td>
+          <td><code>talwar_basic / upgraded</code></td>
+          <td>16 × 16 icons</td>
+          <td><span class="badge badge-retain">RETAIN</span></td>
+          <td>Retain as HUD inventory icons; supplement with high-res inspect dialogue illustrations.</td>
+        </tr>
+        <tr>
+          <td><strong>07_Terrain</strong></td>
+          <td><code>grass, dirt, stone, water</code></td>
+          <td>128 × 16 (16×16 tiles)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Upgrade to 32×32px high-res tilesets with rich natural blending masks (Gate C).</td>
+        </tr>
+        <tr>
+          <td><strong>08_Trees</strong></td>
+          <td><code>forest_trees, sagwan_trees</code></td>
+          <td>128 × 96 (32×48 cells)</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Scale to 64×96px majestic Sahyadri teaks with decoupled canopy Y-sorting.</td>
+        </tr>
+        <tr>
+          <td><strong>10_Forts</strong></td>
+          <td><code>fort_walls, gates, towers</code></td>
+          <td>128 × 48 to 128 × 96</td>
+          <td><span class="badge badge-replace">REPLACE</span></td>
+          <td>Rebuild as monumental modular fort architecture (Buruj bastions, Devdi gates).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 4: SHIVAJI & ROSTER DESIGN SYSTEM -->
+  <div id="tab-roster" class="tab-content">
+    <h3 style="font-size: 16px; color: var(--saffron-light); margin-bottom: 8px;">Character Roster Design System (Parts 3 & 4)</h3>
+    <p style="font-size: 13px; color: #d1d5db; margin-bottom: 16px;">Unified silhouette, equipment profile, color identity, and animation requirements for every major archetype.</p>
+
+    <div class="roster-grid">
+      <div class="roster-card" style="border-color: var(--saffron);">
+        <h4>Chhatrapati Shivaji Maharaj <span class="badge" style="background: var(--saffron); color: #fff;">Protagonist</span></h4>
+        <div class="roster-meta">Size: 48×64px | Palette: Saffron, Cream, Gold, Steel</div>
+        <div class="roster-desc">Researched 17th-century Maratha regalia: Crimson & saffron Pheta with Sirpech, pleated Angarkha, brocade Kamarbandh, and steel Talwar with spiked basket hilt. Heroic 1:4.5 proportions.</div>
+      </div>
+
+      <div class="roster-card">
+        <h4>Mavala Guerrilla Scout <span class="badge" style="background: #166534; color: #fff;">Ally</span></h4>
+        <div class="roster-meta">Size: 40×56px | Palette: Earth, Tan, Deep Green</div>
+        <div class="roster-desc">Agile hill warriors indigenous to the Western Ghats. Armed with light dhal bucklers and talwars. Provide pathfinding, scouting warnings, and ambush support.</div>
+      </div>
+
+      <div class="roster-card">
+        <h4>Stronghold Blacksmith <span class="badge" style="background: #78350f; color: #fff;">Crafting NPC</span></h4>
+        <div class="roster-meta">Size: 44×60px | Palette: Dark Leather, Bronze, Ash</div>
+        <div class="roster-desc">Stationed at fort forges. Forges raw Sahyadri iron ore and sagwan wood into upgraded talwar blades, armor plating, and fort defenses.</div>
+      </div>
+
+      <div class="roster-card">
+        <h4>Adilshahi / Mughal Swordsman <span class="badge" style="background: #dc2626; color: #fff;">Enemy</span></h4>
+        <div class="roster-meta">Size: 40×56px | Palette: Dark Green, Brass, Ochre</div>
+        <div class="roster-desc">Standard patrol guard. Uses telegraphed 2-hit slashes. Vulnerable to timed parries and quick counter-attacks.</div>
+      </div>
+
+      <div class="roster-card">
+        <h4>Bastion Shield Guard <span class="badge" style="background: #dc2626; color: #fff;">Enemy</span></h4>
+        <div class="roster-meta">Size: 44×58px | Palette: Brass, Iron, Russet</div>
+        <div class="roster-desc">Carries a large brass-reinforced Dhal shield. Deflects frontal attacks. Requires flanking, dodge-rolling behind, or Bhoomi earth ground-smash to break guard.</div>
+      </div>
+
+      <div class="roster-card">
+        <h4>Elite Fortress Halberdier <span class="badge" style="background: #dc2626; color: #fff;">Elite</span></h4>
+        <div class="roster-meta">Size: 48×64px | Palette: Polished Steel, Imperial Purple</div>
+        <div class="roster-desc">Formidable fortress guard with sweeping polearm attacks and broad knockback radius. Demands precise dodge evasion and stamina management.</div>
+      </div>
+
+      <div class="roster-card" style="border-color: #9333ea;">
+        <h4>Afzal Khan <span class="badge" style="background: #9333ea; color: #fff;">Boss — Pratapgad</span></h4>
+        <div class="roster-meta">Size: 64×80px | Palette: Royal Bijapur Purple, Brocade Gold</div>
+        <div class="roster-desc">Towering martial commander. Features high-damage overhead cleaves, sweeping sword arcs, and telegraphed grapple lunges in the historical Pratapgad pavilion.</div>
+      </div>
+
+      <div class="roster-card" style="border-color: #3b82f6;">
+        <h4>Shaista Khan <span class="badge" style="background: #3b82f6; color: #fff;">Boss — Lal Mahal</span></h4>
+        <div class="roster-meta">Size: 48×64px | Palette: Midnight Silk, Crimson Sash</div>
+        <div class="roster-desc">Infiltration boss encounter inside Lal Mahal palace. Highly evasive, summoning elite guard waves while executing rapid dagger strikes before attempting retreat.</div>
+      </div>
+
+      <div class="roster-card" style="border-color: #eab308;">
+        <h4>Aurangzeb <span class="badge" style="background: #eab308; color: #000;">Finale — Raigad</span></h4>
+        <div class="roster-meta">Size: 60×76px | Palette: Imperial Gold, Emerald Plume</div>
+        <div class="roster-desc">The climactic fictionalized coronation showdown. Employs royal guard phalanxes, protective shields, and imperial decree attacks counterable by the Tri-Astra awakening.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: WORLD & PROGRESSION -->
+  <div id="tab-world" class="tab-content">
+    <h3 style="font-size: 16px; color: var(--saffron-light); margin-bottom: 8px;">Connected Open World & Character Experience Architecture</h3>
+    <p style="font-size: 13px; color: #d1d5db; margin-bottom: 16px;">The structural paradigm shift from arcade stages to a continuous Sahyadri open world with persistent territory tracking.</p>
+
+    <div style="background: var(--panel-bg); border: 1px solid var(--border-dark); border-radius: 8px; padding: 20px; font-size: 13px; line-height: 1.7;">
+      <h4 style="color: var(--gold-light); margin-bottom: 8px;">1. Decoupling Character Level from Game Stages</h4>
+      <p>In the new engine, <strong>Character Level</strong> reflects Shivaji's personal martial prowess (earned via XP from combat, exploration, and missions). Reaching Character Level 25 no longer teleports the player; rather, it prepares them to travel across the Javali mountain pass to the physical fortress of Pratapgad.</p>
+
+      <h4 style="color: var(--gold-light); margin: 16px 0 8px 0;">2. Global World Coordinates & Chunk Streaming</h4>
+      <p>The entire world is mapped into unified coordinates $(X_w, Y_w)$. Regions (Sahyadri Forest, Pratapgad, Pune & Lal Mahal, High Garrisons, Raigad) are seamlessly connected with natural geographic transitions: steep mountain passes, wooden river footbridges, and fortified gatehouses.</p>
+
+      <h4 style="color: var(--gold-light); margin: 16px 0 8px 0;">3. Persistent World-State System</h4>
+      <p>Liberated villages remain peaceful, with friendly villagers and saffron Bhagwa Zenda banners. Fort gates remain physically open once unlocked. Defeated local garrisons are replaced by Swarajya patrol guards who assist Shivaji when wild bandits or enemy raiding parties approach.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  
+  const selectedContent = document.getElementById(`tab-${tabId}`);
+  if (selectedContent) selectedContent.classList.add('active');
+  
+  event.target.classList.add('active');
+  if (tabId === 'resolution') renderResolutionDemo();
+}
+
+function renderResolutionDemo() {
+  // Render Old 160x160
+  const cOld = document.getElementById('canvas-old');
+  if (cOld) {
+    const ctxOld = cOld.getContext('2d');
+    ctxOld.imageSmoothingEnabled = false;
+    ctxOld.fillStyle = '#28461d'; ctxOld.fillRect(0,0,160,160);
+    // Tree
+    ctxOld.fillStyle = '#422817'; ctxOld.fillRect(30, 20, 8, 20);
+    ctxOld.fillStyle = '#365314'; ctxOld.fillRect(20, 10, 28, 16);
+    // Old 24x32 Shivaji
+    ctxOld.fillStyle = '#e66012'; ctxOld.fillRect(76, 70, 8, 5); // Pheta
+    ctxOld.fillStyle = '#c68642'; ctxOld.fillRect(77, 75, 6, 4); // Face
+    ctxOld.fillStyle = '#fef3c7'; ctxOld.fillRect(75, 79, 10, 10); // Angarkha
+    ctxOld.fillStyle = '#b45309'; ctxOld.fillRect(75, 86, 10, 2); // Sash
+    ctxOld.fillStyle = '#451a03'; ctxOld.fillRect(76, 93, 3, 4); // Feet
+    ctxOld.fillStyle = '#451a03'; ctxOld.fillRect(81, 93, 3, 4);
+    // Bounded walls
+    ctxOld.fillStyle = '#475569'; ctxOld.fillRect(144, 0, 16, 160);
+  }
+
+  // Render New 480x270 Widescreen 32-Bit Viewport
+  const cNew = document.getElementById('canvas-new');
+  if (cNew) {
+    const ctxNew = cNew.getContext('2d');
+    ctxNew.imageSmoothingEnabled = false;
+    // Ground gradient
+    const sky = ctxNew.createLinearGradient(0, 0, 0, 270);
+    sky.addColorStop(0, '#1c2e17'); sky.addColorStop(1, '#2c471c');
+    ctxNew.fillStyle = sky; ctxNew.fillRect(0, 0, 480, 270);
+
+    // Stone road
+    ctxNew.fillStyle = '#543310'; ctxNew.fillRect(0, 160, 480, 40);
+    ctxNew.fillStyle = '#795538'; ctxNew.fillRect(0, 164, 480, 32);
+
+    // Distant Sahyadri mountain ridge
+    ctxNew.fillStyle = '#1e293b';
+    ctxNew.beginPath();
+    ctxNew.moveTo(0, 90); ctxNew.lineTo(120, 40); ctxNew.lineTo(240, 75); ctxNew.lineTo(360, 30); ctxNew.lineTo(480, 85); ctxNew.lineTo(480, 160); ctxNew.lineTo(0, 160);
+    ctxNew.fill();
+
+    // Large Teak Tree (64x96px)
+    ctxNew.fillStyle = '#2b180d'; ctxNew.fillRect(70, 100, 16, 60);
+    ctxNew.fillStyle = '#1e3f14'; ctxNew.beginPath(); ctxNew.arc(78, 90, 38, 0, Math.PI*2); ctxNew.fill();
+    ctxNew.fillStyle = '#365314'; ctxNew.beginPath(); ctxNew.arc(74, 84, 30, 0, Math.PI*2); ctxNew.fill();
+    ctxNew.fillStyle = '#65a30d'; ctxNew.beginPath(); ctxNew.arc(70, 78, 20, 0, Math.PI*2); ctxNew.fill();
+
+    // Fort Rampart Bastion in background
+    ctxNew.fillStyle = '#3c4046'; ctxNew.fillRect(340, 80, 140, 100);
+    ctxNew.fillStyle = '#5e656e';
+    for (let i = 0; i < 5; i++) { ctxNew.fillRect(340 + i*28, 68, 16, 14); } // Merlons
+    // Saffron Flag
+    ctxNew.fillStyle = '#b45309'; ctxNew.fillRect(360, 42, 2, 26);
+    ctxNew.fillStyle = '#e66012'; ctxNew.beginPath(); ctxNew.moveTo(362, 42); ctxNew.lineTo(390, 52); ctxNew.lineTo(362, 62); ctxNew.fill();
+
+    // Redesigned Shivaji Maharaj (Heroic 48x64px cell centered at x=230, y=140)
+    const sx = 230, sy = 140;
+    // Shadow
+    ctxNew.fillStyle = 'rgba(0,0,0,0.45)'; ctxNew.beginPath(); ctxNew.ellipse(sx + 12, sy + 58, 18, 6, 0, 0, Math.PI*2); ctxNew.fill();
+    // Turban (Pheta)
+    ctxNew.fillStyle = '#b91c1c'; ctxNew.fillRect(sx + 4, sy + 4, 18, 14);
+    ctxNew.fillStyle = '#e66012'; ctxNew.fillRect(sx + 6, sy + 8, 14, 8);
+    ctxNew.fillStyle = '#fbbf24'; ctxNew.fillRect(sx + 4, sy + 6, 3, 5); // Sirpech feather
+    // Face & Beard
+    ctxNew.fillStyle = '#c68642'; ctxNew.fillRect(sx + 7, sy + 18, 12, 10);
+    ctxNew.fillStyle = '#1c1917'; ctxNew.fillRect(sx + 6, sy + 22, 14, 7); // Moustache & beard
+    // Royal Angarkha
+    ctxNew.fillStyle = '#fef3c7'; ctxNew.fillRect(sx + 4, sy + 28, 18, 20);
+    // Kamarbandh Sash
+    ctxNew.fillStyle = '#b45309'; ctxNew.fillRect(sx + 3, sy + 38, 20, 6);
+    ctxNew.fillStyle = '#fbbf24'; ctxNew.fillRect(sx + 5, sy + 40, 16, 2);
+    // Talwar at hip
+    ctxNew.fillStyle = '#fbbf24'; ctxNew.fillRect(sx - 3, sy + 36, 6, 4); // Hilt
+    ctxNew.fillStyle = '#e2e8f0'; ctxNew.fillRect(sx - 8, sy + 40, 5, 14); // Scabbard
+    // Trousers & Mojari Shoes
+    ctxNew.fillStyle = '#fef3c7'; ctxNew.fillRect(sx + 6, sy + 48, 6, 8);
+    ctxNew.fillStyle = '#fef3c7'; ctxNew.fillRect(sx + 14, sy + 48, 6, 8);
+    ctxNew.fillStyle = '#451a03'; ctxNew.fillRect(sx + 4, sy + 55, 8, 4);
+    ctxNew.fillStyle = '#451a03'; ctxNew.fillRect(sx + 14, sy + 55, 8, 4);
+
+    // Warm Sunbeam Lighting Overlay
+    ctxNew.fillStyle = 'rgba(254, 240, 138, 0.08)';
+    ctxNew.beginPath();
+    ctxNew.moveTo(200, 0); ctxNew.lineTo(320, 0); ctxNew.lineTo(400, 270); ctxNew.lineTo(240, 270);
+    ctxNew.fill();
+  }
+}
+
+// Initial draw
+window.addEventListener('load', () => {
+  renderResolutionDemo();
+});
+</script>
+
+</body>
+</html>
