@@ -1,0 +1,91 @@
+{
+  "project": "Chronicles of Swarajya: The Divine Blade",
+  "artDirection": "Option B: Detailed 32-Bit High-Resolution Pixel Art",
+  "generatedAt": "2026-10-12T16:02:00.000Z",
+  "resolutionStandard": {
+    "playerCell": "48x64",
+    "playerAttackCell": "64x64",
+    "standardEnemyCell": "40x56",
+    "eliteEnemyCell": "48x64",
+    "bossCell": "64x80",
+    "targetVirtualCanvas": "480x270"
+  },
+  "palette": {
+    "SAFFRON_BASE": "#e66012",
+    "SAFFRON_HI": "#f59e0b",
+    "SAFFRON_DARK": "#b45309",
+    "PHETA_RED": "#b91c1c",
+    "PHETA_RED_DARK": "#7f1d1d",
+    "GOLD_BASE": "#fbbf24",
+    "GOLD_HI": "#fef08a",
+    "ANGARKHA_BASE": "#f5e8b4",
+    "ANGARKHA_HI": "#fef3c7",
+    "ANGARKHA_DARK": "#af9b69",
+    "SKIN_BASE": "#c68642",
+    "SKIN_HI": "#ebb280",
+    "BEARD_BLACK": "#1c1917",
+    "MOJARI_BASE": "#451a03",
+    "STEEL_BASE": "#94a3b8",
+    "STEEL_HI": "#e2e8f0",
+    "STEEL_GLINT": "#ffffff"
+  },
+  "shivaji": {
+    "idle": {
+      "file": "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png",
+      "frameW": 48,
+      "frameH": 64,
+      "cols": 4,
+      "rows": 4,
+      "fps": 3,
+      "loop": true,
+      "pivot": { "x": 24, "y": 58 },
+      "directions": ["south", "north", "east", "west"],
+      "description": "4-frame subtle breathing loop, gentle pheta plume sway, hand resting on talwar hilt."
+    },
+    "walk": {
+      "file": "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_walk.png",
+      "frameW": 48,
+      "frameH": 64,
+      "cols": 8,
+      "rows": 4,
+      "fps": 8,
+      "loop": true,
+      "pivot": { "x": 24, "y": 58 },
+      "directions": ["south", "north", "east", "west"],
+      "description": "8-frame fluid athletic stride with natural angarkha hem pendulum sway and arm counter-motion."
+    },
+    "attack": {
+      "file": "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_attack.png",
+      "frameW": 64,
+      "frameH": 64,
+      "cols": 6,
+      "rows": 4,
+      "fps": 10,
+      "loop": false,
+      "pivot": { "x": 32, "y": 58 },
+      "directions": ["south", "north", "east", "west"],
+      "hitboxTiming": {
+        "windupFrames": [0, 1, 2],
+        "activeHitFrames": [3],
+        "followThroughFrames": [4],
+        "recoveryFrames": [5]
+      },
+      "description": "6-frame talwar slash with telegraphed anticipation, explosive forward arc, and luminous crescent trail."
+    }
+  },
+  "portraits": {
+    "shivaji": {
+      "file": "ChroniclesOfSwarajya_Art/04_Portraits/shivaji_portrait.png",
+      "dimensions": "1024x1024",
+      "type": "Illustrated Bust",
+      "usage": "Dialogue cutscenes, opening cinematic, and quest briefings."
+    }
+  },
+  "previews": {
+    "gallery": {
+      "file": "ChroniclesOfSwarajya_Art/06_Previews/shivaji_animation_gallery.png",
+      "dimensions": "760x480",
+      "description": "Side-by-side comparison of old Phase 1 24x32 sprite vs new Option B 48x64 sprite, with 4-directional idle and attack combo strip."
+    }
+  }
+}
