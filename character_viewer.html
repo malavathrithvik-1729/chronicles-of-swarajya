@@ -656,6 +656,15 @@ const animCtx = animCanvas.getContext('2d');
 const sheetCanvas = document.getElementById('sheet-canvas');
 const sheetCtx = sheetCanvas.getContext('2d');
 
+function resolveAssetPath(path) {
+  // If viewing from inside ChroniclesOfSwarajya_Art/, strip prefix
+  const loc = window.location.pathname;
+  if (loc.indexOf('/ChroniclesOfSwarajya_Art/') !== -1 && path.startsWith('ChroniclesOfSwarajya_Art/')) {
+    return path.replace('ChroniclesOfSwarajya_Art/', '');
+  }
+  return path;
+}
+
 function selectAsset(id) {
   currentAssetId = id;
   const asset = ASSETS[id];
@@ -695,16 +704,25 @@ function selectAsset(id) {
   updateCanvasZoom();
 
   currentImg = new Image();
+  const primaryPath = resolveAssetPath(asset.file);
+  const altPath = primaryPath.startsWith('ChroniclesOfSwarajya_Art/') 
+    ? primaryPath.replace('ChroniclesOfSwarajya_Art/', '') 
+    : ('ChroniclesOfSwarajya_Art/' + primaryPath);
+
   currentImg.onload = () => {
     document.getElementById('error-banner').style.display = 'none';
     renderSheet();
     renderFrame();
   };
   currentImg.onerror = () => {
+    if (currentImg.src.indexOf(encodeURI(altPath)) === -1 && currentImg.src.indexOf(altPath) === -1) {
+      currentImg.src = altPath;
+      return;
+    }
     document.getElementById('error-banner').style.display = 'block';
     document.getElementById('error-banner').innerText = `Failed to load ${asset.file}`;
   };
-  currentImg.src = asset.file;
+  currentImg.src = primaryPath;
 }
 
 function updateCanvasZoom() {
@@ -719,7 +737,7 @@ function updateCanvasZoom() {
 
 function renderFrame() {
   const asset = ASSETS[currentAssetId];
-  if (!asset || !currentImg.complete) return;
+  if (!asset || !currentImg.complete || currentImg.naturalWidth === 0) return;
 
   animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
   const sx = currentFrameCol * asset.frameW;
@@ -749,7 +767,7 @@ function renderFrame() {
 
 function renderSheet() {
   const asset = ASSETS[currentAssetId];
-  if (!asset || !currentImg.complete) return;
+  if (!asset || !currentImg.complete || currentImg.naturalWidth === 0) return;
 
   sheetCanvas.width = currentImg.naturalWidth;
   sheetCanvas.height = currentImg.naturalHeight;
@@ -871,7 +889,7 @@ function setupComparisonCanvases() {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(oldImg, 0, 0, 24, 32, 0, 0, 24, 32);
   };
-  oldImg.src = 'ChroniclesOfSwarajya_Art/01_Shivaji_Phase1_Legacy/shivaji_idle.png';
+  oldImg.src = resolveAssetPath('ChroniclesOfSwarajya_Art/01_Shivaji_Phase1_Legacy/shivaji_idle.png');
 
   const newImg = new Image();
   newImg.onload = () => {
@@ -880,7 +898,7 @@ function setupComparisonCanvases() {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(newImg, 0, 0, 48, 64, 0, 0, 48, 64);
   };
-  newImg.src = 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png';
+  newImg.src = resolveAssetPath('ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png');
 }
 
 window.addEventListener('load', () => {
