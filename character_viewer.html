@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chronicles of Swarajya — Option B Character Studio & Animation Inspector</title>
+<title>Chronicles of Swarajya — Master Character Studio & Animation Inspector</title>
 <style>
   :root {
     --bg-dark: #0a0806;
@@ -21,6 +21,7 @@
     --text-muted: #9ca3af;
     --accent-green: #22c55e;
     --accent-blue: #38bdf8;
+    --accent-purple: #c084fc;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
   body, html {
@@ -36,7 +37,7 @@
   header {
     background: radial-gradient(circle at top, #2d160c 0%, #140f0c 100%);
     border-bottom: 2px solid var(--border-gold);
-    padding: 12px 24px;
+    padding: 10px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -44,7 +45,7 @@
     z-index: 10;
   }
   header h1 {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--saffron-light);
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -70,13 +71,13 @@
 
   /* Left Sidebar: Asset Selector */
   #sidebar {
-    width: 320px;
+    width: 330px;
     background: var(--panel-bg);
     border-right: 2px solid var(--border-dark);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    padding: 14px;
+    padding: 12px;
   }
   .cat-header {
     font-size: 11px;
@@ -84,8 +85,8 @@
     color: var(--gold-light);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin: 14px 0 6px 0;
-    padding-bottom: 4px;
+    margin: 12px 0 6px 0;
+    padding-bottom: 3px;
     border-bottom: 1px dashed #78350f;
   }
   .cat-header:first-child { margin-top: 0; }
@@ -93,10 +94,10 @@
     background: var(--card-bg);
     border: 1px solid var(--border-dark);
     color: var(--text-cream);
-    padding: 8px 10px;
-    margin-bottom: 6px;
+    padding: 6px 9px;
+    margin-bottom: 4px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     font-family: inherit;
     cursor: pointer;
     text-align: left;
@@ -118,7 +119,7 @@
   }
   .asset-tag {
     font-size: 9px;
-    padding: 2px 5px;
+    padding: 1px 4px;
     border-radius: 3px;
     background: rgba(0,0,0,0.4);
     color: var(--gold-light);
@@ -138,7 +139,7 @@
     padding: 8px 16px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     flex-wrap: wrap;
     font-size: 12px;
   }
@@ -149,14 +150,14 @@
   }
   .tool-label {
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
   }
   .btn-ctrl {
     background: var(--card-bg);
     border: 1px solid var(--border-dark);
     color: var(--text-cream);
-    padding: 4px 10px;
+    padding: 4px 9px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 11px;
@@ -214,33 +215,33 @@
 
   /* Right Sprite Sheet & Inspector Panel */
   #sheet-panel {
-    width: 380px;
+    width: 360px;
     background: var(--panel-bg);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    padding: 16px;
+    padding: 14px;
   }
   .panel-title {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--gold-light);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 8px;
-    padding-bottom: 4px;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
     border-bottom: 1px solid var(--border-dark);
   }
   #sheet-canvas-wrap {
     background: #080605;
     border: 1px solid var(--border-dark);
     border-radius: 4px;
-    padding: 8px;
+    padding: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     overflow: auto;
-    max-height: 280px;
+    max-height: 240px;
   }
   #sheet-canvas {
     image-rendering: pixelated;
@@ -248,29 +249,27 @@
     display: block;
   }
 
-  /* Metadata table */
   .meta-row {
     display: flex;
     justify-content: space-between;
     font-size: 11px;
-    padding: 4px 0;
+    padding: 3px 0;
     border-bottom: 1px dashed rgba(255,255,255,0.06);
   }
   .meta-key { color: var(--text-muted); }
   .meta-val { color: var(--gold-light); font-weight: 600; }
 
-  /* Side-by-side comparison box */
   #compare-box {
-    margin-top: 14px;
+    margin-top: 12px;
     background: var(--card-bg);
     border: 1px solid var(--border-dark);
     border-radius: 6px;
-    padding: 12px;
+    padding: 10px;
   }
   #compare-box h4 {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--saffron-light);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     text-transform: uppercase;
   }
   .compare-view {
@@ -284,17 +283,16 @@
     border: 1px solid #444;
     background: #000;
     display: block;
-    margin: 0 auto 4px auto;
+    margin: 0 auto 3px auto;
   }
-  .compare-caption { font-size: 10px; color: var(--text-muted); }
+  .compare-caption { font-size: 9px; color: var(--text-muted); }
 
-  /* Error modal / toast */
   #error-banner {
     display: none;
     background: #991b1b;
     color: #fff;
-    padding: 8px 16px;
-    font-size: 12px;
+    padding: 6px 16px;
+    font-size: 11px;
     text-align: center;
     font-weight: bold;
   }
@@ -306,83 +304,201 @@
   <div>
     <h1>
       <span class="badge badge-optb">GATE B</span>
-      Chronicles of Swarajya: Option B Character Studio & Inspector
+      Chronicles of Swarajya: Master Character Studio
     </h1>
   </div>
   <div>
-    <span class="badge badge-rec">32-Bit High-Res Pixel Pipeline (48×64 Standard)</span>
+    <span class="badge badge-rec">Complete Option B 32-Bit High-Res Roster</span>
   </div>
 </header>
 
-<div id="error-banner">Asset load failed! Verify local server path.</div>
+<div id="error-banner">Asset load warning.</div>
 
 <div id="app-container">
   <!-- Left Sidebar -->
   <aside id="sidebar">
-    <div class="cat-header">1. Shivaji Maharaj (Redesigned Option B)</div>
+    <div class="cat-header">1. Protagonist — Shivaji Maharaj</div>
     <button class="asset-btn active" data-id="optb_shivaji_idle">
-      <span>Shivaji — Idle (4 Directions)</span>
-      <span class="asset-tag">48×64 | 4f</span>
+      <span>Shivaji — Idle</span><span class="asset-tag">48×64 | 4f</span>
     </button>
     <button class="asset-btn" data-id="optb_shivaji_walk">
-      <span>Shivaji — Walk Cycle (4 Directions)</span>
-      <span class="asset-tag">48×64 | 8f</span>
+      <span>Shivaji — Walk</span><span class="asset-tag">48×64 | 8f</span>
     </button>
     <button class="asset-btn" data-id="optb_shivaji_attack">
-      <span>Shivaji — Sword Attack (4 Directions)</span>
-      <span class="asset-tag">64×64 | 6f</span>
+      <span>Shivaji — Sword Attack</span><span class="asset-tag">64×64 | 6f</span>
     </button>
 
-    <div class="cat-header">2. Illustrated Dialogue Portraits</div>
-    <button class="asset-btn" data-id="portrait_shivaji">
-      <span>Shivaji Maharaj — Cutscene Bust</span>
-      <span class="asset-tag">1024×1024</span>
+    <div class="cat-header">2. Ordinary Enemy Roster</div>
+    <button class="asset-btn" data-id="optb_swordsman_idle">
+      <span>Swordsman — Idle</span><span class="asset-tag">40×56 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_swordsman_walk">
+      <span>Swordsman — Walk</span><span class="asset-tag">40×56 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_swordsman_attack">
+      <span>Swordsman — Attack</span><span class="asset-tag">56×56 | 6f</span>
     </button>
 
-    <div class="cat-header">3. Previews & Comparison Galleries</div>
-    <button class="asset-btn" data-id="gallery_preview">
-      <span>Option B Showcase & Comparison</span>
-      <span class="asset-tag">Gallery</span>
+    <button class="asset-btn" data-id="optb_shield_guard_idle">
+      <span>Shield Guard — Idle</span><span class="asset-tag">44×58 | 4f</span>
     </button>
-    <button class="asset-btn" data-id="palette_preview">
-      <span>Option B Color Swatch Palette</span>
-      <span class="asset-tag">Palette</span>
+    <button class="asset-btn" data-id="optb_shield_guard_walk">
+      <span>Shield Guard — Walk</span><span class="asset-tag">44×58 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_shield_guard_attack">
+      <span>Shield Guard — Bash</span><span class="asset-tag">60×58 | 6f</span>
     </button>
 
-    <div class="cat-header">4. Legacy Phase 1 Sprites (Archived)</div>
-    <button class="asset-btn" data-id="legacy_shivaji_idle">
-      <span>Old Shivaji Idle (Phase 1)</span>
-      <span class="asset-tag">24×32 | 2f</span>
+    <button class="asset-btn" data-id="optb_archer_idle">
+      <span>Archer — Idle</span><span class="asset-tag">40×56 | 4f</span>
     </button>
-    <button class="asset-btn" data-id="legacy_shivaji_walk">
-      <span>Old Shivaji Walk (Phase 1)</span>
-      <span class="asset-tag">24×32 | 4f</span>
+    <button class="asset-btn" data-id="optb_archer_walk">
+      <span>Archer — Walk</span><span class="asset-tag">40×56 | 8f</span>
     </button>
-    <button class="asset-btn" data-id="legacy_shivaji_attack">
-      <span>Old Shivaji Attack (Phase 1)</span>
-      <span class="asset-tag">24×32 | 3f</span>
+    <button class="asset-btn" data-id="optb_archer_attack">
+      <span>Archer — Bow Shoot</span><span class="asset-tag">56×56 | 6f</span>
+    </button>
+
+    <button class="asset-btn" data-id="optb_charging_soldier_idle">
+      <span>Charger — Idle</span><span class="asset-tag">44×58 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_charging_soldier_walk">
+      <span>Charger — Run</span><span class="asset-tag">44×58 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_charging_soldier_attack">
+      <span>Charger — Strike</span><span class="asset-tag">60×58 | 6f</span>
+    </button>
+
+    <button class="asset-btn" data-id="optb_elite_halberdier_idle">
+      <span>Halberdier — Idle</span><span class="asset-tag">48×64 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_elite_halberdier_walk">
+      <span>Halberdier — Walk</span><span class="asset-tag">48×64 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_elite_halberdier_attack">
+      <span>Halberdier — Sweep</span><span class="asset-tag">64×64 | 6f</span>
+    </button>
+
+    <button class="asset-btn" data-id="optb_spear_soldier_idle">
+      <span>Spearman — Idle</span><span class="asset-tag">40×56 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_spear_soldier_walk">
+      <span>Spearman — Walk</span><span class="asset-tag">40×56 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_spear_soldier_attack">
+      <span>Spearman — Thrust</span><span class="asset-tag">56×56 | 6f</span>
+    </button>
+
+    <div class="cat-header">3. Major Bosses (Bespoke)</div>
+    <button class="asset-btn" data-id="optb_afzal_khan_idle">
+      <span>Afzal Khan — Idle</span><span class="asset-tag">64×80 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_afzal_khan_walk">
+      <span>Afzal Khan — Walk</span><span class="asset-tag">64×80 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_afzal_khan_attack">
+      <span>Afzal Khan — Cleave</span><span class="asset-tag">84×80 | 6f</span>
+    </button>
+
+    <button class="asset-btn" data-id="optb_shaista_khan_idle">
+      <span>Shaista Khan — Idle</span><span class="asset-tag">60×76 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_shaista_khan_walk">
+      <span>Shaista Khan — Walk</span><span class="asset-tag">60×76 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_shaista_khan_attack">
+      <span>Shaista Khan — Daggers</span><span class="asset-tag">80×76 | 6f</span>
+    </button>
+
+    <button class="asset-btn" data-id="optb_aurangzeb_idle">
+      <span>Aurangzeb — Idle</span><span class="asset-tag">64×80 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_aurangzeb_walk">
+      <span>Aurangzeb — Walk</span><span class="asset-tag">64×80 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_aurangzeb_attack">
+      <span>Aurangzeb — Sceptre</span><span class="asset-tag">84×80 | 6f</span>
+    </button>
+
+    <div class="cat-header">4. Allied Characters & NPCs</div>
+    <button class="asset-btn" data-id="optb_mavala_warrior_idle">
+      <span>Mavala Warrior — Idle</span><span class="asset-tag">44×58 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_mavala_warrior_walk">
+      <span>Mavala Warrior — Walk</span><span class="asset-tag">44×58 | 8f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_mavala_scout_idle">
+      <span>Mavala Scout — Idle</span><span class="asset-tag">40×56 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_village_elder_idle">
+      <span>Village Elder — Standing</span><span class="asset-tag">40×56 | 4f</span>
+    </button>
+    <button class="asset-btn" data-id="optb_blacksmith_idle">
+      <span>Blacksmith — At Anvil</span><span class="asset-tag">48×64 | 4f</span>
+    </button>
+
+    <div class="cat-header">5. Illustrated Dialogue Portraits</div>
+    <button class="asset-btn" data-id="port_shivaji">
+      <span>Shivaji Maharaj Bust</span><span class="asset-tag">1024×1024</span>
+    </button>
+    <button class="asset-btn" data-id="port_bhavani">
+      <span>Goddess Bhavani</span><span class="asset-tag">1024×1024</span>
+    </button>
+    <button class="asset-btn" data-id="port_afzal">
+      <span>Afzal Khan (Bijapur)</span><span class="asset-tag">1024×1024</span>
+    </button>
+    <button class="asset-btn" data-id="port_shaista">
+      <span>Shaista Khan (Lal Mahal)</span><span class="asset-tag">1024×1024</span>
+    </button>
+    <button class="asset-btn" data-id="port_aurangzeb">
+      <span>Aurangzeb (Imperial)</span><span class="asset-tag">1024×1024</span>
+    </button>
+    <button class="asset-btn" data-id="port_mavala_w">
+      <span>Mavala Warrior</span><span class="asset-tag">1024×1024</span>
+    </button>
+    <button class="asset-btn" data-id="port_elder">
+      <span>Village Elder</span><span class="asset-tag">1024×1024</span>
+    </button>
+    <button class="asset-btn" data-id="port_smith">
+      <span>Fort Blacksmith (Lohar)</span><span class="asset-tag">1024×1024</span>
+    </button>
+    <button class="asset-btn" data-id="port_commander">
+      <span>Enemy Commander</span><span class="asset-tag">1024×1024</span>
+    </button>
+
+    <div class="cat-header">6. Showcase & Roster Galleries</div>
+    <button class="asset-btn" data-id="gal_enemies">
+      <span>Enemy Roster Showcase</span><span class="asset-tag">Gallery</span>
+    </button>
+    <button class="asset-btn" data-id="gal_bosses">
+      <span>Boss Roster Showcase</span><span class="asset-tag">Gallery</span>
+    </button>
+    <button class="asset-btn" data-id="gal_allies">
+      <span>Allies Roster Showcase</span><span class="asset-tag">Gallery</span>
+    </button>
+    <button class="asset-btn" data-id="gal_weapons">
+      <span>Weapons Showcase</span><span class="asset-tag">Gallery</span>
+    </button>
+    <button class="asset-btn" data-id="gal_shivaji">
+      <span>Shivaji Animation Gallery</span><span class="asset-tag">Gallery</span>
     </button>
   </aside>
 
   <!-- Center Stage Area -->
   <main id="stage">
-    <!-- Toolbar Controls -->
     <div id="toolbar">
-      <!-- Playback -->
       <div class="tool-group">
         <button id="btn-play" class="btn-ctrl active">⏸ Pause</button>
         <button id="btn-step-prev" class="btn-ctrl">◀ Step</button>
         <button id="btn-step-next" class="btn-ctrl">Step ▶</button>
       </div>
 
-      <!-- FPS Slider -->
       <div class="tool-group">
         <span class="tool-label">Speed:</span>
-        <input type="range" id="fps-slider" min="1" max="24" value="6" style="width: 80px; accent-color: var(--saffron);">
-        <span id="fps-val" style="font-weight: bold; width: 36px;">6 FPS</span>
+        <input type="range" id="fps-slider" min="1" max="24" value="6" style="width: 75px; accent-color: var(--saffron);">
+        <span id="fps-val" style="font-weight: bold; width: 34px;">6 FPS</span>
       </div>
 
-      <!-- Direction Selector -->
       <div class="tool-group" id="dir-selector">
         <span class="tool-label">Direction:</span>
         <button class="btn-ctrl active" data-dir="0">South</button>
@@ -391,17 +507,14 @@
         <button class="btn-ctrl" data-dir="3">West</button>
       </div>
 
-      <!-- Zoom -->
       <div class="tool-group">
         <span class="tool-label">Zoom:</span>
         <button class="btn-ctrl" data-zoom="1">1×</button>
         <button class="btn-ctrl" data-zoom="2">2×</button>
         <button class="btn-ctrl active" data-zoom="4">4×</button>
         <button class="btn-ctrl" data-zoom="6">6×</button>
-        <button class="btn-ctrl" data-zoom="8">8×</button>
       </div>
 
-      <!-- Background Style -->
       <div class="tool-group">
         <span class="tool-label">BG:</span>
         <button class="btn-ctrl active" data-bg="checker">Checker</button>
@@ -410,22 +523,18 @@
         <button class="btn-ctrl" data-bg="light">Light</button>
       </div>
 
-      <!-- Overlay toggles -->
       <div class="tool-group">
         <button id="btn-toggle-pivot" class="btn-ctrl">Pivot Crosshair</button>
-        <button id="btn-toggle-box" class="btn-ctrl">Cell Bounds</button>
+        <button id="btn-toggle-box" class="btn-ctrl">Bounds</button>
       </div>
     </div>
 
-    <!-- Viewport Area -->
     <div id="viewport-area">
-      <!-- Animated Canvas View -->
       <div id="anim-panel" class="viewport-bg-checker">
         <canvas id="anim-canvas" width="48" height="64"></canvas>
-        <div id="frame-indicator" style="margin-top: 12px; font-size: 11px; color: var(--gold-light);">Frame: 0 / 4</div>
+        <div id="frame-indicator" style="margin-top: 10px; font-size: 11px; color: var(--gold-light);">Frame: 0 / 4</div>
       </div>
 
-      <!-- Right Sheet & Inspector Panel -->
       <aside id="sheet-panel">
         <div class="panel-title">Sprite Sheet Atlas & Active Cell</div>
         <div id="sheet-canvas-wrap">
@@ -437,22 +546,21 @@
         <div class="meta-row"><span class="meta-key">Cell Dimensions:</span><span class="meta-val" id="meta-dims">48 × 64 px</span></div>
         <div class="meta-row"><span class="meta-key">Atlas Grid:</span><span class="meta-val" id="meta-grid">4 cols × 4 rows</span></div>
         <div class="meta-row"><span class="meta-key">Total Frames:</span><span class="meta-val" id="meta-total">16 frames</span></div>
-        <div class="meta-row"><span class="meta-key">Pivot Anchor:</span><span class="meta-val" id="meta-pivot">(24, 58) [Feet Center]</span></div>
+        <div class="meta-row"><span class="meta-key">Pivot Anchor:</span><span class="meta-val" id="meta-pivot">(24, 58)</span></div>
         <div class="meta-row"><span class="meta-key">Loop Mode:</span><span class="meta-val" id="meta-loop">Looping Cycle</span></div>
-        <div class="meta-row"><span class="meta-key">File Path:</span><span class="meta-val" id="meta-file" style="font-size: 9px; word-break: break-all;">ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png</span></div>
+        <div class="meta-row"><span class="meta-key">File Path:</span><span class="meta-val" id="meta-file" style="font-size: 9px; word-break: break-all;">-</span></div>
 
-        <!-- Live Old vs New Comparison Box -->
         <div id="compare-box">
-          <h4>Old 24×32 (Phase 1) vs New 48×64 (Option B)</h4>
+          <h4>Old 24×32 vs Option B High-Res</h4>
           <div class="compare-view">
             <div class="compare-col">
               <canvas id="compare-old" width="24" height="32" style="width: 72px; height: 96px;"></canvas>
-              <div class="compare-caption">Old: 24×32 Chibi</div>
+              <div class="compare-caption">Phase 1 (Legacy)</div>
             </div>
-            <div style="font-size: 16px; color: var(--gold-light); font-weight: bold;">➔</div>
+            <div style="font-size: 14px; color: var(--gold-light); font-weight: bold;">➔</div>
             <div class="compare-col">
               <canvas id="compare-new" width="48" height="64" style="width: 72px; height: 96px;"></canvas>
-              <div class="compare-caption">New: 48×64 Heroic</div>
+              <div class="compare-caption">Option B 32-Bit</div>
             </div>
           </div>
         </div>
@@ -462,80 +570,76 @@
 </div>
 
 <script>
-// Master Asset Database
 const ASSETS = {
-  optb_shivaji_idle: {
-    name: "Shivaji Maharaj — Idle",
-    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png",
-    frameW: 48, frameH: 64, cols: 4, rows: 4, fps: 3, loop: true,
-    pivot: { x: 24, y: 58 },
-    dirs: ["South (Front)", "North (Back)", "East (Right)", "West (Left)"],
-    desc: "4-frame subtle breathing cycle, gentle pheta plume sway, hand resting on talwar hilt."
-  },
-  optb_shivaji_walk: {
-    name: "Shivaji Maharaj — Walk Cycle",
-    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_walk.png",
-    frameW: 48, frameH: 64, cols: 8, rows: 4, fps: 8, loop: true,
-    pivot: { x: 24, y: 58 },
-    dirs: ["South (Front)", "North (Back)", "East (Right)", "West (Left)"],
-    desc: "8-frame fluid athletic stride with natural angarkha hem pendulum sway and arm counter-motion."
-  },
-  optb_shivaji_attack: {
-    name: "Shivaji Maharaj — Sword Attack",
-    file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_attack.png",
-    frameW: 64, frameH: 64, cols: 6, rows: 4, fps: 10, loop: false,
-    pivot: { x: 32, y: 58 },
-    dirs: ["South (Front)", "North (Back)", "East (Right)", "West (Left)"],
-    desc: "6-frame talwar slash with telegraphed anticipation, explosive forward arc, and luminous crescent trail."
-  },
-  portrait_shivaji: {
-    name: "Shivaji Maharaj — Illustrated Portrait Bust",
-    file: "ChroniclesOfSwarajya_Art/04_Portraits/shivaji_portrait.png",
-    frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true,
-    pivot: { x: 512, y: 512 },
-    dirs: ["Frontal Bust"],
-    isPortrait: true
-  },
-  gallery_preview: {
-    name: "Option B Showcase & Comparison Gallery",
-    file: "ChroniclesOfSwarajya_Art/06_Previews/shivaji_animation_gallery.png",
-    frameW: 760, frameH: 480, cols: 1, rows: 1, fps: 1, loop: true,
-    pivot: { x: 380, y: 240 },
-    dirs: ["Full Showcase"],
-    isStatic: true
-  },
-  palette_preview: {
-    name: "Option B Master Color Palette Swatches",
-    file: "ChroniclesOfSwarajya_Art/00_ArtStyle/option_b_palette.png",
-    frameW: 320, frameH: 160, cols: 1, rows: 1, fps: 1, loop: true,
-    pivot: { x: 160, y: 80 },
-    dirs: ["Color Swatches"],
-    isStatic: true
-  },
-  legacy_shivaji_idle: {
-    name: "Old Shivaji Idle (Phase 1)",
-    file: "ChroniclesOfSwarajya_Art/01_Shivaji_Phase1_Legacy/shivaji_idle.png",
-    frameW: 24, frameH: 32, cols: 2, rows: 4, fps: 2, loop: true,
-    pivot: { x: 12, y: 28 },
-    dirs: ["South", "North", "East", "West"]
-  },
-  legacy_shivaji_walk: {
-    name: "Old Shivaji Walk (Phase 1)",
-    file: "ChroniclesOfSwarajya_Art/01_Shivaji_Phase1_Legacy/shivaji_walk.png",
-    frameW: 24, frameH: 32, cols: 4, rows: 4, fps: 6, loop: true,
-    pivot: { x: 12, y: 28 },
-    dirs: ["South", "North", "East", "West"]
-  },
-  legacy_shivaji_attack: {
-    name: "Old Shivaji Attack (Phase 1)",
-    file: "ChroniclesOfSwarajya_Art/01_Shivaji_Phase1_Legacy/shivaji_attack.png",
-    frameW: 24, frameH: 32, cols: 3, rows: 4, fps: 8, loop: false,
-    pivot: { x: 12, y: 28 },
-    dirs: ["South", "North", "East", "West"]
-  }
+  // Shivaji
+  optb_shivaji_idle: { file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png", frameW: 48, frameH: 64, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:24, y:58}, dirs: ["South", "North", "East", "West"] },
+  optb_shivaji_walk: { file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_walk.png", frameW: 48, frameH: 64, cols: 8, rows: 4, fps: 8, loop: true, pivot: {x:24, y:58}, dirs: ["South", "North", "East", "West"] },
+  optb_shivaji_attack: { file: "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_attack.png", frameW: 64, frameH: 64, cols: 6, rows: 4, fps: 10, loop: false, pivot: {x:32, y:58}, dirs: ["South", "North", "East", "West"] },
+
+  // Enemies
+  optb_swordsman_idle: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_idle.png", frameW: 40, frameH: 56, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:20, y:52}, dirs: ["South", "North", "East", "West"] },
+  optb_swordsman_walk: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_walk.png", frameW: 40, frameH: 56, cols: 8, rows: 4, fps: 7, loop: true, pivot: {x:20, y:52}, dirs: ["South", "North", "East", "West"] },
+  optb_swordsman_attack: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman/swordsman_attack.png", frameW: 56, frameH: 56, cols: 6, rows: 4, fps: 9, loop: false, pivot: {x:28, y:52}, dirs: ["South", "North", "East", "West"] },
+
+  optb_shield_guard_idle: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_idle.png", frameW: 44, frameH: 58, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:22, y:54}, dirs: ["South", "North", "East", "West"] },
+  optb_shield_guard_walk: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_walk.png", frameW: 44, frameH: 58, cols: 8, rows: 4, fps: 6, loop: true, pivot: {x:22, y:54}, dirs: ["South", "North", "East", "West"] },
+  optb_shield_guard_attack: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard/shield_guard_attack.png", frameW: 60, frameH: 58, cols: 6, rows: 4, fps: 8, loop: false, pivot: {x:30, y:54}, dirs: ["South", "North", "East", "West"] },
+
+  optb_archer_idle: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/archer/archer_idle.png", frameW: 40, frameH: 56, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:20, y:52}, dirs: ["South", "North", "East", "West"] },
+  optb_archer_walk: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/archer/archer_walk.png", frameW: 40, frameH: 56, cols: 8, rows: 4, fps: 7, loop: true, pivot: {x:20, y:52}, dirs: ["South", "North", "East", "West"] },
+  optb_archer_attack: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/archer/archer_attack.png", frameW: 56, frameH: 56, cols: 6, rows: 4, fps: 8, loop: false, pivot: {x:28, y:52}, dirs: ["South", "North", "East", "West"] },
+
+  optb_charging_soldier_idle: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/charging_soldier/charging_soldier_idle.png", frameW: 44, frameH: 58, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:22, y:54}, dirs: ["South", "North", "East", "West"] },
+  optb_charging_soldier_walk: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/charging_soldier/charging_soldier_walk.png", frameW: 44, frameH: 58, cols: 8, rows: 4, fps: 8, loop: true, pivot: {x:22, y:54}, dirs: ["South", "North", "East", "West"] },
+  optb_charging_soldier_attack: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/charging_soldier/charging_soldier_attack.png", frameW: 60, frameH: 58, cols: 6, rows: 4, fps: 10, loop: false, pivot: {x:30, y:54}, dirs: ["South", "North", "East", "West"] },
+
+  optb_elite_halberdier_idle: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/elite_halberdier/elite_halberdier_idle.png", frameW: 48, frameH: 64, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:24, y:60}, dirs: ["South", "North", "East", "West"] },
+  optb_elite_halberdier_walk: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/elite_halberdier/elite_halberdier_walk.png", frameW: 48, frameH: 64, cols: 8, rows: 4, fps: 6, loop: true, pivot: {x:24, y:60}, dirs: ["South", "North", "East", "West"] },
+  optb_elite_halberdier_attack: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/elite_halberdier/elite_halberdier_attack.png", frameW: 64, frameH: 64, cols: 6, rows: 4, fps: 8, loop: false, pivot: {x:32, y:60}, dirs: ["South", "North", "East", "West"] },
+
+  optb_spear_soldier_idle: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/spear_soldier/spear_soldier_idle.png", frameW: 40, frameH: 56, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:20, y:52}, dirs: ["South", "North", "East", "West"] },
+  optb_spear_soldier_walk: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/spear_soldier/spear_soldier_walk.png", frameW: 40, frameH: 56, cols: 8, rows: 4, fps: 7, loop: true, pivot: {x:20, y:52}, dirs: ["South", "North", "East", "West"] },
+  optb_spear_soldier_attack: { file: "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/spear_soldier/spear_soldier_attack.png", frameW: 56, frameH: 56, cols: 6, rows: 4, fps: 9, loop: false, pivot: {x:28, y:52}, dirs: ["South", "North", "East", "West"] },
+
+  // Bosses
+  optb_afzal_khan_idle: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/afzal_khan/afzal_khan_idle.png", frameW: 64, frameH: 80, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:32, y:74}, dirs: ["South", "North", "East", "West"] },
+  optb_afzal_khan_walk: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/afzal_khan/afzal_khan_walk.png", frameW: 64, frameH: 80, cols: 8, rows: 4, fps: 6, loop: true, pivot: {x:32, y:74}, dirs: ["South", "North", "East", "West"] },
+  optb_afzal_khan_attack: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/afzal_khan/afzal_khan_attack.png", frameW: 84, frameH: 80, cols: 6, rows: 4, fps: 8, loop: false, pivot: {x:42, y:74}, dirs: ["South", "North", "East", "West"] },
+
+  optb_shaista_khan_idle: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/shaista_khan/shaista_khan_idle.png", frameW: 60, frameH: 76, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:30, y:71}, dirs: ["South", "North", "East", "West"] },
+  optb_shaista_khan_walk: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/shaista_khan/shaista_khan_walk.png", frameW: 60, frameH: 76, cols: 8, rows: 4, fps: 7, loop: true, pivot: {x:30, y:71}, dirs: ["South", "North", "East", "West"] },
+  optb_shaista_khan_attack: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/shaista_khan/shaista_khan_attack.png", frameW: 80, frameH: 76, cols: 6, rows: 4, fps: 9, loop: false, pivot: {x:40, y:71}, dirs: ["South", "North", "East", "West"] },
+
+  optb_aurangzeb_idle: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/aurangzeb/aurangzeb_idle.png", frameW: 64, frameH: 80, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:32, y:74}, dirs: ["South", "North", "East", "West"] },
+  optb_aurangzeb_walk: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/aurangzeb/aurangzeb_walk.png", frameW: 64, frameH: 80, cols: 8, rows: 4, fps: 6, loop: true, pivot: {x:32, y:74}, dirs: ["South", "North", "East", "West"] },
+  optb_aurangzeb_attack: { file: "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/aurangzeb/aurangzeb_attack.png", frameW: 84, frameH: 80, cols: 6, rows: 4, fps: 8, loop: false, pivot: {x:42, y:74}, dirs: ["South", "North", "East", "West"] },
+
+  // Allies
+  optb_mavala_warrior_idle: { file: "ChroniclesOfSwarajya_Art/03_Allies_OptionB/mavala_warrior/mavala_warrior_idle.png", frameW: 44, frameH: 58, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:22, y:54}, dirs: ["South", "North", "East", "West"] },
+  optb_mavala_warrior_walk: { file: "ChroniclesOfSwarajya_Art/03_Allies_OptionB/mavala_warrior/mavala_warrior_walk.png", frameW: 44, frameH: 58, cols: 8, rows: 4, fps: 7, loop: true, pivot: {x:22, y:54}, dirs: ["South", "North", "East", "West"] },
+  optb_mavala_scout_idle: { file: "ChroniclesOfSwarajya_Art/03_Allies_OptionB/mavala_scout/mavala_scout_idle.png", frameW: 40, frameH: 56, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:20, y:52}, dirs: ["South", "North", "East", "West"] },
+  optb_village_elder_idle: { file: "ChroniclesOfSwarajya_Art/03_Allies_OptionB/village_elder/village_elder_idle.png", frameW: 40, frameH: 56, cols: 4, rows: 4, fps: 2, loop: true, pivot: {x:20, y:52}, dirs: ["South", "North", "East", "West"] },
+  optb_blacksmith_idle: { file: "ChroniclesOfSwarajya_Art/03_Allies_OptionB/blacksmith/blacksmith_idle.png", frameW: 48, frameH: 64, cols: 4, rows: 4, fps: 3, loop: true, pivot: {x:24, y:60}, dirs: ["South", "North", "East", "West"] },
+
+  // Portraits
+  port_shivaji: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/shivaji_portrait.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+  port_bhavani: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/bhavani_portrait.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+  port_afzal: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/afzal_khan.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+  port_shaista: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/shaista_khan.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+  port_aurangzeb: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/aurangzeb.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+  port_mavala_w: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/mavala_warrior.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+  port_elder: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/village_elder.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+  port_smith: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/blacksmith.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+  port_commander: { file: "ChroniclesOfSwarajya_Art/05_Portraits_OptionB/enemy_commander.png", frameW: 1024, frameH: 1024, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:512,y:512}, dirs: ["Portrait"] },
+
+  // Galleries
+  gal_enemies: { file: "ChroniclesOfSwarajya_Art/07_Previews_OptionB/enemy_roster_gallery.png", frameW: 960, frameH: 420, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:480,y:210}, dirs: ["Gallery"] },
+  gal_bosses: { file: "ChroniclesOfSwarajya_Art/07_Previews_OptionB/boss_roster_gallery.png", frameW: 840, frameH: 440, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:420,y:220}, dirs: ["Gallery"] },
+  gal_allies: { file: "ChroniclesOfSwarajya_Art/07_Previews_OptionB/allies_roster_gallery.png", frameW: 740, frameH: 360, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:370,y:180}, dirs: ["Gallery"] },
+  gal_weapons: { file: "ChroniclesOfSwarajya_Art/07_Previews_OptionB/weapons_gallery.png", frameW: 640, frameH: 240, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:320,y:120}, dirs: ["Gallery"] },
+  gal_shivaji: { file: "ChroniclesOfSwarajya_Art/06_Previews/shivaji_animation_gallery.png", frameW: 760, frameH: 480, cols: 1, rows: 1, fps: 1, loop: true, pivot: {x:380,y:240}, dirs: ["Gallery"] }
 };
 
-// Studio State
 let currentAssetId = 'optb_shivaji_idle';
 let currentImg = new Image();
 let currentDirRow = 0;
@@ -567,7 +671,6 @@ function selectAsset(id) {
   document.getElementById('fps-slider').value = currentFps;
   document.getElementById('fps-val').innerText = `${currentFps} FPS`;
 
-  // Update direction buttons
   const dirGroup = document.getElementById('dir-selector');
   if (asset.dirs.length <= 1) {
     dirGroup.style.display = 'none';
@@ -579,7 +682,6 @@ function selectAsset(id) {
     });
   }
 
-  // Update Metadata
   document.getElementById('meta-id').innerText = id;
   document.getElementById('meta-dims').innerText = `${asset.frameW} × ${asset.frameH} px`;
   document.getElementById('meta-grid').innerText = `${asset.cols} cols × ${asset.rows} rows`;
@@ -588,12 +690,10 @@ function selectAsset(id) {
   document.getElementById('meta-loop').innerText = asset.loop ? "Looping Cycle" : "Single Shot";
   document.getElementById('meta-file').innerText = asset.file;
 
-  // Set Canvas dimensions
   animCanvas.width = asset.frameW;
   animCanvas.height = asset.frameH;
   updateCanvasZoom();
 
-  // Load Image
   currentImg = new Image();
   currentImg.onload = () => {
     document.getElementById('error-banner').style.display = 'none';
@@ -610,7 +710,6 @@ function selectAsset(id) {
 function updateCanvasZoom() {
   const asset = ASSETS[currentAssetId];
   if (!asset) return;
-  // Limit zoom for portraits/galleries
   let z = currentZoom;
   if (asset.frameW > 200) z = Math.min(1, currentZoom / 4);
 
@@ -623,20 +722,17 @@ function renderFrame() {
   if (!asset || !currentImg.complete) return;
 
   animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
-
   const sx = currentFrameCol * asset.frameW;
   const sy = currentDirRow * asset.frameH;
 
   animCtx.drawImage(currentImg, sx, sy, asset.frameW, asset.frameH, 0, 0, asset.frameW, asset.frameH);
 
-  // Cell Bounds Overlay
   if (showBounds) {
     animCtx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
     animCtx.lineWidth = 1;
     animCtx.strokeRect(0, 0, asset.frameW, asset.frameH);
   }
 
-  // Pivot Crosshair Overlay
   if (showPivot && asset.pivot) {
     const px = asset.pivot.x;
     const py = asset.pivot.y;
@@ -660,7 +756,6 @@ function renderSheet() {
   sheetCtx.clearRect(0, 0, sheetCanvas.width, sheetCanvas.height);
   sheetCtx.drawImage(currentImg, 0, 0);
 
-  // Highlight active frame cell
   const sx = currentFrameCol * asset.frameW;
   const sy = currentDirRow * asset.frameH;
 
@@ -668,15 +763,12 @@ function renderSheet() {
   sheetCtx.lineWidth = 2;
   sheetCtx.strokeRect(sx + 1, sy + 1, asset.frameW - 2, asset.frameH - 2);
 
-  // Fill subtle highlight
   sheetCtx.fillStyle = 'rgba(245, 158, 11, 0.2)';
   sheetCtx.fillRect(sx, sy, asset.frameW, asset.frameH);
 }
 
-// Animation Loop
 function loop(now) {
   requestAnimationFrame(loop);
-
   if (!isPlaying) return;
 
   const asset = ASSETS[currentAssetId];
@@ -687,18 +779,14 @@ function loop(now) {
     lastFrameTime = now;
     currentFrameCol++;
     if (currentFrameCol >= asset.cols) {
-      if (asset.loop) {
-        currentFrameCol = 0;
-      } else {
-        currentFrameCol = asset.cols - 1; // Hold on final recovery frame
-      }
+      if (asset.loop) currentFrameCol = 0;
+      else currentFrameCol = asset.cols - 1;
     }
     renderFrame();
     renderSheet();
   }
 }
 
-// Event Bindings
 document.querySelectorAll('.asset-btn').forEach(btn => {
   btn.addEventListener('click', () => selectAsset(btn.dataset.id));
 });
@@ -775,7 +863,6 @@ document.getElementById('btn-toggle-box').addEventListener('click', function() {
   renderFrame();
 });
 
-// Setup Live Old vs New Comparison Canvas
 function setupComparisonCanvases() {
   const oldImg = new Image();
   oldImg.onload = () => {
@@ -796,7 +883,6 @@ function setupComparisonCanvases() {
   newImg.src = 'ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png';
 }
 
-// Initial Boot
 window.addEventListener('load', () => {
   selectAsset('optb_shivaji_idle');
   setupComparisonCanvases();

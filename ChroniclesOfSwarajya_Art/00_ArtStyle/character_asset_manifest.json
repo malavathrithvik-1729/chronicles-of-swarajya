@@ -1,13 +1,16 @@
 {
   "project": "Chronicles of Swarajya: The Divine Blade",
   "artDirection": "Option B: Detailed 32-Bit High-Resolution Pixel Art",
-  "generatedAt": "2026-10-12T16:02:00.000Z",
+  "lastUpdated": "2026-10-12T18:14:00.000Z",
   "resolutionStandard": {
     "playerCell": "48x64",
     "playerAttackCell": "64x64",
-    "standardEnemyCell": "40x56",
-    "eliteEnemyCell": "48x64",
-    "bossCell": "64x80",
+    "standardSoldierCell": "40x56",
+    "shieldGuardCell": "44x58",
+    "chargingSoldierCell": "44x58",
+    "eliteHalberdierCell": "48x64",
+    "alliesCell": "40x56 to 48x64",
+    "bossCell": "60x76 to 64x80",
     "targetVirtualCanvas": "480x270"
   },
   "palette": {
@@ -20,72 +23,168 @@
     "GOLD_HI": "#fef08a",
     "ANGARKHA_BASE": "#f5e8b4",
     "ANGARKHA_HI": "#fef3c7",
-    "ANGARKHA_DARK": "#af9b69",
     "SKIN_BASE": "#c68642",
     "SKIN_HI": "#ebb280",
     "BEARD_BLACK": "#1c1917",
     "MOJARI_BASE": "#451a03",
     "STEEL_BASE": "#94a3b8",
     "STEEL_HI": "#e2e8f0",
-    "STEEL_GLINT": "#ffffff"
+    "STEEL_GLINT": "#ffffff",
+    "DECCAN_GREEN": "#19552d",
+    "IMPERIAL_PURPLE": "#691ea0",
+    "DAMASCENE_GOLD": "#b4780f",
+    "MIDNIGHT_SILK": "#1e293b"
   },
-  "shivaji": {
+  "protagonist_shivaji": {
     "idle": {
       "file": "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_idle.png",
-      "frameW": 48,
-      "frameH": 64,
-      "cols": 4,
-      "rows": 4,
-      "fps": 3,
-      "loop": true,
+      "frameW": 48, "frameH": 64, "cols": 4, "rows": 4, "fps": 3, "loop": true,
       "pivot": { "x": 24, "y": 58 },
-      "directions": ["south", "north", "east", "west"],
-      "description": "4-frame subtle breathing loop, gentle pheta plume sway, hand resting on talwar hilt."
+      "directions": ["south", "north", "east", "west"]
     },
     "walk": {
       "file": "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_walk.png",
-      "frameW": 48,
-      "frameH": 64,
-      "cols": 8,
-      "rows": 4,
-      "fps": 8,
-      "loop": true,
+      "frameW": 48, "frameH": 64, "cols": 8, "rows": 4, "fps": 8, "loop": true,
       "pivot": { "x": 24, "y": 58 },
-      "directions": ["south", "north", "east", "west"],
-      "description": "8-frame fluid athletic stride with natural angarkha hem pendulum sway and arm counter-motion."
+      "directions": ["south", "north", "east", "west"]
     },
     "attack": {
       "file": "ChroniclesOfSwarajya_Art/01_Shivaji/shivaji_attack.png",
-      "frameW": 64,
-      "frameH": 64,
-      "cols": 6,
-      "rows": 4,
-      "fps": 10,
-      "loop": false,
+      "frameW": 64, "frameH": 64, "cols": 6, "rows": 4, "fps": 10, "loop": false,
       "pivot": { "x": 32, "y": 58 },
-      "directions": ["south", "north", "east", "west"],
-      "hitboxTiming": {
-        "windupFrames": [0, 1, 2],
-        "activeHitFrames": [3],
-        "followThroughFrames": [4],
-        "recoveryFrames": [5]
-      },
-      "description": "6-frame talwar slash with telegraphed anticipation, explosive forward arc, and luminous crescent trail."
+      "directions": ["south", "north", "east", "west"]
+    }
+  },
+  "enemies": {
+    "swordsman": {
+      "folder": "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/swordsman",
+      "frameW": 40, "frameH": 56,
+      "idle": { "file": "swordsman_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "swordsman_walk.png", "cols": 8, "rows": 4, "fps": 7, "loop": true },
+      "attack": { "file": "swordsman_attack.png", "cols": 6, "rows": 4, "frameW": 56, "frameH": 56, "fps": 9, "loop": false }
+    },
+    "shield_guard": {
+      "folder": "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/shield_guard",
+      "frameW": 44, "frameH": 58,
+      "idle": { "file": "shield_guard_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "shield_guard_walk.png", "cols": 8, "rows": 4, "fps": 6, "loop": true },
+      "attack": { "file": "shield_guard_attack.png", "cols": 6, "rows": 4, "frameW": 60, "frameH": 58, "fps": 8, "loop": false }
+    },
+    "archer": {
+      "folder": "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/archer",
+      "frameW": 40, "frameH": 56,
+      "idle": { "file": "archer_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "archer_walk.png", "cols": 8, "rows": 4, "fps": 7, "loop": true },
+      "attack": { "file": "archer_attack.png", "cols": 6, "rows": 4, "frameW": 56, "frameH": 56, "fps": 8, "loop": false }
+    },
+    "charging_soldier": {
+      "folder": "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/charging_soldier",
+      "frameW": 44, "frameH": 58,
+      "idle": { "file": "charging_soldier_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "charging_soldier_walk.png", "cols": 8, "rows": 4, "fps": 8, "loop": true },
+      "attack": { "file": "charging_soldier_attack.png", "cols": 6, "rows": 4, "frameW": 60, "frameH": 58, "fps": 10, "loop": false }
+    },
+    "elite_halberdier": {
+      "folder": "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/elite_halberdier",
+      "frameW": 48, "frameH": 64,
+      "idle": { "file": "elite_halberdier_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "elite_halberdier_walk.png", "cols": 8, "rows": 4, "fps": 6, "loop": true },
+      "attack": { "file": "elite_halberdier_attack.png", "cols": 6, "rows": 4, "frameW": 64, "frameH": 64, "fps": 8, "loop": false }
+    },
+    "spear_soldier": {
+      "folder": "ChroniclesOfSwarajya_Art/02_Enemies_OptionB/spear_soldier",
+      "frameW": 40, "frameH": 56,
+      "idle": { "file": "spear_soldier_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "spear_soldier_walk.png", "cols": 8, "rows": 4, "fps": 7, "loop": true },
+      "attack": { "file": "spear_soldier_attack.png", "cols": 6, "rows": 4, "frameW": 56, "frameH": 56, "fps": 9, "loop": false }
+    }
+  },
+  "bosses": {
+    "afzal_khan": {
+      "folder": "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/afzal_khan",
+      "frameW": 64, "frameH": 80,
+      "idle": { "file": "afzal_khan_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "afzal_khan_walk.png", "cols": 8, "rows": 4, "fps": 6, "loop": true },
+      "attack": { "file": "afzal_khan_attack.png", "cols": 6, "rows": 4, "frameW": 84, "frameH": 80, "fps": 8, "loop": false }
+    },
+    "shaista_khan": {
+      "folder": "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/shaista_khan",
+      "frameW": 60, "frameH": 76,
+      "idle": { "file": "shaista_khan_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "shaista_khan_walk.png", "cols": 8, "rows": 4, "fps": 7, "loop": true },
+      "attack": { "file": "shaista_khan_attack.png", "cols": 6, "rows": 4, "frameW": 80, "frameH": 76, "fps": 9, "loop": false }
+    },
+    "aurangzeb": {
+      "folder": "ChroniclesOfSwarajya_Art/04_Bosses_OptionB/aurangzeb",
+      "frameW": 64, "frameH": 80,
+      "idle": { "file": "aurangzeb_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "aurangzeb_walk.png", "cols": 8, "rows": 4, "fps": 6, "loop": true },
+      "attack": { "file": "aurangzeb_attack.png", "cols": 6, "rows": 4, "frameW": 84, "frameH": 80, "fps": 8, "loop": false }
+    }
+  },
+  "allies": {
+    "mavala_warrior": {
+      "folder": "ChroniclesOfSwarajya_Art/03_Allies_OptionB/mavala_warrior",
+      "frameW": 44, "frameH": 58,
+      "idle": { "file": "mavala_warrior_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "mavala_warrior_walk.png", "cols": 8, "rows": 4, "fps": 7, "loop": true }
+    },
+    "mavala_scout": {
+      "folder": "ChroniclesOfSwarajya_Art/03_Allies_OptionB/mavala_scout",
+      "frameW": 40, "frameH": 56,
+      "idle": { "file": "mavala_scout_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "mavala_scout_walk.png", "cols": 8, "rows": 4, "fps": 8, "loop": true }
+    },
+    "village_elder": {
+      "folder": "ChroniclesOfSwarajya_Art/03_Allies_OptionB/village_elder",
+      "frameW": 40, "frameH": 56,
+      "idle": { "file": "village_elder_idle.png", "cols": 4, "rows": 4, "fps": 2, "loop": true },
+      "walk": { "file": "village_elder_walk.png", "cols": 8, "rows": 4, "fps": 5, "loop": true }
+    },
+    "blacksmith": {
+      "folder": "ChroniclesOfSwarajya_Art/03_Allies_OptionB/blacksmith",
+      "frameW": 48, "frameH": 64,
+      "idle": { "file": "blacksmith_idle.png", "cols": 4, "rows": 4, "fps": 3, "loop": true },
+      "walk": { "file": "blacksmith_walk.png", "cols": 8, "rows": 4, "fps": 6, "loop": true }
     }
   },
   "portraits": {
-    "shivaji": {
-      "file": "ChroniclesOfSwarajya_Art/04_Portraits/shivaji_portrait.png",
-      "dimensions": "1024x1024",
-      "type": "Illustrated Bust",
-      "usage": "Dialogue cutscenes, opening cinematic, and quest briefings."
-    }
+    "folder": "ChroniclesOfSwarajya_Art/05_Portraits_OptionB",
+    "dimensions": "1024x1024",
+    "list": [
+      "shivaji_portrait.png",
+      "bhavani_portrait.png",
+      "afzal_khan.png",
+      "shaista_khan.png",
+      "aurangzeb.png",
+      "mavala_warrior.png",
+      "mavala_scout.png",
+      "village_elder.png",
+      "village_leader.png",
+      "blacksmith.png",
+      "messenger.png",
+      "enemy_commander.png"
+    ]
+  },
+  "weapons": {
+    "folder": "ChroniclesOfSwarajya_Art/06_Weapons_OptionB",
+    "list": [
+      "talwar_basic.png",
+      "talwar_upgraded.png",
+      "heavy_curved_sword.png",
+      "halberd.png",
+      "spear.png",
+      "bow_and_arrow.png",
+      "maratha_dhal_shield.png"
+    ]
   },
   "previews": {
-    "gallery": {
-      "file": "ChroniclesOfSwarajya_Art/06_Previews/shivaji_animation_gallery.png",
-      "dimensions": "760x480",
-      "description": "Side-by-side comparison of old Phase 1 24x32 sprite vs new Option B 48x64 sprite, with 4-directional idle and attack combo strip."
-    }
+    "folder": "ChroniclesOfSwarajya_Art/07_Previews_OptionB",
+    "list": [
+      "enemy_roster_gallery.png",
+      "boss_roster_gallery.png",
+      "allies_roster_gallery.png",
+      "weapons_gallery.png"
+    ]
   }
 }
