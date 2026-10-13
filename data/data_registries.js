@@ -437,27 +437,29 @@ const CRAFTING_RECIPES = [
 const WORLD_REGIONS = {
   "sahyadri_gateway_valley": {
     "id": "sahyadri_gateway_valley",
-    "name": "Sahyadri Open World",
-    "biome": "Sahyadri forest, river valley, highlands, village, raider outpost, and Kot Fort",
+    "name": "Sahyadri Gateway Valley (Connected Open World)",
+    "biome": "Monsoon Teak Forest, Koyna River Valley, Bhavani Nagar, Sahyadri Highlands & Kot Fortress",
     "worldWidth": 120,
     "worldHeight": 70,
     "tileSize": 16,
+    "sectorSizeTiles": 8,
+    "sectorCols": 15,
+    "sectorRows": 9,
     "viewportTarget": {
       "width": 480,
       "height": 270
     },
-    "mapId": "surface",
     "subZones": [
       {
         "id": "forest_clearing",
         "name": "Sacred Awakening Forest",
         "bounds": {
-          "x1": 1,
-          "y1": 3,
+          "x1": 0,
+          "y1": 0,
           "x2": 29,
-          "y2": 66
+          "y2": 69
         },
-        "description": "A deep teak forest with gathering clearings, old trails, and a hidden shrine.",
+        "description": "Lush monsoon teak groves where Shivaji awakens, gathers initial timber and ironstone, and forges his first blade.",
         "musicTrack": "forest_ambient"
       },
       {
@@ -465,89 +467,94 @@ const WORLD_REGIONS = {
         "name": "Koyna River Valley",
         "bounds": {
           "x1": 30,
-          "y1": 3,
+          "y1": 0,
           "x2": 46,
-          "y2": 66
+          "y2": 69
         },
-        "description": "A north-to-south river corridor with two crossings, herbs, clay, and a hidden waterfall shrine.",
+        "description": "Swift mountain river spanned by a main timber footbridge and a northern shallow stone ford.",
         "musicTrack": "river_ambient"
+      },
+      {
+        "id": "sahyadri_highlands",
+        "name": "Sahyadri Highlands",
+        "bounds": {
+          "x1": 47,
+          "y1": 0,
+          "x2": 76,
+          "y2": 14
+        },
+        "description": "Rugged basalt cliff switchbacks and wind-swept mountain passes overlooking the Koyna basin.",
+        "musicTrack": "highland_winds"
+      },
+      {
+        "id": "abandoned_mine_approach",
+        "name": "Highland Abandoned Mine Entrance",
+        "bounds": {
+          "x1": 77,
+          "y1": 0,
+          "x2": 92,
+          "y2": 37
+        },
+        "description": "Craggy ironstone ridge housing the timber-shored entrance to the subterranean Sahyadri iron cavern.",
+        "musicTrack": "highland_winds"
       },
       {
         "id": "village_bhavani_nagar",
         "name": "Bhavani Nagar & Countryside",
         "bounds": {
           "x1": 47,
-          "y1": 8,
-          "x2": 74,
-          "y2": 36
+          "y1": 15,
+          "x2": 76,
+          "y2": 37
         },
-        "description": "A living settlement with a central well, market paths, a blacksmith, and surrounding farmland.",
+        "description": "Settled Maratha village featuring a stone well, elder's wada, blacksmith forge, and surrounding countryside trails.",
         "musicTrack": "village_theme"
       },
       {
-        "id": "sahyadri_highlands",
-        "name": "Sahyadri Highlands",
-        "bounds": {
-          "x1": 75,
-          "y1": 8,
-          "x2": 92,
-          "y2": 38
-        },
-        "additionalBounds": [
-          {
-            "x1": 47,
-            "y1": 3,
-            "x2": 92,
-            "y2": 7
-          },
-          {
-            "x1": 79,
-            "y1": 39,
-            "x2": 92,
-            "y2": 66
-          }
-        ],
-        "description": "Basalt switchbacks, exposed ironstone, an ancient shrine, and the abandoned mine entrance.",
-        "musicTrack": "highland_wind"
-      },
-      {
-        "id": "kot_fort_and_outpost",
-        "name": "Deshmukh Outpost & Kot Fort",
+        "id": "raider_outpost",
+        "name": "Deshmukh Raider Outpost",
         "bounds": {
           "x1": 47,
-          "y1": 39,
-          "x2": 78,
-          "y2": 66
+          "y1": 38,
+          "x2": 92,
+          "y2": 69
         },
-        "additionalBounds": [
-          {
-            "x1": 93,
-            "y1": 3,
-            "x2": 118,
-            "y2": 66
-          }
-        ],
-        "description": "The southern raider encampment and the monumental Kot Fort citadel.",
+        "description": "Hostile forward military encampment threatening Bhavani Nagar and guarding the southern supply road to Kot Fort.",
+        "musicTrack": "tension_combat"
+      },
+      {
+        "id": "kot_fort_approach",
+        "name": "Kot Fort Citadel & Approach",
+        "bounds": {
+          "x1": 93,
+          "y1": 0,
+          "x2": 119,
+          "y2": 69
+        },
+        "description": "Monumental basalt walls, the iron-spiked Dilli Darwaja gate, fortified courtyard, and high Buruj flagstaff.",
         "musicTrack": "fortress_march"
       }
     ]
   },
   "sahyadri_iron_cavern": {
     "id": "sahyadri_iron_cavern",
-    "name": "Highland Abandoned Mine",
-    "biome": "Subterranean basalt cavern",
-    "mapType": "interior",
+    "name": "Highland Abandoned Iron Mine (Interior Region)",
+    "biome": "Subterranean Basalt & Wootz Iron Cavern",
+    "isInterior": true,
+    "playableInCurrentStep": false,
     "worldWidth": 40,
     "worldHeight": 25,
     "tileSize": 16,
-    "viewportTarget": {
-      "width": 480,
-      "height": 270
+    "parentRegionId": "sahyadri_gateway_valley",
+    "entranceWorldPos": {
+      "x": 1360,
+      "y": 144
     },
-    "parentRegion": "sahyadri_gateway_valley",
-    "entryId": "mine_entrance_marker",
-    "description": "A future enterable cave region containing ironstone, Wootz ore, lost blacksmith tools, sentries, and a recipe cache.",
-    "implementationStatus": "region metadata ready; cave gameplay is scheduled for Step 5"
+    "surfaceReturnPos": {
+      "x": 1360,
+      "y": 168
+    },
+    "description": "Registered 40x25 underground mine interior for future subterranean exploration, rare ore mining, and return-to-surface transitions."
   }
 };
 

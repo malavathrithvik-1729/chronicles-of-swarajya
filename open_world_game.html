@@ -357,6 +357,104 @@
     padding: 16px;
     gap: 12px;
   }
+
+  /* HUD Minimap */
+  #minimap-container {
+    position: absolute;
+    top: 38px;
+    right: 8px;
+    background: rgba(14, 10, 8, 0.92);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    padding: 3px;
+    z-index: 11;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.85);
+    cursor: pointer;
+  }
+  #minimapCanvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border: 1px solid #3b2313;
+    background: #070504;
+  }
+  #minimap-caption {
+    font-size: 8px;
+    color: var(--gold-hi);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* World Map Modal ([M]) */
+  #world-map-modal .modal-panel {
+    width: 464px;
+    max-height: 258px;
+  }
+  .world-map-layout {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .world-map-canvas-wrap {
+    position: relative;
+    border: 1px solid var(--border-gold);
+    background: #060403;
+    flex-shrink: 0;
+  }
+  #worldMapCanvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .world-map-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 9px;
+    background: #1a120d;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    padding: 6px;
+    overflow-y: auto;
+  }
+  .map-zone-item {
+    padding: 2px 4px;
+    border-radius: 2px;
+    margin-bottom: 2px;
+    font-size: 8.5px;
+  }
+  .map-zone-item.discovered {
+    color: var(--text-cream);
+    background: rgba(230, 96, 18, 0.16);
+    border-left: 2px solid var(--saffron-hi);
+  }
+  .map-zone-item.undiscovered {
+    color: #6b5b50;
+    background: rgba(0, 0, 0, 0.25);
+    border-left: 2px solid #3a2a20;
+  }
+  .map-legend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    font-size: 8px;
+    color: var(--text-muted);
+    border-top: 1px solid #3a2618;
+    padding-top: 4px;
+  }
+  .legend-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 3px;
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
@@ -390,6 +488,12 @@
         <span>🪙 <b id="inv-gold">15</b></span>
         <span id="hud-weapon">⚔️ FISTS</span>
       </div>
+    </div>
+
+    <!-- HUD Minimap -->
+    <div id="minimap-container" onclick="toggleWorldMapModal()" title="Click or press [M] to open World Map">
+      <canvas id="minimapCanvas" width="90" height="54"></canvas>
+      <div id="minimap-caption">[M] WORLD MAP</div>
     </div>
 
     <!-- Subzone Banner -->
@@ -474,6 +578,37 @@
         <button class="btn-title" style="background:var(--saffron);" onclick="respawnPlayer()">RESPAWN AT CLEARING</button>
       </div>
     </div>
+
+    <!-- 6. Full-Screen World Map Modal ([M]) -->
+    <div id="world-map-modal" class="modal-overlay">
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div class="modal-title" id="world-map-title">SAHYADRI STRATEGIC WORLD MAP — [M] OR [ESC] TO CLOSE</div>
+          <button class="modal-close" onclick="closeWorldMapModal()">✕</button>
+        </div>
+        <div class="modal-body" style="padding:8px;">
+          <div class="world-map-layout">
+            <div class="world-map-canvas-wrap">
+              <canvas id="worldMapCanvas" width="240" height="140"></canvas>
+            </div>
+            <div class="world-map-sidebar">
+              <div>
+                <div style="color:var(--gold-hi); font-weight:bold; margin-bottom:3px;" id="map-discovery-stats">Regions: 1/7 | Sectors: 1/135</div>
+                <div id="map-region-list"></div>
+              </div>
+              <div class="map-legend-grid">
+                <div><span class="legend-dot" style="background:#f97316;"></span>Shivaji</div>
+                <div><span class="legend-dot" style="background:#facc15;"></span>Station / Forge</div>
+                <div><span class="legend-dot" style="background:#38bdf8;"></span>Village / Quest</div>
+                <div><span class="legend-dot" style="background:#a855f7;"></span>Mine / Cavern</div>
+                <div><span class="legend-dot" style="background:#ef4444;"></span>Fort / Outpost</div>
+                <div><span class="legend-dot" style="background:#1c1510;"></span>Unexplored Fog</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -482,19 +617,31 @@
 
 <script>
 // =============================================================================
-// OPEN-WORLD GAME ENGINE (GATE E: FULL COMBAT, ASTRA & REFINED EXPERIENCE)
-// Viewport: 480 x 270 (16:9 widescreen) | Connected World: 80 x 40 tiles (16px)
+// OPEN-WORLD GAME ENGINE (GATE F STEP 1: 120x70 CONNECTED WORLD & FOG OF WAR)
+// Viewport: 480 x 270 (16:9 widescreen) | Connected World: 120 x 70 tiles (16px)
 // =============================================================================
 
 const V_WIDTH = 480;
 const V_HEIGHT = 270;
 const TILE_SIZE = 16;
-const WORLD_COLS = 80;
-const WORLD_ROWS = 40;
+const WORLD_COLS = 120;
+const WORLD_ROWS = 70;
+const SECTOR_TILES = 8;
+const SECTOR_COLS = Math.ceil(WORLD_COLS / SECTOR_TILES); // 15
+const SECTOR_ROWS = Math.ceil(WORLD_ROWS / SECTOR_TILES); // 9
+const TOTAL_SECTORS = SECTOR_COLS * SECTOR_ROWS; // 135
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+
+const minimapCanvas = document.getElementById('minimapCanvas');
+const minimapCtx = minimapCanvas.getContext('2d');
+minimapCtx.imageSmoothingEnabled = false;
+
+const worldMapCanvas = document.getElementById('worldMapCanvas');
+const worldMapCtx = worldMapCanvas.getContext('2d');
+worldMapCtx.imageSmoothingEnabled = false;
 
 // Audio Synthesizer (Zero-dependency Web Audio API)
 class OpenWorldAudio {
@@ -643,11 +790,12 @@ const SAVE_KEY = 'swarajya_open_world_save_v1';
 
 let pendingAstraSelection = null;
 let gameRunning = false;
+let discoveredCellSet = new Set();
 
 const state = {
   // Player
   player: {
-    x: 120, // Spawn in Forest Clearing
+    x: 120, // Spawn in Sacred Awakening Forest (col 7, row 17)
     y: 280,
     dir: 0, // 0: S, 1: N, 2: E, 3: W
     vx: 0,
@@ -691,7 +839,12 @@ const state = {
 
   // World State
   worldState: {
-    currentZone: 'forest_clearing',
+    currentZone: 'Sacred Awakening Forest',
+    currentZoneId: 'forest_clearing',
+    activeMapId: 'sahyadri_gateway_valley',
+    surfaceReturnPos: { x: 1360, y: 168 },
+    discoveredSubZones: [],
+    discoveredCells: [],
     gateUnlocked: false,
     flagHoisted: false,
     villageLiberated: false,
@@ -722,10 +875,10 @@ const state = {
 
 // =============================================================================
 // WORLD GENERATOR & CONNECTED REGION MAP
-// 80 cols x 40 rows (1280px x 640px world)
+// 120 cols x 70 rows (1920px x 1120px connected surface world)
 // =============================================================================
 let groundTiles = [];
-let collisionMap = []; // 0: walkable, 1: solid cliff/wall, 2: river/water, 3: bridge
+let collisionMap = []; // 0: walkable, 1: solid cliff/wall, 2: river/water
 
 function buildConnectedSahyadriWorld() {
   groundTiles = [];
@@ -735,17 +888,31 @@ function buildConnectedSahyadriWorld() {
     const tileRow = [];
     const colRow = [];
     for (let c = 0; c < WORLD_COLS; c++) {
-      // 1. Natural Boundary Mountain Cliffs (North rows 0..2, South rows 37..39)
-      if (r <= 2 || r >= 37 || c === 0 || c === WORLD_COLS - 1) {
+      // 1. Outer Boundary Mountain Cliffs (North rows 0..1, South rows 68..69, West col 0, East col 119)
+      if (r <= 1 || r >= WORLD_ROWS - 2 || c === 0 || c === WORLD_COLS - 1) {
         tileRow.push({ type: 'cliff', idx: (c % 4) });
         colRow.push(1);
         continue;
       }
 
-      // 2. Koyna River Channel (Cols 28..31, crossing at r 18..22)
-      if (c >= 28 && c <= 31) {
-        if (r >= 18 && r <= 22) {
+      // 2. Intentional Connecting Roads & Passes (Guaranteed Walkable Routes)
+      const isCentralForestToVillageRoad = (r >= 18 && r <= 21 && c >= 6 && c <= 65);
+      const isNorthernForestToMineTrail = (r >= 8 && r <= 10 && c >= 14 && c <= 87);
+      const isForestNorthSouthConnector = (c >= 14 && c <= 16 && r >= 8 && r <= 21);
+      const isHighlandVillageOutpostSpine = (c >= 58 && c <= 60 && r >= 8 && r <= 50);
+      const isVillageToKotFortApproachRoad = (r >= 31 && r <= 34 && c >= 58 && c <= 95);
+      const isMineToFortMountainRoad = (c >= 84 && c <= 86 && r >= 8 && r <= 48);
+      const isOutpostToFortMilitaryRoad = (r >= 46 && r <= 48 && c >= 58 && c <= 86);
+
+      // 3. Koyna River Channel (Cols 35..38, spanning North-to-South)
+      if (c >= 35 && c <= 38) {
+        if (r >= 18 && r <= 21) {
+          // Main Koyna Timber Footbridge
           tileRow.push({ type: 'bridge', idx: 0 });
+          colRow.push(0);
+        } else if (r >= 8 && r <= 10) {
+          // Northern Shallow Stone Ford
+          tileRow.push({ type: 'stone', idx: (c + r) % 4 });
           colRow.push(0);
         } else {
           tileRow.push({ type: 'water', idx: (c + r) % 4 });
@@ -754,27 +921,70 @@ function buildConnectedSahyadriWorld() {
         continue;
       }
 
-      // 3. Fort Enclosure & Stone Courtyard (Cols 60..78)
-      if (c >= 60) {
-        if (c === 60 && (r < 18 || r > 22)) {
-          tileRow.push({ type: 'fort_wall', idx: 0 });
-          colRow.push(1);
-        } else if (c === 60 && r >= 18 && r <= 22) {
+      // 4. Kot Fort Enclosure & Citadel Perimeter (Cols 96..115, Rows 12..54)
+      // Flank cliffs along col 96 (rows 2..11 and 55..67) ensure the western gate is the sole entry route
+      if (c === 96 && (r < 12 || r > 54)) {
+        tileRow.push({ type: 'cliff', idx: (r % 4) });
+        colRow.push(1);
+        continue;
+      }
+      if (c >= 96 && c <= 115 && r >= 12 && r <= 54) {
+        if (c === 96 && r >= 31 && r <= 34) {
+          // Western Dilli Darwaja Gate
           tileRow.push({ type: 'gate', idx: 0 });
           colRow.push(state.worldState.gateUnlocked ? 0 : 1);
+        } else if (c === 96 || c === 115 || r === 12 || r === 54) {
+          // Solid Fort Perimeter Walls
+          tileRow.push({ type: 'fort_wall', idx: 0 });
+          colRow.push(1);
         } else {
+          // Fortified Courtyard Stone Paving
           tileRow.push({ type: 'stone', idx: (c % 4) });
           colRow.push(0);
         }
         continue;
       }
 
-      // 4. Village of Bhavani Nagar (Cols 40..54, Rows 5..20)
-      if (c >= 40 && c <= 54 && r >= 5 && r <= 20) {
-        if ((c === 47 && r === 12)) {
+      // 5. Sahyadri Highlands & Abandoned Mine Ridge (Cols 47..92, Rows 2..14)
+      if (c >= 47 && c <= 92 && r <= 14) {
+        if (r === 14) {
+          // Southern Highland Cliff Escarpment — open only at the two mountain passes
+          if (isHighlandVillageOutpostSpine || isMineToFortMountainRoad) {
+            tileRow.push({ type: 'dirt', idx: 1 });
+            colRow.push(0);
+          } else {
+            tileRow.push({ type: 'cliff', idx: (c % 4) });
+            colRow.push(1);
+          }
+          continue;
+        }
+        if (r <= 4 && c >= 50 && c <= 90) {
+          // High Northern Crags
+          tileRow.push({ type: 'cliff', idx: (c % 4) });
+          colRow.push(1);
+          continue;
+        }
+        if (isNorthernForestToMineTrail || isHighlandVillageOutpostSpine || isMineToFortMountainRoad) {
+          tileRow.push({ type: 'dirt', idx: 1 });
+          colRow.push(0);
+        } else {
+          tileRow.push({ type: 'stone', idx: (c + r) % 4 });
+          colRow.push(0);
+        }
+        continue;
+      }
+
+      // 6. Bhavani Nagar Settlement & Countryside (Cols 47..76, Rows 15..37)
+      if (c >= 47 && c <= 76 && r >= 15 && r <= 37) {
+        if (c === 55 && r === 23) {
           tileRow.push({ type: 'village_well', idx: 0 });
           colRow.push(1);
-        } else if (r % 4 === 0 || c % 5 === 0) {
+        } else if (
+          isCentralForestToVillageRoad ||
+          isHighlandVillageOutpostSpine ||
+          isVillageToKotFortApproachRoad ||
+          (c >= 50 && c <= 66 && (r === 18 || r === 26))
+        ) {
           tileRow.push({ type: 'dirt', idx: 0 });
           colRow.push(0);
         } else {
@@ -784,14 +994,22 @@ function buildConnectedSahyadriWorld() {
         continue;
       }
 
-      // 5. Connecting Dirt Roads & Red Trails
-      if ((r >= 19 && r <= 21) || (c >= 46 && c <= 48 && r >= 12 && r <= 30)) {
+      // 7. Connected Dirt Roads Across Remaining Regions
+      if (
+        isCentralForestToVillageRoad ||
+        isNorthernForestToMineTrail ||
+        isForestNorthSouthConnector ||
+        isHighlandVillageOutpostSpine ||
+        isVillageToKotFortApproachRoad ||
+        isMineToFortMountainRoad ||
+        isOutpostToFortMilitaryRoad
+      ) {
         tileRow.push({ type: 'dirt', idx: 1 });
         colRow.push(0);
         continue;
       }
 
-      // 6. Lush Sahyadri Forest Base
+      // 8. Lush Sahyadri Teak Forest & Valley Base
       tileRow.push({ type: 'grass', idx: (c * 7 + r * 13) % 4 });
       colRow.push(0);
     }
@@ -799,45 +1017,144 @@ function buildConnectedSahyadriWorld() {
     collisionMap.push(colRow);
   }
 
-  // Populate Interactive Harvest Nodes
+  // Populate Interactive Harvest Nodes (All verified on walkable collision === 0 tiles)
   state.harvestNodes = [
     { id: 'tree_1', type: 'wood_sagwan', x: 80, y: 180, hp: 3, name: 'Sagwan Teak Tree' },
     { id: 'tree_2', type: 'wood_sagwan', x: 160, y: 220, hp: 3, name: 'Sagwan Teak Tree' },
-    { id: 'tree_3', type: 'wood_sagwan', x: 110, y: 340, hp: 3, name: 'Sagwan Teak Tree' },
+    { id: 'tree_3', type: 'wood_sagwan', x: 110, y: 360, hp: 3, name: 'Sagwan Teak Tree' },
     { id: 'tree_4', type: 'wood_sagwan', x: 220, y: 150, hp: 3, name: 'Sagwan Teak Tree' },
     { id: 'ore_1', type: 'ore_iron', x: 140, y: 110, hp: 3, name: 'Hematite Ore Vein' },
     { id: 'ore_2', type: 'ore_iron', x: 260, y: 380, hp: 3, name: 'Hematite Ore Vein' },
     { id: 'ore_3', type: 'ore_iron', x: 70, y: 260, hp: 3, name: 'Hematite Ore Vein' },
-    { id: 'tree_5', type: 'wood_sagwan', x: 370, y: 140, hp: 3, name: 'Sagwan Teak Tree' },
-    { id: 'ore_4', type: 'ore_iron', x: 420, y: 360, hp: 3, name: 'Hematite Ore Vein' },
+    { id: 'tree_5', type: 'wood_sagwan', x: 496, y: 224, hp: 3, name: 'Sagwan Teak Tree' },
+    { id: 'ore_4', type: 'ore_iron', x: 672, y: 256, hp: 3, name: 'Hematite Ore Vein' },
+    { id: 'ore_5', type: 'ore_iron', x: 1040, y: 144, hp: 3, name: 'Highland Iron Vein' },
+    { id: 'ore_6', type: 'ore_iron', x: 1312, y: 176, hp: 3, name: 'Mine Ridge Iron Vein' },
+    { id: 'tree_6', type: 'wood_sagwan', x: 832, y: 464, hp: 3, name: 'Countryside Sagwan Tree' }
   ];
 
-  // Populate World Interactive Stations, NPCs & Varied Tactical Enemies
+  // Populate World Interactive Stations, Landmarks, NPCs & Tactical Enemies
   state.entities = [
-    // Field Anvil in Forest
+    // 1. Sacred Awakening Forest: Field Smithing Anvil
     { id: 'station_field_anvil', type: 'station', name: 'Field Smithing Anvil', x: 200, y: 300, stationType: 'field_or_anvil' },
-    // Village Elder NPC
-    { id: 'npc_elder', type: 'npc', name: 'Village Elder', x: 680, y: 160, role: 'elder', portrait: 'elder_portrait' },
-    // Village Blacksmith Forge
-    { id: 'station_village_forge', type: 'station', name: 'Bhavani Nagar Blacksmith Forge', x: 760, y: 180, stationType: 'village_blacksmith' },
-    // Fort Gate Landmark
-    { id: 'fort_gate_obj', type: 'gate_barrier', name: 'Kot Fort Dilli Darwaja', x: 960, y: 320 },
-    // High Saffron Bastion Flag
-    { id: 'bhagwa_zenda_obj', type: 'flag_point', name: 'Bastion Bhagwa Zenda Staff', x: 1160, y: 220 },
+    // 2. Bhavani Nagar Village: Elder & Master Blacksmith Forge
+    { id: 'npc_elder', type: 'npc', name: 'Village Elder', x: 860, y: 290, role: 'elder', portrait: 'elder_portrait' },
+    { id: 'station_village_forge', type: 'station', name: 'Bhavani Nagar Blacksmith Forge', x: 980, y: 290, stationType: 'village_blacksmith' },
+    // 3. Highland Abandoned Mine Entrance (Registered interior: sahyadri_iron_cavern)
+    { id: 'mine_entrance_obj', type: 'mine_entrance', name: 'Highland Abandoned Iron Mine', x: 1360, y: 144, targetInterior: 'sahyadri_iron_cavern' },
+    // 4. Kot Fort Western Gate (Dilli Darwaja at col 96, rows 31..34)
+    { id: 'fort_gate_obj', type: 'gate_barrier', name: 'Kot Fort Dilli Darwaja', x: 1536, y: 520 },
+    // 5. Kot Fort Citadel Courtyard: High Saffron Bastion Flagstaff
+    { id: 'bhagwa_zenda_obj', type: 'flag_point', name: 'Bastion Bhagwa Zenda Staff', x: 1760, y: 520 },
 
-    // Tactical Enemy Encounters (All Option B Roster Roles)
-    // 1. Forest Outpost Raider (Fast Swordsman)
-    createEnemy('enemy_1', 'swordsman', 'Deccan Scout', 320, 310, { hp: 45, atk: 12, detectRadius: 110, attackRange: 28 }),
-    // 2. Raider Camp Vanguard (Charging Soldier & Ranged Archer)
-    createEnemy('enemy_2', 'charging_soldier', 'Raider Berserker', 680, 430, { hp: 65, atk: 18, detectRadius: 130, attackRange: 34, chargeSpeed: 110 }),
-    createEnemy('enemy_3', 'archer', 'Camp Sniper', 790, 420, { hp: 38, atk: 14, detectRadius: 150, attackRange: 130, isRanged: true }),
-    createEnemy('enemy_4', 'shield_guard', 'Camp Shield Guard', 740, 460, { hp: 85, def: 6, atk: 15, detectRadius: 100, attackRange: 26, isShielded: true }),
-    // 3. Fort Gateway Elite Defenders
-    createEnemy('enemy_5', 'elite_halberdier', 'Citadel Halberdier', 930, 290, { hp: 95, atk: 20, detectRadius: 110, attackRange: 42 }),
-    createEnemy('enemy_6', 'shield_guard', 'Citadel Iron Guard', 930, 350, { hp: 90, def: 8, atk: 16, detectRadius: 100, attackRange: 26, isShielded: true }),
-    // 4. Citadel Courtyard Sentry
-    createEnemy('enemy_7', 'spear_soldier', 'Courtyard Spearman', 1080, 280, { hp: 60, atk: 15, detectRadius: 120, attackRange: 40 })
+    // Tactical Enemy Encounters (All Option B Roster Roles on walkable terrain)
+    // 1. Forest Outpost Raider (Fast Swordsman near eastern forest road)
+    createEnemy('enemy_1', 'swordsman', 'Deccan Scout', 420, 310, { hp: 45, atk: 12, detectRadius: 110, attackRange: 28 }),
+    // 2. Deshmukh Raider Outpost Vanguard (Charging Soldier, Sniper & Shield Guard)
+    createEnemy('enemy_2', 'charging_soldier', 'Raider Berserker', 940, 740, { hp: 65, atk: 18, detectRadius: 130, attackRange: 34, chargeSpeed: 110 }),
+    createEnemy('enemy_3', 'archer', 'Camp Sniper', 1040, 720, { hp: 38, atk: 14, detectRadius: 150, attackRange: 130, isRanged: true }),
+    createEnemy('enemy_4', 'shield_guard', 'Camp Shield Guard', 980, 780, { hp: 85, def: 6, atk: 15, detectRadius: 100, attackRange: 26, isShielded: true }),
+    // 3. Kot Fort Gateway Elite Defenders (Guarding outside Dilli Darwaja)
+    createEnemy('enemy_5', 'elite_halberdier', 'Citadel Halberdier', 1480, 496, { hp: 95, atk: 20, detectRadius: 110, attackRange: 42 }),
+    createEnemy('enemy_6', 'shield_guard', 'Citadel Iron Guard', 1480, 544, { hp: 90, def: 8, atk: 16, detectRadius: 100, attackRange: 26, isShielded: true }),
+    // 4. Kot Fort Citadel Courtyard Sentry
+    createEnemy('enemy_7', 'spear_soldier', 'Courtyard Spearman', 1660, 520, { hp: 60, atk: 15, detectRadius: 120, attackRange: 40 })
   ];
+}
+
+function applyFortGateCollisionState() {
+  const val = state.worldState.gateUnlocked ? 0 : 1;
+  for (let r = 31; r <= 34; r++) {
+    if (collisionMap[r] && collisionMap[r][96] !== undefined) {
+      collisionMap[r][96] = val;
+    }
+  }
+}
+
+// =============================================================================
+// FOG OF WAR & SUB-ZONE DISCOVERY SYSTEM (15x9 SECTORS, 8x8 TILES EACH)
+// =============================================================================
+function syncDiscoveredCellSet() {
+  discoveredCellSet.clear();
+  if (!Array.isArray(state.worldState.discoveredCells)) {
+    state.worldState.discoveredCells = [];
+  }
+  for (const key of state.worldState.discoveredCells) {
+    discoveredCellSet.add(key);
+  }
+}
+
+function isSectorDiscovered(sc, sr) {
+  return discoveredCellSet.has(`${sc}_${sr}`);
+}
+
+function isWorldPosDiscovered(wx, wy) {
+  const sc = Math.floor(wx / (TILE_SIZE * SECTOR_TILES));
+  const sr = Math.floor(wy / (TILE_SIZE * SECTOR_TILES));
+  return isSectorDiscovered(sc, sr);
+}
+
+function getSubZoneAtTile(c, r) {
+  const region = (typeof WORLD_REGIONS !== 'undefined' && WORLD_REGIONS.sahyadri_gateway_valley)
+    ? WORLD_REGIONS.sahyadri_gateway_valley
+    : null;
+  if (!region || !Array.isArray(region.subZones)) return null;
+  for (const sz of region.subZones) {
+    const b = sz.bounds;
+    if (c >= b.x1 && c <= b.x2 && r >= b.y1 && r <= b.y2) {
+      return sz;
+    }
+  }
+  return null;
+}
+
+function updateDiscoveryAndZone(allowPersist = true) {
+  const p = state.player;
+  const c = Math.max(0, Math.min(WORLD_COLS - 1, Math.floor(p.x / TILE_SIZE)));
+  const r = Math.max(0, Math.min(WORLD_ROWS - 1, Math.floor(p.y / TILE_SIZE)));
+  const sc = Math.floor(c / SECTOR_TILES);
+  const sr = Math.floor(r / SECTOR_TILES);
+
+  let newlyRevealedSector = false;
+  for (let dsr = -1; dsr <= 1; dsr++) {
+    for (let dsc = -1; dsc <= 1; dsc++) {
+      const nsc = sc + dsc;
+      const nsr = sr + dsr;
+      if (nsc >= 0 && nsc < SECTOR_COLS && nsr >= 0 && nsr < SECTOR_ROWS) {
+        const key = `${nsc}_${nsr}`;
+        if (!discoveredCellSet.has(key)) {
+          discoveredCellSet.add(key);
+          state.worldState.discoveredCells.push(key);
+          newlyRevealedSector = true;
+        }
+      }
+    }
+  }
+
+  const subZone = getSubZoneAtTile(c, r);
+  let newlyDiscoveredZone = false;
+  if (subZone) {
+    const prevZoneId = state.worldState.currentZoneId;
+    state.worldState.currentZone = subZone.name;
+    state.worldState.currentZoneId = subZone.id;
+
+    if (!Array.isArray(state.worldState.discoveredSubZones)) {
+      state.worldState.discoveredSubZones = [];
+    }
+
+    if (!state.worldState.discoveredSubZones.includes(subZone.id)) {
+      state.worldState.discoveredSubZones.push(subZone.id);
+      newlyDiscoveredZone = true;
+      gainXP(25);
+      showZoneBanner(`DISCOVERED: ${subZone.name} (+25 XP)`);
+    } else if (prevZoneId !== subZone.id) {
+      showZoneBanner(subZone.name);
+    }
+  }
+
+  if (allowPersist && (newlyRevealedSector || newlyDiscoveredZone)) {
+    saveGame();
+  }
 }
 
 function createEnemy(id, model, name, x, y, opts = {}) {
@@ -1017,6 +1334,7 @@ function confirmAstraSelection() {
   document.getElementById('title-modal').classList.remove('active');
   gameRunning = true;
   audio.play('fanfare');
+  updateDiscoveryAndZone(false);
   saveGame();
   showZoneBanner(`DIVINE VOW SEALED: ${pendingAstraSelection.toUpperCase()} ASTRA EQUIPPED!`);
   updateHUD();
@@ -1112,11 +1430,190 @@ function updateHUD() {
   document.getElementById('inv-gold').innerText = state.inventory.gold_huns || 0;
 }
 
+let bannerTimeout = null;
 function showZoneBanner(text) {
   const banner = document.getElementById('zone-banner');
   banner.innerText = text;
   banner.classList.add('visible');
-  setTimeout(() => { banner.classList.remove('visible'); }, 3500);
+  if (bannerTimeout) clearTimeout(bannerTimeout);
+  bannerTimeout = setTimeout(() => { banner.classList.remove('visible'); }, 3500);
+}
+
+// =============================================================================
+// MINIMAP & FULL-SCREEN WORLD MAP ([M])
+// =============================================================================
+function isWorldMapOpen() {
+  return document.getElementById('world-map-modal').classList.contains('active');
+}
+
+function openWorldMapModal() {
+  if (!gameRunning) return;
+  const modal = document.getElementById('world-map-modal');
+  modal.classList.add('active');
+  renderWorldMapModal();
+}
+
+function closeWorldMapModal() {
+  document.getElementById('world-map-modal').classList.remove('active');
+}
+
+function toggleWorldMapModal() {
+  if (!gameRunning) return;
+  if (isWorldMapOpen()) {
+    closeWorldMapModal();
+  } else {
+    openWorldMapModal();
+  }
+}
+
+function getTileMapColor(tile) {
+  if (!tile) return '#090706';
+  switch (tile.type) {
+    case 'grass': return '#2f5922';
+    case 'dirt': return '#8c6239';
+    case 'water': return '#1d4ed8';
+    case 'bridge': return '#d97706';
+    case 'stone': return '#64748b';
+    case 'cliff': return '#27272a';
+    case 'fort_wall': return '#18181b';
+    case 'gate': return state.worldState.gateUnlocked ? '#eab308' : '#b91c1c';
+    case 'village_well': return '#38bdf8';
+    default: return '#2f5922';
+  }
+}
+
+function renderMinimap() {
+  const mw = minimapCanvas.width;  // 90
+  const mh = minimapCanvas.height; // 54
+  const scale = 3; // 3px per tile -> 30x18 tile window around Shivaji
+  const viewCols = Math.floor(mw / scale); // 30
+  const viewRows = Math.floor(mh / scale); // 18
+
+  minimapCtx.fillStyle = '#070504';
+  minimapCtx.fillRect(0, 0, mw, mh);
+
+  const pCol = Math.floor(state.player.x / TILE_SIZE);
+  const pRow = Math.floor(state.player.y / TILE_SIZE);
+  const startC = Math.max(0, Math.min(WORLD_COLS - viewCols, pCol - Math.floor(viewCols / 2)));
+  const startR = Math.max(0, Math.min(WORLD_ROWS - viewRows, pRow - Math.floor(viewRows / 2)));
+
+  for (let r = 0; r < viewRows; r++) {
+    const wc = startR + r;
+    for (let c = 0; c < viewCols; c++) {
+      const tc = startC + c;
+      const sc = Math.floor(tc / SECTOR_TILES);
+      const sr = Math.floor(wc / SECTOR_TILES);
+      if (!isSectorDiscovered(sc, sr)) {
+        minimapCtx.fillStyle = '#0c0907';
+      } else {
+        minimapCtx.fillStyle = getTileMapColor(groundTiles[wc] && groundTiles[wc][tc]);
+      }
+      minimapCtx.fillRect(c * scale, r * scale, scale, scale);
+    }
+  }
+
+  // Draw discovered landmarks/stations within minimap window
+  state.entities.forEach(ent => {
+    if (ent.type === 'enemy' && ent.hp <= 0) return;
+    if (!isWorldPosDiscovered(ent.x, ent.y)) return;
+    const ec = Math.floor(ent.x / TILE_SIZE) - startC;
+    const er = Math.floor(ent.y / TILE_SIZE) - startR;
+    if (ec < 0 || ec >= viewCols || er < 0 || er >= viewRows) return;
+
+    if (ent.type === 'station') minimapCtx.fillStyle = '#facc15';
+    else if (ent.type === 'npc') minimapCtx.fillStyle = '#38bdf8';
+    else if (ent.type === 'mine_entrance') minimapCtx.fillStyle = '#a855f7';
+    else if (ent.type === 'gate_barrier' || ent.type === 'flag_point') minimapCtx.fillStyle = '#ef4444';
+    else return;
+
+    minimapCtx.fillRect(ec * scale, er * scale, scale, scale);
+  });
+
+  // Draw Shivaji marker on minimap
+  const px = (pCol - startC) * scale;
+  const py = (pRow - startR) * scale;
+  minimapCtx.fillStyle = '#f97316';
+  minimapCtx.fillRect(px - 1, py - 1, scale + 2, scale + 2);
+  minimapCtx.fillStyle = '#ffffff';
+  minimapCtx.fillRect(px, py, scale, scale);
+}
+
+function renderWorldMapModal() {
+  const scale = 2; // 120 * 2 = 240px width, 70 * 2 = 140px height
+  worldMapCtx.fillStyle = '#060403';
+  worldMapCtx.fillRect(0, 0, worldMapCanvas.width, worldMapCanvas.height);
+
+  // 1. Render discovered terrain tiles vs unexplored 8x8 fog sectors
+  for (let r = 0; r < WORLD_ROWS; r++) {
+    const sr = Math.floor(r / SECTOR_TILES);
+    for (let c = 0; c < WORLD_COLS; c++) {
+      const sc = Math.floor(c / SECTOR_TILES);
+      if (isSectorDiscovered(sc, sr)) {
+        worldMapCtx.fillStyle = getTileMapColor(groundTiles[r] && groundTiles[r][c]);
+      } else {
+        worldMapCtx.fillStyle = ((sc + sr) % 2 === 0) ? '#0e0a08' : '#130e0b';
+      }
+      worldMapCtx.fillRect(c * scale, r * scale, scale, scale);
+    }
+  }
+
+  // 2. Render subtle sector grid lines over fog
+  worldMapCtx.strokeStyle = 'rgba(180, 83, 9, 0.14)';
+  worldMapCtx.lineWidth = 1;
+  for (let sc = 0; sc <= SECTOR_COLS; sc++) {
+    const x = sc * SECTOR_TILES * scale;
+    worldMapCtx.beginPath();
+    worldMapCtx.moveTo(x, 0);
+    worldMapCtx.lineTo(x, worldMapCanvas.height);
+    worldMapCtx.stroke();
+  }
+  for (let sr = 0; sr <= SECTOR_ROWS; sr++) {
+    const y = sr * SECTOR_TILES * scale;
+    worldMapCtx.beginPath();
+    worldMapCtx.moveTo(0, y);
+    worldMapCtx.lineTo(worldMapCanvas.width, y);
+    worldMapCtx.stroke();
+  }
+
+  // 3. Render known landmarks ONLY if their sector has been discovered
+  state.entities.forEach(ent => {
+    if (ent.type === 'enemy') return;
+    if (!isWorldPosDiscovered(ent.x, ent.y)) return;
+    const mx = Math.floor(ent.x / TILE_SIZE) * scale;
+    const my = Math.floor(ent.y / TILE_SIZE) * scale;
+
+    if (ent.type === 'station') worldMapCtx.fillStyle = '#facc15';
+    else if (ent.type === 'npc') worldMapCtx.fillStyle = '#38bdf8';
+    else if (ent.type === 'mine_entrance') worldMapCtx.fillStyle = '#a855f7';
+    else if (ent.type === 'gate_barrier' || ent.type === 'flag_point') worldMapCtx.fillStyle = '#ef4444';
+    else return;
+
+    worldMapCtx.fillRect(mx - 2, my - 2, 5, 5);
+  });
+
+  // 4. Render Shivaji's live position
+  const px = Math.floor(state.player.x / TILE_SIZE) * scale;
+  const py = Math.floor(state.player.y / TILE_SIZE) * scale;
+  worldMapCtx.fillStyle = '#f97316';
+  worldMapCtx.fillRect(px - 3, py - 3, 7, 7);
+  worldMapCtx.fillStyle = '#ffffff';
+  worldMapCtx.fillRect(px - 1, py - 1, 3, 3);
+
+  // 5. Populate sidebar with Discovered Regions & Sector progress
+  const subZones = (WORLD_REGIONS && WORLD_REGIONS.sahyadri_gateway_valley && WORLD_REGIONS.sahyadri_gateway_valley.subZones) || [];
+  const discZones = state.worldState.discoveredSubZones || [];
+  document.getElementById('map-discovery-stats').innerText =
+    `Regions: ${discZones.length}/${subZones.length} | Sectors: ${discoveredCellSet.size}/${TOTAL_SECTORS}`;
+
+  const regionListEl = document.getElementById('map-region-list');
+  regionListEl.innerHTML = '';
+  subZones.forEach(sz => {
+    const isDisc = discZones.includes(sz.id);
+    const div = document.createElement('div');
+    div.className = `map-zone-item ${isDisc ? 'discovered' : 'undiscovered'}`;
+    div.innerText = isDisc ? `✓ ${sz.name}` : `? Unexplored Region`;
+    regionListEl.appendChild(div);
+  });
 }
 
 // =============================================================================
@@ -1125,12 +1622,32 @@ function showZoneBanner(text) {
 const keys = {};
 window.addEventListener('keydown', (e) => {
   audio.init();
-  keys[e.key.toLowerCase()] = true;
+  const k = e.key.toLowerCase();
 
-  if (e.key === 'c' || e.key === 'C') {
+  // Map Modal Controls ([M] or [Escape])
+  if (k === 'm') {
+    e.preventDefault();
+    toggleWorldMapModal();
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (isWorldMapOpen()) {
+      e.preventDefault();
+      closeWorldMapModal();
+      return;
+    }
+    closeCraftingModal();
+  }
+
+  // Pause gameplay hotkeys while World Map is open
+  if (isWorldMapOpen()) return;
+
+  keys[k] = true;
+
+  if (k === 'c') {
     openCraftingModal('field_or_anvil');
   }
-  if (e.key === 'e' || e.key === 'E') {
+  if (k === 'e') {
     handleInteraction();
   }
   if (e.key === ' ') {
@@ -1139,7 +1656,7 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'Shift') {
     castAstra();
   }
-  if (e.key === 'q' || e.key === 'Q') {
+  if (k === 'q') {
     performDodge();
   }
 });
@@ -1220,6 +1737,7 @@ function damageEnemy(en, rawDmg) {
     state.inventory.gold_huns = (state.inventory.gold_huns || 0) + 10;
     showZoneBanner(`DEFEATED: ${en.name} (+55 XP, +10 HUNS)`);
     checkVillageStatus();
+    saveGame();
   }
 }
 
@@ -1243,12 +1761,17 @@ function handleInteraction() {
       } else if (ent.type === 'npc' && ent.role === 'elder') {
         showDialogue('Village Elder', 'elder_portrait', 'Bhavani Nagar is eternally grateful to you, Shivba! The forge is yours, and our people stand with Swarajya.');
         return;
+      } else if (ent.type === 'mine_entrance') {
+        state.worldState.surfaceReturnPos = { x: p.x, y: p.y };
+        showDialogue('Highland Abandoned Iron Mine', 'blacksmith_portrait', 'The timber-shored entrance to the Sahyadri Iron Cavern (40x25 interior) stands before you. Heavy rockfall currently blocks deep descent.');
+        return;
       } else if (ent.type === 'gate_barrier') {
         if (state.worldState.villageLiberated) {
           state.worldState.gateUnlocked = true;
-          collisionMap[19][60] = 0; collisionMap[20][60] = 0; collisionMap[21][60] = 0;
+          applyFortGateCollisionState();
           showZoneBanner('KOT FORT GATEWAY BREACHED! ASCEND TO THE CITADEL');
           audio.play('fanfare');
+          saveGame();
         } else {
           showDialogue('Gatekeeper Inscription', 'bhavani_portrait', 'The heavy Dilli Darwaja iron spikes remain locked. Liberate Bhavani Nagar to secure the fortress key.');
         }
@@ -1257,6 +1780,7 @@ function handleInteraction() {
         state.worldState.flagHoisted = true;
         audio.play('fanfare');
         showZoneBanner('SWARAJYA VICTORIOUS! SAFFRON BHAGWA ZENDA HOISTED OVER KOT FORT');
+        saveGame();
         return;
       }
     }
@@ -1290,7 +1814,8 @@ function isSolid(worldX, worldY) {
 }
 
 function update(dt) {
-  if (!gameRunning) return;
+  // Pause world simulation when game is not running or when World Map modal is open
+  if (!gameRunning || isWorldMapOpen()) return;
   const p = state.player;
 
   // Invulnerability & Cooldowns
@@ -1357,23 +1882,13 @@ function update(dt) {
   state.camX = Math.max(0, Math.min(maxCamX, targetCamX));
   state.camY = Math.max(0, Math.min(maxCamY, targetCamY));
 
-  // Determine subzone for HUD
-  const c = Math.floor(p.x / TILE_SIZE);
-  let curZone = 'forest_clearing';
-  if (c >= 25 && c <= 38) curZone = 'Koyna River Crossing';
-  else if (c >= 39 && c <= 58 && p.y < 350) curZone = 'Bhavani Nagar Village';
-  else if (c >= 39 && c <= 58 && p.y >= 350) curZone = 'Hostile Raider Encampment';
-  else if (c >= 59) curZone = 'Kot Fortress Citadel';
-  else curZone = 'Sacred Sahyadri Teak Forest';
-
-  if (state.worldState.currentZone !== curZone) {
-    state.worldState.currentZone = curZone;
-    showZoneBanner(curZone);
-  }
+  // Update Fog of War & Sub-Zone Discovery (+25 XP once per named region)
+  updateDiscoveryAndZone(true);
 
   // Check interaction pill prompt
   let hasNearby = false;
   for (const ent of state.entities) {
+    if (ent.type === 'enemy') continue;
     if (Math.hypot(p.x - ent.x, p.y - ent.y) < 38) {
       hasNearby = true;
       break;
@@ -1403,7 +1918,6 @@ function updateEnemyAI(dt) {
 
     // Determine direction facing player
     if (distToPlayer < en.detectRadius || en.state === 'chase' || en.state === 'attack') {
-      const angle = Math.atan2(p.y - en.y, p.x - en.x);
       if (Math.abs(p.x - en.x) > Math.abs(p.y - en.y)) {
         en.dir = p.x > en.x ? 2 : 3;
       } else {
@@ -1521,6 +2035,7 @@ function respawnPlayer() {
   p.y = 280;
   p.invulnerableTimer = 1.5;
   document.getElementById('defeat-modal').classList.remove('active');
+  updateDiscoveryAndZone(true);
   updateHUD();
   showZoneBanner('RESTORED AT SACRED FOREST CLEARING');
 }
@@ -1531,12 +2046,12 @@ function respawnPlayer() {
 function render() {
   ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
 
-  const startCol = Math.floor(state.camX / TILE_SIZE);
+  const startCol = Math.max(0, Math.floor(state.camX / TILE_SIZE));
   const endCol = Math.min(WORLD_COLS - 1, Math.floor((state.camX + V_WIDTH) / TILE_SIZE) + 1);
-  const startRow = Math.floor(state.camY / TILE_SIZE);
+  const startRow = Math.max(0, Math.floor(state.camY / TILE_SIZE));
   const endRow = Math.min(WORLD_ROWS - 1, Math.floor((state.camY + V_HEIGHT) / TILE_SIZE) + 1);
 
-  // 1. Base Terrain Ground Tiles
+  // 1. Base Terrain Ground Tiles (Viewport Culled)
   for (let r = startRow; r <= endRow; r++) {
     for (let c = startCol; c <= endCol; c++) {
       const tile = groundTiles[r][c];
@@ -1545,19 +2060,19 @@ function render() {
 
       if (tile.type === 'grass') {
         const img = images['grass_tiles'];
-        if (img && img.complete) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
+        if (img && img.complete && img.naturalWidth > 0) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
         else { ctx.fillStyle = '#3a632a'; ctx.fillRect(sx, sy, 16, 16); }
       } else if (tile.type === 'dirt') {
         const img = images['dirt_tiles'];
-        if (img && img.complete) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
+        if (img && img.complete && img.naturalWidth > 0) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
         else { ctx.fillStyle = '#795538'; ctx.fillRect(sx, sy, 16, 16); }
       } else if (tile.type === 'stone') {
         const img = images['stone_tiles'];
-        if (img && img.complete) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
+        if (img && img.complete && img.naturalWidth > 0) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
         else { ctx.fillStyle = '#5e656e'; ctx.fillRect(sx, sy, 16, 16); }
       } else if (tile.type === 'water') {
         const img = images['water_tiles'];
-        if (img && img.complete) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
+        if (img && img.complete && img.naturalWidth > 0) ctx.drawImage(img, tile.idx * 16, 0, 16, 16, sx, sy, 16, 16);
         else { ctx.fillStyle = '#1f487e'; ctx.fillRect(sx, sy, 16, 16); }
       } else if (tile.type === 'bridge') {
         ctx.fillStyle = '#8a5b32'; ctx.fillRect(sx, sy, 16, 16);
@@ -1568,19 +2083,26 @@ function render() {
       } else if (tile.type === 'gate') {
         ctx.fillStyle = state.worldState.gateUnlocked ? '#8a5b32' : '#3b2516';
         ctx.fillRect(sx, sy, 16, 16);
+      } else if (tile.type === 'village_well') {
+        ctx.fillStyle = '#475569'; ctx.fillRect(sx, sy, 16, 16);
+        ctx.fillStyle = '#0284c7'; ctx.fillRect(sx + 3, sy + 3, 10, 10);
       }
     }
   }
 
-  // 2. Y-Sorted Entities & Objects
+  // 2. Y-Sorted Entities & Objects (Viewport Culled)
   const renderList = [];
 
   state.harvestNodes.forEach(node => {
-    if (node.hp > 0) renderList.push({ type: 'node', obj: node, y: node.y });
+    if (node.hp > 0 && Math.abs(node.x - (state.camX + V_WIDTH / 2)) < V_WIDTH && Math.abs(node.y - (state.camY + V_HEIGHT / 2)) < V_HEIGHT) {
+      renderList.push({ type: 'node', obj: node, y: node.y });
+    }
   });
 
   state.entities.forEach(ent => {
-    if (ent.type !== 'enemy' || ent.hp > 0) renderList.push({ type: 'entity', obj: ent, y: ent.y });
+    if ((ent.type !== 'enemy' || ent.hp > 0) && Math.abs(ent.x - (state.camX + V_WIDTH / 2)) < V_WIDTH && Math.abs(ent.y - (state.camY + V_HEIGHT / 2)) < V_HEIGHT) {
+      renderList.push({ type: 'entity', obj: ent, y: ent.y });
+    }
   });
 
   renderList.push({ type: 'player', obj: state.player, y: state.player.y });
@@ -1612,6 +2134,9 @@ function render() {
     else if (pt.type === 'wave_bhoomi') ctx.fillStyle = 'rgba(250, 204, 21, 0.4)';
     ctx.fill();
   });
+
+  // 4. Update HUD Minimap
+  renderMinimap();
 }
 
 function renderPlayer(sx, sy) {
@@ -1622,7 +2147,7 @@ function renderPlayer(sx, sy) {
   ctx.ellipse(sx, sy + 18, 12, 4, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  let sheetKey = p.isAttacking ? 'shivaji_attack' : (Math.abs(p.vx) > 0 || Math.abs(p.vy) > 0 || keys['w'] || keys['s'] || keys['a'] || keys['d'] ? 'shivaji_walk' : 'shivaji_idle');
+  let sheetKey = p.isAttacking ? 'shivaji_attack' : (Math.abs(p.vx) > 0 || Math.abs(p.vy) > 0 || keys['w'] || keys['s'] || keys['a'] || keys['d'] || keys['arrowup'] || keys['arrowdown'] || keys['arrowleft'] || keys['arrowright'] ? 'shivaji_walk' : 'shivaji_idle');
   const sheet = images[sheetKey];
   const fw = p.isAttacking ? 64 : 48;
   const fh = 64;
@@ -1634,7 +2159,7 @@ function renderPlayer(sx, sy) {
     ctx.globalAlpha = 0.5;
   }
 
-  if (sheet && sheet.complete) {
+  if (sheet && sheet.complete && sheet.naturalWidth > 0) {
     ctx.drawImage(sheet, col * fw, row * fh, fw, fh, sx - fw / 2, sy - 40, fw, fh);
   } else {
     ctx.fillStyle = '#e66012'; ctx.fillRect(sx - 8, sy - 24, 16, 24);
@@ -1654,7 +2179,7 @@ function renderPlayer(sx, sy) {
 function renderHarvestNode(node, sx, sy) {
   if (node.type === 'wood_sagwan') {
     const img = images['sagwan_trees'];
-    if (img && img.complete) ctx.drawImage(img, 0, 0, 48, 64, sx - 24, sy - 52, 48, 64);
+    if (img && img.complete && img.naturalWidth > 0) ctx.drawImage(img, 0, 0, 48, 64, sx - 24, sy - 52, 48, 64);
     else { ctx.fillStyle = '#422817'; ctx.fillRect(sx - 6, sy - 20, 12, 20); ctx.fillStyle = '#65a30d'; ctx.beginPath(); ctx.arc(sx, sy - 28, 18, 0, Math.PI*2); ctx.fill(); }
   } else {
     ctx.fillStyle = '#5e656e'; ctx.beginPath(); ctx.arc(sx, sy, 10, 0, Math.PI*2); ctx.fill();
@@ -1692,7 +2217,7 @@ function renderWorldEntity(ent, sx, sy) {
       ctx.fillText('!', sx - 3, sy - fh + 10);
     }
 
-    if (sheet && sheet.complete) {
+    if (sheet && sheet.complete && sheet.naturalWidth > 0) {
       ctx.drawImage(sheet, col * fw, row * fh, fw, fh, sx - fw / 2, sy - 36, fw, fh);
     } else {
       ctx.fillStyle = '#205c34'; ctx.fillRect(sx - 6, sy - 20, 12, 20);
@@ -1708,6 +2233,10 @@ function renderWorldEntity(ent, sx, sy) {
   } else if (ent.type === 'npc') {
     ctx.fillStyle = '#f59e0b'; ctx.fillRect(sx - 6, sy - 20, 12, 20);
     ctx.fillStyle = '#fef3c7'; ctx.fillRect(sx - 4, sy - 28, 8, 8);
+  } else if (ent.type === 'mine_entrance') {
+    ctx.fillStyle = '#422817'; ctx.fillRect(sx - 14, sy - 22, 28, 22);
+    ctx.fillStyle = '#090706'; ctx.fillRect(sx - 9, sy - 16, 18, 16);
+    ctx.fillStyle = '#a855f7'; ctx.fillRect(sx - 3, sy - 10, 6, 4);
   } else if (ent.type === 'gate_barrier') {
     ctx.fillStyle = state.worldState.gateUnlocked ? '#8a5b32' : '#3b2516';
     ctx.fillRect(sx - 16, sy - 24, 32, 24);
@@ -1720,7 +2249,7 @@ function renderWorldEntity(ent, sx, sy) {
 }
 
 // =============================================================================
-// FLOW & SAVE PERSISTENCE
+// FLOW & SAVE PERSISTENCE (BACKWARDS COMPATIBLE WITH swarajya_open_world_save_v1)
 // =============================================================================
 function startNewAdventureFlow() {
   audio.init();
@@ -1733,6 +2262,7 @@ function continueSavedAdventure() {
   if (loadGame()) {
     document.getElementById('title-modal').classList.remove('active');
     gameRunning = true;
+    updateDiscoveryAndZone(true);
     showZoneBanner(`WELCOME BACK, SHIVBA! (${state.player.selectedAstra ? state.player.selectedAstra.toUpperCase() : 'NO'} ASTRA)`);
   }
 }
@@ -1768,8 +2298,31 @@ function loadGame() {
     const data = JSON.parse(raw);
     if (data.player) Object.assign(state.player, data.player);
     if (data.inventory) Object.assign(state.inventory, data.inventory);
-    if (data.worldState) Object.assign(state.worldState, data.worldState);
+    if (data.worldState) {
+      Object.assign(state.worldState, data.worldState);
+    }
+    // Safe migration defaults for older Gate D/E saves
+    if (!Array.isArray(state.worldState.discoveredSubZones)) {
+      state.worldState.discoveredSubZones = [];
+    }
+    if (!Array.isArray(state.worldState.discoveredCells)) {
+      state.worldState.discoveredCells = [];
+    }
+    if (!state.worldState.activeMapId) {
+      state.worldState.activeMapId = 'sahyadri_gateway_valley';
+    }
+    if (!state.worldState.surfaceReturnPos) {
+      state.worldState.surfaceReturnPos = { x: 1360, y: 168 };
+    }
+    // Ensure loaded player coordinates remain on walkable terrain in the expanded 120x70 map
+    if (isSolid(state.player.x, state.player.y)) {
+      state.player.x = 120;
+      state.player.y = 280;
+    }
     if (data.activeMissions) state.activeMissions = data.activeMissions;
+
+    applyFortGateCollisionState();
+    syncDiscoveredCellSet();
     recalculatePlayerStats();
     return true;
   } catch (e) {
@@ -1809,6 +2362,7 @@ window.addEventListener('resize', adjustCanvasScale);
 
 // Initialization
 buildConnectedSahyadriWorld();
+syncDiscoveredCellSet();
 checkSaveStatus();
 recalculatePlayerStats();
 adjustCanvasScale();
