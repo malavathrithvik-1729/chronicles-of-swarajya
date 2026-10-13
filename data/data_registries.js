@@ -437,77 +437,117 @@ const CRAFTING_RECIPES = [
 const WORLD_REGIONS = {
   "sahyadri_gateway_valley": {
     "id": "sahyadri_gateway_valley",
-    "name": "Sahyadri Gateway Valley (Connected Open World)",
-    "biome": "Monsoon Teak Forest, River Crossing, Hill Pass & Kot Fortress",
-    "worldWidth": 80,
-    "worldHeight": 40,
+    "name": "Sahyadri Open World",
+    "biome": "Sahyadri forest, river valley, highlands, village, raider outpost, and Kot Fort",
+    "worldWidth": 120,
+    "worldHeight": 70,
     "tileSize": 16,
     "viewportTarget": {
       "width": 480,
       "height": 270
     },
+    "mapId": "surface",
     "subZones": [
       {
         "id": "forest_clearing",
         "name": "Sacred Awakening Forest",
         "bounds": {
-          "x1": 0,
-          "y1": 0,
-          "x2": 24,
-          "y2": 39
+          "x1": 1,
+          "y1": 3,
+          "x2": 29,
+          "y2": 66
         },
-        "description": "Lush teak groves where Shivaji awakens and gathers his initial timber and ironstone ore.",
+        "description": "A deep teak forest with gathering clearings, old trails, and a hidden shrine.",
         "musicTrack": "forest_ambient"
       },
       {
         "id": "river_crossing",
-        "name": "Koyna Stream & Timber Footbridge",
+        "name": "Koyna River Valley",
         "bounds": {
-          "x1": 25,
-          "y1": 0,
-          "x2": 38,
-          "y2": 39
+          "x1": 30,
+          "y1": 3,
+          "x2": 46,
+          "y2": 66
         },
-        "description": "Flowing river separating the deep woods from the settled village and mountain paths.",
+        "description": "A north-to-south river corridor with two crossings, herbs, clay, and a hidden waterfall shrine.",
         "musicTrack": "river_ambient"
       },
       {
         "id": "village_bhavani_nagar",
-        "name": "Bhavani Nagar Settlement",
+        "name": "Bhavani Nagar & Countryside",
         "bounds": {
-          "x1": 39,
-          "y1": 0,
-          "x2": 56,
-          "y2": 22
+          "x1": 47,
+          "y1": 8,
+          "x2": 74,
+          "y2": 36
         },
-        "description": "Rustic village with thatched huts, an ancient central stone well, blacksmith forge, and elder's home.",
+        "description": "A living settlement with a central well, market paths, a blacksmith, and surrounding farmland.",
         "musicTrack": "village_theme"
       },
       {
-        "id": "raider_camp",
-        "name": "Deshmukh Raider Encampment",
+        "id": "sahyadri_highlands",
+        "name": "Sahyadri Highlands",
         "bounds": {
-          "x1": 40,
-          "y1": 23,
-          "x2": 58,
-          "y2": 39
+          "x1": 75,
+          "y1": 8,
+          "x2": 92,
+          "y2": 38
         },
-        "description": "Hostile forward encampment with military pavilion tents, supply caches, and enemy sentries threatening the valley.",
-        "musicTrack": "tension_combat"
+        "additionalBounds": [
+          {
+            "x1": 47,
+            "y1": 3,
+            "x2": 92,
+            "y2": 7
+          },
+          {
+            "x1": 79,
+            "y1": 39,
+            "x2": 92,
+            "y2": 66
+          }
+        ],
+        "description": "Basalt switchbacks, exposed ironstone, an ancient shrine, and the abandoned mine entrance.",
+        "musicTrack": "highland_wind"
       },
       {
-        "id": "kot_fort_approach",
-        "name": "Kot Fort Monumental Approach & Citadel",
+        "id": "kot_fort_and_outpost",
+        "name": "Deshmukh Outpost & Kot Fort",
         "bounds": {
-          "x1": 59,
-          "y1": 0,
-          "x2": 79,
-          "y2": 39
+          "x1": 47,
+          "y1": 39,
+          "x2": 78,
+          "y2": 66
         },
-        "description": "Steep stone staircase, twin monumental bastions, iron-spiked timber gate, and courtyard bastion.",
+        "additionalBounds": [
+          {
+            "x1": 93,
+            "y1": 3,
+            "x2": 118,
+            "y2": 66
+          }
+        ],
+        "description": "The southern raider encampment and the monumental Kot Fort citadel.",
         "musicTrack": "fortress_march"
       }
     ]
+  },
+  "sahyadri_iron_cavern": {
+    "id": "sahyadri_iron_cavern",
+    "name": "Highland Abandoned Mine",
+    "biome": "Subterranean basalt cavern",
+    "mapType": "interior",
+    "worldWidth": 40,
+    "worldHeight": 25,
+    "tileSize": 16,
+    "viewportTarget": {
+      "width": 480,
+      "height": 270
+    },
+    "parentRegion": "sahyadri_gateway_valley",
+    "entryId": "mine_entrance_marker",
+    "description": "A future enterable cave region containing ironstone, Wootz ore, lost blacksmith tools, sentries, and a recipe cache.",
+    "implementationStatus": "region metadata ready; cave gameplay is scheduled for Step 5"
   }
 };
 
